@@ -5,10 +5,15 @@ from Queue import Empty
 class Proxy:
     def __init__(self, actor):
         self.__channel = actor.channel
+        self.actor = actor
         for method in actor.tell:
             setattr(self, method, TellWrapper(self.__channel,method,actor.url))
         for method in actor.ask:
             setattr(self, method, AskWrapper(self.__channel,method,actor.url))
+
+    def __repr__(self):
+        return 'Proxy(actor=%s, tell=%s, ask = %s)' % (self.actor, self.actor.tell,self.actor.ask)
+
 
 
 

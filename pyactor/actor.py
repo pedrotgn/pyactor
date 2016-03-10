@@ -32,22 +32,27 @@ class Channel(Queue):
         return self.get(timeout=timeout)
 
 class ActorRef(object):
-    def __init__(self,url,klass,channel=Channel()):
-        self.url = url
-        self.channel = channel
-        self.tell = klass._tell
-        self.ask = klass._ask
-
-
-class Actor(object):
-    def __init__(self, url, klass, *args,**kwargs):
-        #super(Actor,self).__init__(url,klass)
+    def __init__(self,url,klass):
+    #channel=Channel()):
         self.url = url
         self.channel = Channel()
-        self.__obj = klass(*args, **kwargs)
-        #self.__obj = klass(*args)
         self.tell = klass._tell
         self.ask = klass._ask
+        self.klass = klass
+
+    def __repr__(self):
+        return 'Actor(url=%s, class=%s)' % (self.url, self.klass)
+
+
+class Actor(ActorRef):
+    def __init__(self, url, klass, args=[]):
+        super(Actor,self).__init__(url,klass)
+        #self.url = url
+        #self.channel = Channel()
+        self.__obj = klass(*args)
+        #self.__obj = klass(*args)
+        #self.tell = klass._tell
+        #self.ask = klass._ask
         self.tell.append('stop')
         self.running = True
 

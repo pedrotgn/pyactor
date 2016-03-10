@@ -23,22 +23,22 @@ class Host(object):
             #self.aref = 'atom://' + self.dispatcher.name + '/controller/Host/0'
             #self.name = self.dispatcher.name
 
-    def spawn(self,id,klass,*args):
+    def spawn(self,id,klass,args=[]):
         #  url = 'local://name/'+i
         if actors.has_key(id):
             raise AlreadyExists()
         else:
-            new_actor = Actor(id,klass,*args)
+            new_actor = Actor(id,klass,args)
             launch_actor(id,new_actor)
             return Proxy(new_actor)
 
 
-    def spawn_n(self,n,id,klass):
+    def spawn_n(self,n,id,klass,args=[]):
       #  url = 'local://name/'+id
         if actors.has_key(id):
             raise AlreadyExists()
         else:
-            group  = [Actor(id,klass) for i in range(n)]
+            group  = [Actor(id,klass,args) for i in range(n)]
             for elem in group[1:]:
                 elem.channel = group[0].channel
             for new_actor in group:
@@ -79,7 +79,7 @@ def launch_actor(id,actor):
 
 
 def init_host(name='default',transport=()):
-    host = Actor(name,Host,name,transport)
+    host = Actor(name,Host,[name,transport])
     launch_actor(name,host)
     global _host
     _host = Proxy(host)
