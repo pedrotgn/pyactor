@@ -26,12 +26,14 @@ class Future(object):
         self.target = actor_url
 
     def get(self,timeout=1):
-        _from  = get_current()
+        #_from  = get_current()
         ##  SENDING MESSAGE ASK
-        msg = (_from, self.target,ASK, self.method,self.params, self.channel)
+        #msg = (_from, self.target,ASK, self.method,self.params, self.channel)
+        msg = AskRequest(ASK,self.method,self.params,self.channel)
         self.actor_channel.send(msg)
         try:
-            result = self.channel.receive(timeout)
+            response = self.channel.receive(timeout)
+            result = response.result
             if isinstance(result, Exception):
                 raise result
             else:
@@ -41,9 +43,9 @@ class Future(object):
 
     def add_callback(self,callback):
         _from = get_current()
-
         ##  SENDING MESSAGE FUTURE
-        msg = (_from, self.target, FUTURE, self.method,self.params,callback,actors[_from].channel)
+        #msg = (_from, self.target, FUTURE, self.method,self.params,callback,actors[_from].channel)
+        msg = FutureRequest(FUTURE,self.method,self.params,callback,actors[_from].channel)
         self.actor_channel.send(msg)
 
 
@@ -55,9 +57,10 @@ class TellWrapper:
         self.__target = actor_url
 
     def __call__(self, *args, **kwargs):
-        _from = get_current()
+        #_from = get_current()
         ##  SENDING MESSAGE TELL
-        msg = (_from, self.__target, TELL, self.__method,args)
+        #msg = (_from, self.__target, TELL, self.__method,args)
+        msg = TellRequest(TELL,self.__method,args)
         self.__channel.send(msg)
 
 class AskWrapper:

@@ -14,6 +14,7 @@ class Channel(Queue):
         Queue.__init__(self)
 
     def send(self,msg):
+        #print msg
         """
         It sends a message to the current channel
 
@@ -67,23 +68,25 @@ class Actor(ActorRef):
 
     def receive(self,msg):
         ''' receive messages and invokes object method'''
-        if msg[METHOD]=='stop':
+        if msg.method=='stop':
                 self.running = False
         else:
             result = None
             try:
-                invoke = getattr(self.__obj, msg[METHOD])
-                params = msg[PARAMS]
+                invoke = getattr(self.__obj, msg.method)
+                params = msg.params
                 result = invoke(*params)
 
             except Exception, e:
                 result = e
                 print result
-            if msg[TYPE]== ASK:
-                msg[FUTURE].send(result)
-            if msg[TYPE]== FUTURE:
-                response = (msg[TO],msg[FROM],TELL, msg[FUTURE],[result])
-                actors[msg[FROM]].channel.send(response)
+            if msg.type == ASK:
+                response = AskResponse(result)
+                msg.channel.send(response)
+            if msg.type == FUTURE:
+                #response = (msg[TO],msg[FROM],TELL, msg[FUTURE],[result])
+                response = TellRequest(TELL,msg.callback,[result])
+                msg.channel.send(response)
 
 
     def run(self):

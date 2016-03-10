@@ -10,5 +10,5 @@ setup(
     url='https://github.com/pedrotgn/pyactor',
     license='LICENSE.txt',
     description='Python Actor Middleware',
-    long_description=open('README').read(),
+    long_description=open('README.md').read(),
 )
