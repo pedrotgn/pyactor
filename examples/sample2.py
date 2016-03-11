@@ -13,7 +13,7 @@ class Echo:
 
 
 
-h = init_host('pedro')
+h = init_host()
 e1 = h.spawn('echo1',Echo).get()
 e1.echo('hola amigo !!')
 e1.bye()

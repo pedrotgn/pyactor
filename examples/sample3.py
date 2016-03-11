@@ -23,7 +23,7 @@ class Bot:
     def pong(self,msg):
         print 'callback',msg
 
-h = init_host('pedro')
+h = init_host()
 e1 = h.spawn('echo1',Echo).get()
 bot = h.spawn('bot',Bot).get()
 bot.set_echo(e1)

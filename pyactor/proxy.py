@@ -19,20 +19,20 @@ class Proxy:
 
 class Future(object):
     def __init__(self,actor_channel,method,params,actor_url):
-        self.channel = Channel()
-        self.method = method
-        self.params = params
-        self.actor_channel = actor_channel
-        self.target = actor_url
+        self.__channel = Channel()
+        self.__method = method
+        self.__params = params
+        self.__actor_channel = actor_channel
+        self.__target = actor_url
 
     def get(self,timeout=1):
         #_from  = get_current()
         ##  SENDING MESSAGE ASK
         #msg = (_from, self.target,ASK, self.method,self.params, self.channel)
-        msg = AskRequest(ASK,self.method,self.params,self.channel)
-        self.actor_channel.send(msg)
+        msg = AskRequest(ASK,self.__method,self.__params,self.__channel,self.__target)
+        self.__actor_channel.send(msg)
         try:
-            response = self.channel.receive(timeout)
+            response = self.__channel.receive(timeout)
             result = response.result
             if isinstance(result, Exception):
                 raise result
@@ -43,10 +43,11 @@ class Future(object):
 
     def add_callback(self,callback):
         _from = get_current()
+        from_actor = actors[_from]
         ##  SENDING MESSAGE FUTURE
         #msg = (_from, self.target, FUTURE, self.method,self.params,callback,actors[_from].channel)
-        msg = FutureRequest(FUTURE,self.method,self.params,callback,actors[_from].channel)
-        self.actor_channel.send(msg)
+        msg = FutureRequest(FUTURE,self.__method,self.__params,callback,from_actor.channel,self.__target,from_actor.url)
+        self.__actor_channel.send(msg)
 
 
 
@@ -60,7 +61,7 @@ class TellWrapper:
         #_from = get_current()
         ##  SENDING MESSAGE TELL
         #msg = (_from, self.__target, TELL, self.__method,args)
-        msg = TellRequest(TELL,self.__method,args)
+        msg = TellRequest(TELL,self.__method,args,self.__target)
         self.__channel.send(msg)
 
 class AskWrapper:

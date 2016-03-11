@@ -11,25 +11,29 @@ class Host(object):
     _tell = ['shutdown']
     _ask = ['spawn','lookup','spawn_n','lookup2']
 
-    def __init__(self,name,transport):
-        self.name = name
-        self.load_transport(transport)
+    def __init__(self,url):
+        self.load_transport(url)
 
-    def load_transport(self, transport):
-        if transport != ():
-            host,port = transport[1]
-            self.dispatcher = TCPDispatcher(transport[1])
-            launch_actor(transport[0],self.dispatcher)
+    def load_transport(self, url):
+        aurl = urlparse(url)
+        self.transport = aurl.scheme
+        self.host_url = aurl
+        if aurl.scheme == 'tcp':
+            self.dispatcher = TCPDispatcher(aurl)
+            launch_actor('tcp',self.dispatcher)
+
+
+
             #self.aref = 'atom://' + self.dispatcher.name + '/controller/Host/0'
             #self.name = self.dispatcher.name
 
     def spawn(self,id,klass,args=[]):
-        #  url = 'local://name/'+i
-        if actors.has_key(id):
+        url = '%s://%s/%s' % (self.transport,self.host_url.netloc,id)
+        if actors.has_key(url):
             raise AlreadyExists()
         else:
-            new_actor = Actor(id,klass,args)
-            launch_actor(id,new_actor)
+            new_actor = Actor(url,klass,args)
+            launch_actor(url,new_actor)
             return Proxy(new_actor)
 
 
@@ -46,8 +50,9 @@ class Host(object):
             return Proxy(new_actor)
 
     def lookup(self,id):
+        url =  '%s://%s/%s' % (self.transport,self.host_url.netloc,id)
         if actors.has_key(id):
-            return Proxy(actors[id])
+            return Proxy(actors[url])
         else:
             raise NotFound()
 
@@ -57,17 +62,19 @@ class Host(object):
             Proxy(actor).stop()
 
 
-    def lookup2(self, aref,klass):
-        aurl = urlparse(aref)
-        print aurl
-        if self.dispatcher.is_local(aurl.netloc):
-            if not actors.has_key(aurl.path):
-                raise NotFound(aref)
+    def lookup_url(self, url,klass):
+        if self.is_local(aurl):
+            if not actors.has_key(url):
+                raise NotFound(url)
             else:
-                return Proxy(actors[id])
+                return Proxy(actors[url])
         else:
-            remote_actor = ActorRef(aref,klass,self.dispatcher.channel)
+            remote_actor = ActorRef(url,klass,self.dispatcher.channel)
             return Proxy(remote_actor)
+
+    def is_local(self,url):
+        aurl = urlparse(aref)
+        return self.host_url.netloc == aurl.netloc
 
 
 
@@ -78,9 +85,9 @@ def launch_actor(id,actor):
     threads[actor.thread] = id
 
 
-def init_host(name='default',transport=()):
-    host = Actor(name,Host,[name,transport])
-    launch_actor(name,host)
+def init_host(url='local://local/host'):
+    host = Actor(url,Host,[url])
+    launch_actor(url,host)
     global _host
     _host = Proxy(host)
     return _host

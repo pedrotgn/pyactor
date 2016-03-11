@@ -5,10 +5,10 @@ from urlparse import urlparse
 
 class TCPDispatcher(Actor):
 
-    def __init__(self,addr):
+    def __init__(self,aurl):
         #Actor.__init__(self)
-        ip, port = addr
-        self.name = ip + ':' + str(port)
+        address = aurl.netloc.split(':')
+        ip, port = address[0],address[1]
         self.conn = Server(ip, port, self)
         self.addr = addr
         #self.host = host
@@ -22,7 +22,7 @@ class TCPDispatcher(Actor):
     def receive(self,msg):
         #if msg[MODE]==SYNC and msg[TYPE]==CALL:
         #    self.callback[msg[RPC_ID]]= msg[SRC]
-        if msg[METHOD]=='stop':
+        if msg,method=='stop':
                 self.running = False
                 self.conn.close()
         else:
@@ -31,9 +31,6 @@ class TCPDispatcher(Actor):
                 self.conn.send(data)
             except Exception,e:
                 print e,'TCP ERROR 2'
-
-    def is_local(self, name):
-        return name == self.name
 
     def on_message(self, data):
         print data

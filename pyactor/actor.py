@@ -84,8 +84,9 @@ class Actor(ActorRef):
                 response = AskResponse(result)
                 msg.channel.send(response)
             if msg.type == FUTURE:
+                response = TellRequest(TELL,msg.callback,[result],msg.from_url)
                 #response = (msg[TO],msg[FROM],TELL, msg[FUTURE],[result])
-                response = TellRequest(TELL,msg.callback,[result])
+                #response = TellRequest(TELL,msg.callback,[result],msg.from)
                 msg.channel.send(response)
 
 
