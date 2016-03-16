@@ -3,19 +3,21 @@ import socket
 from socket import AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR
 from threading import Thread
 import types, struct, cPickle, sys
-#from tcp import TCPDispatcher
+from tcp import TCPDispatcher
 
 class Server:
-    def __init__(self, host, port):
+    def __init__(self, addr):
         listenSocket = socket.socket(AF_INET, SOCK_STREAM)
         listenSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
-        listenSocket.bind((host, port))
+        host,port = addr
+        listenSocket.bind((host, int(port)))
         listenSocket.listen(10)
         #print "SERVER: Listening"
+        self.addr = addr
         self.sockets = {}
         self.endpoints={}
         self.socket = listenSocket
-        self.addr = host,port
+        #self.addr = host,port
         #self.listener = listener
         self.thread = Thread(target=self.accept_connections, args=[listenSocket])
         self.thread.start()
@@ -27,25 +29,23 @@ class Server:
 
     def accept_endpoint_connections(self, listenSocket):
         clientSocket, clientAddress = listenSocket.accept()
-        EndPoint(self, clientSocket)
+        EndPoint(self, clientSocket,self.addr)
 
-    #def get_dispatcher(url):
-    #    tcp = new TCPDispatcher()
-    #    ep = self.get_endpoint(url)
-    #    self.listener = tcp
-    #    tcp.set_endpoint(ep)
-    #    return tcp
+    def get_dispatcher(self,addr):
+        ep = self.get_endpoint(addr)
+        tcp = TCPDispatcher(ep)
+        ep.listener = tcp
+        return tcp
 
-    def get_endpoint(self,url):
-        addrl = url.netloc.split(':')
-        addr = addrl[0],addrl[1]
+    def get_endpoint(self,addr):
+
         if self.endpoints.has_key(addr):
             return self.endpoints[addr]
         else:
             conn = socket.socket(AF_INET, SOCK_STREAM)
             (ip, port) = addr
             conn.connect((ip, int(port)))
-            self.endpoints[addr] = EndPoint(self, conn)
+            self.endpoints[addr] = EndPoint(self, conn, addr)
             return self.endpoints[addr]
 
     def send(self, addr, msg):
@@ -83,9 +83,10 @@ class EndPoint:
     packetSizeFmt = "!I"
     packetSizeLength = struct.calcsize(packetSizeFmt)
 
-    def __init__(self, server, epSocket):
+    def __init__(self, server, epSocket,addr):
         self.socket = epSocket
 
+        self.addr = addr
         self.server = server
         self.init = False
 
@@ -130,7 +131,7 @@ class EndPoint:
             print msg[0]
             self.server.endpoints[msg[0]]=self
             self.init= True
-        #self.server.listener.on_message(msg[1])
+        self.listener.on_message(msg[1])
         print msg
 
 
@@ -139,6 +140,8 @@ class EndPoint:
         self.socket.send(struct.pack("!I", len(data)))
         self.socket.send(data)
 
-    def send(self,data):
+    def send(self,msg):
+        msg2 = (self.addr,msg)
+        data = cPickle.dumps(msg2)
         self.socket.send(struct.pack("!I", len(data)))
         self.socket.send(data)

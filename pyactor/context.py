@@ -1,28 +1,32 @@
 from urlparse import urlparse
 from actor import Actor,ActorRef
 from proxy import Proxy
-from tcp import TCPDispatcher
+from tcp_server import Server
 from util import *
 import signal, sys
 from time import sleep
 
 
+
 class Host(object):
     _tell = ['shutdown']
-    _ask = ['spawn','lookup','spawn_n','lookup2']
+    _ask = ['spawn','lookup','spawn_n','lookup_url']
 
     def __init__(self,url):
         self.load_transport(url)
 
     def load_transport(self, url):
         aurl = urlparse(url)
+        addrl = aurl.netloc.split(':')
+        self.addr = addrl[0],addrl[1]
         self.transport = aurl.scheme
         self.host_url = aurl
+
+
         if aurl.scheme == 'tcp':
-            self.dispatcher = TCPDispatcher(aurl)
-            launch_actor('tcp',self.dispatcher)
-
-
+            self.tcp = Server(self.addr)
+            dispatcher = self.tcp.get_dispatcher(self.addr)
+            launch_actor(self.addr,dispatcher)
 
             #self.aref = 'atom://' + self.dispatcher.name + '/controller/Host/0'
             #self.name = self.dispatcher.name
@@ -63,17 +67,25 @@ class Host(object):
 
 
     def lookup_url(self, url,klass):
+        aurl = urlparse(url)
         if self.is_local(aurl):
             if not actors.has_key(url):
                 raise NotFound(url)
             else:
                 return Proxy(actors[url])
         else:
-            remote_actor = ActorRef(url,klass,self.dispatcher.channel)
+            addrl = aurl.netloc.split(':')
+            addr = addrl[0],addrl[1]
+            if actors.has_key(addr):
+                dispatcher = actors[addr]
+            else:
+                dispatcher = self.tcp.get_dispatcher(addr)
+                launch_actor(addr,dispatcher)
+            remote_actor = ActorRef(url,klass,dispatcher.channel)
             return Proxy(remote_actor)
 
-    def is_local(self,url):
-        aurl = urlparse(aref)
+
+    def is_local(self,aurl):
         return self.host_url.netloc == aurl.netloc
 
 

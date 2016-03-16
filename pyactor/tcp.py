@@ -1,34 +1,35 @@
 from actor import Actor, Channel
-from tcp_server import Server
 from util import *
 from urlparse import urlparse
 
 class TCPDispatcher(Actor):
 
-    def __init__(self,aurl):
+    def __init__(self,conn):
         #Actor.__init__(self)
-        address = aurl.netloc.split(':')
-        ip, port = address[0],address[1]
-        self.conn = Server(ip, port, self)
-        self.addr = addr
+        #address = aurl.netloc.split(':')
+        #ip, port = address[0],address[1]
+        #self.conn = Server(ip, port, self)
+
+        #self.addr = addr
         #self.host = host
+        self.conn = conn
         self.running = True
         self.channel = Channel()
         self.callback = {}
         self.tell = ['stop']
         self.ask=[]
-        self.url = self.name
+        #self.url = self.name
 
     def receive(self,msg):
         #if msg[MODE]==SYNC and msg[TYPE]==CALL:
         #    self.callback[msg[RPC_ID]]= msg[SRC]
-        if msg,method=='stop':
+        print msg
+        if msg.method=='stop':
                 self.running = False
                 self.conn.close()
         else:
             try:
-                data = [self.addr,msg]
-                self.conn.send(data)
+                self.conn.send(msg)
             except Exception,e:
                 print e,'TCP ERROR 2'
 

@@ -33,10 +33,13 @@ class Channel(Queue):
         return self.get(timeout=timeout)
 
 class ActorRef(object):
-    def __init__(self,url,klass):
+    def __init__(self,url,klass,channel=None):
     #channel=Channel()):
         self.url = url
-        self.channel = Channel()
+        if channel:
+            self.channel = channel
+        else:
+            self.channel = Channel()
         self.tell = klass._tell
         self.ask = klass._ask
         self.klass = klass

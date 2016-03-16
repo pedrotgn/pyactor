@@ -10,7 +10,7 @@ class Echo:
 
 
 tcpconf = ('tcp',('127.0.0.1',1265))
-host = init_host('server',tcpconf)
+host = init_host('tcp://127.0.0.1:1277/host')
 
 e1 = host.spawn('echo1',Echo).get()
 
