@@ -97,7 +97,7 @@ def launch_actor(id,actor):
     threads[actor.thread] = id
 
 
-def init_host(url='local://local/host'):
+def init_host(url='local://local:6666/host'):
     host = Actor(url,Host,[url])
     launch_actor(url,host)
     global _host
