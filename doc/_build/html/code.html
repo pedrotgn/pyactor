@@ -1,0 +1,723 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Main Code &mdash; PyActor 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="PyActor 0.1 documentation" href="index.html" />
+    <link rel="prev" title="Welcome to PyActor’s documentation!" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyActor’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyActor 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-pyactor">
+<span id="main-code"></span><span id="code"></span><h1>Main Code<a class="headerlink" href="#module-pyactor" title="Permalink to this headline">¶</a></h1>
+<p>PyActor: Python Actorlibrary</p>
+<div class="section" id="first-steps">
+<h2>First steps:<a class="headerlink" href="#first-steps" title="Permalink to this headline">¶</a></h2>
+<p>This library allows the creation and management of actors in a distributed system using Python.
+The core of the library is implemented in the three modules explained in this page. That contains
+the actors, the proxys that allows them to be accessed from remote locations and the hosts that
+put it all together.</p>
+<p>First of all, a Host (<a class="reference internal" href="#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">context.Host</span></code></a>) is needed in order to create some actors. To create a host, use the
+function <a class="reference internal" href="#pyactor.context.init_host" title="pyactor.context.init_host"><code class="xref py py-func docutils literal"><span class="pre">context.init_host()</span></code></a> which returns the proxy of a host. Then, use this proxy to spawn
+actors by giving the class type of the actor to create. The <a class="reference internal" href="#pyactor.context.Host.spawn" title="pyactor.context.Host.spawn"><code class="xref py py-meth docutils literal"><span class="pre">context.Host.spawn()</span></code></a> method will return the proxy (<a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">proxy.Proxy</span></code></a>)
+that manages that actor, but you will need to use the .get() to obtain it from the Future created for the querie when called
+the :meth:<a href="#id1"><span class="problematic" id="id2">`</span></a>context.Host.spawn`which is actualy an ask method of the host actor. See example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">h</span> <span class="o">=</span> <span class="n">init_host</span><span class="p">()</span>
+<span class="n">actor1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;id1&#39;</span><span class="p">,</span><span class="n">MyClass</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The class of an actor must have defined its methods in the _tell and _ask lists so they can be called through the proxy.
+In the _tell list will be named those methods meant to be asynchronous and in the _ask list, the synchronous ones.
+In this example we have a class MyClass with a sync method <em>ask_me()</em> and a async method <em>tell_me()</em>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
+    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;tell_me&#39;</span><span class="p">]</span>
+    <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ask_me&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">tell_me</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="n">msg</span>
+    <span class="k">def</span> <span class="nf">ask_me</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;hello back&#39;</span>
+</pre></div>
+</div>
+<p>As you can see, the async method recieves a message and simply prints it while the sync method returns a result.
+More basic examples can be found in the &#8216;pyactor/examples&#8217; directory of the project: sample1.py, sample2.py and sample3.py.</p>
+</div>
+<div class="section" id="module-pyactor.actor">
+<span id="actor"></span><h2>Actor<a class="headerlink" href="#module-pyactor.actor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyactor.actor.Actor">
+<em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">Actor</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>args=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Actor is the instance of an object to which is possible to acces and invoke its methods remotely.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> (<em>str.</em>) &#8211; URL where the actor is running.</li>
+<li><strong>klass</strong> (<em>class</em>) &#8211; class type for the actor.</li>
+<li><strong>args</strong> (<em>list</em>) &#8211; arguments for the <em>klass</em> class if appropriate.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyactor.actor.Actor.is_alive">
+<code class="descname">is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor.is_alive" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">(<em>bool.</em>) identifies the current state of the actor. <strong>True</strong> if it is running.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.actor.Actor.receive">
+<code class="descname">receive</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor.receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>The message received from the queue specify a method of the class of the actor. This invokes it.
+If the communication is an <a class="reference internal" href="#pyactor.util.AskRequest" title="pyactor.util.AskRequest"><code class="xref py py-class docutils literal"><span class="pre">AskRequest</span></code></a>, sends the result back to the channel named in the message
+as an <a class="reference internal" href="#pyactor.util.AskResponse" title="pyactor.util.AskResponse"><code class="xref py py-class docutils literal"><span class="pre">AskResponse</span></code></a>.
+If it is a FUTURE, generates a <a class="reference internal" href="#pyactor.util.TellRequest" title="pyactor.util.TellRequest"><code class="xref py py-class docutils literal"><span class="pre">TellRequest</span></code></a> to send the result to the sender&#8217;s method specified in
+the callback field of the tuple.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> &#8211; The message is a namedtuple of the defined in util.py (<a class="reference internal" href="#pyactor.util.AskRequest" title="pyactor.util.AskRequest"><code class="xref py py-class docutils literal"><span class="pre">AskRequest</span></code></a>, <a class="reference internal" href="#pyactor.util.TellRequest" title="pyactor.util.TellRequest"><code class="xref py py-class docutils literal"><span class="pre">TellRequest</span></code></a>, <a class="reference internal" href="#pyactor.util.FutureRequest" title="pyactor.util.FutureRequest"><code class="xref py py-class docutils literal"><span class="pre">FutureRequest</span></code></a>).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.actor.Actor.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the actor thread wich will process the channel queue while the actor <a class="reference internal" href="#pyactor.actor.Actor.is_alive" title="pyactor.actor.Actor.is_alive"><code class="xref py py-meth docutils literal"><span class="pre">is_alive()</span></code></a>,
+making it able to receive queries.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.actor.ActorRef">
+<em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">ActorRef</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>channel=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.ActorRef" title="Permalink to this definition">¶</a></dt>
+<dd><p>ActorRef contains the main components of an actor. These are the URL where it is located, the communication
+channel and the class of the actor as also the synchronous and asynchronous methods the class implements.
+When no channel is specified a new one will be created wich is also the default procedure.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">This is a superclass of <a class="reference internal" href="#pyactor.actor.Actor" title="pyactor.actor.Actor"><code class="xref py py-class docutils literal"><span class="pre">Actor</span></code></a> and has no direct functionality.</p>
+</div>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.actor.Channel">
+<em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">Channel</code><a class="headerlink" href="#pyactor.actor.Channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Channel is the main communication mechanism between actors. It is actually a simple facade to the
+Queue.Queue python class.</p>
+<dl class="method">
+<dt id="pyactor.actor.Channel.receive">
+<code class="descname">receive</code><span class="sig-paren">(</span><em>timeout=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Channel.receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>It receives a message from the channel, blocking the calling thread until the response is received, or
+the timeout is triggered.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> (<em>int</em>) &#8211; timeout to wait for messages. If none provided it will block until a message arrives.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">returns a message sent to the channel. It is a tuple using the constants in util.py (<a class="reference internal" href="#module-pyactor.util" title="pyactor.util"><code class="xref py py-mod docutils literal"><span class="pre">pyactor.util</span></code></a>).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.actor.Channel.send">
+<code class="descname">send</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Channel.send" title="Permalink to this definition">¶</a></dt>
+<dd><p>It sends a message to the current channel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> &#8211; The message sent to an actor. It is a tuple using the constants in util.py (<a class="reference internal" href="#module-pyactor.util" title="pyactor.util"><code class="xref py py-mod docutils literal"><span class="pre">pyactor.util</span></code></a>).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyactor.proxy">
+<span id="proxy"></span><h2>Proxy<a class="headerlink" href="#module-pyactor.proxy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyactor.proxy.AskWrapper">
+<em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">AskWrapper</code><span class="sig-paren">(</span><em>channel</em>, <em>method</em>, <em>actor_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.AskWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for Ask type queries to the proxy. Creates a <a class="reference internal" href="#pyactor.proxy.Future" title="pyactor.proxy.Future"><code class="xref py py-class docutils literal"><span class="pre">Future</span></code></a> to manage the result reply.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>channel</strong> (<a class="reference internal" href="#pyactor.actor.Channel" title="pyactor.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the querie.</li>
+<li><strong>method</strong> (<em>str.</em>) &#8211; name of the method this querie is gonna invoke.</li>
+<li><strong>actor_url</strong> (<em>str.</em>) &#8211; URL address where the actor is set.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.proxy.Future">
+<em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">Future</code><span class="sig-paren">(</span><em>actor_channel</em>, <em>method</em>, <em>params</em>, <em>actor_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.Future" title="Permalink to this definition">¶</a></dt>
+<dd><p>Future manages the remote method invocations that returns a result. Mostly for ask requests.</p>
+<dl class="method">
+<dt id="pyactor.proxy.Future.add_callback">
+<code class="descname">add_callback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.Future.add_callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a callback on the Future. This will generate a new <a class="reference internal" href="#pyactor.util.FutureRequest" title="pyactor.util.FutureRequest"><code class="xref py py-class docutils literal"><span class="pre">FutureRequest</span></code></a> sent to the actor that will invoke
+the callback function with the result by parameter.</p>
+<p>In sample3.py you can see how to use it:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span>
+<span class="n">future</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="s1">&#39;pong&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>pong is a method of the same class that receives the result of the querie in parameter <em>msg</em>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+    <span class="nb">print</span> <span class="s1">&#39;callback&#39;</span><span class="p">,</span><span class="n">msg</span>
+</pre></div>
+</div>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>callback</strong> (<em>str.</em>) &#8211; name of the function where to send the response.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.proxy.Future.get">
+<code class="descname">get</code><span class="sig-paren">(</span><em>timeout=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.Future.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Invokes the method sending a querie through the channel and obtains the result of this method.</p>
+<p>It is necessary to invoke this method with a synchronous querie in order to get the result. As in sample2.py:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">e1</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Unless you use this method, you will get the future itself, which means the method has not been invoked yet,
+like in sample3.py:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>In this case, you could set a callback with <a class="reference internal" href="#pyactor.proxy.Future.add_callback" title="pyactor.proxy.Future.add_callback"><code class="xref py py-meth docutils literal"><span class="pre">add_callback()</span></code></a>, so the result will be sent to the method ou specify.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timeout</strong> (<em>int</em>) &#8211; timeout to wait for the result. If not specified, it&#8217;s set to 1 sec.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the result of the invoked method. Could be any type.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">Timeout</span></code>, or an error receiving from the channel.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.proxy.Proxy">
+<em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">Proxy</code><span class="sig-paren">(</span><em>actor</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.Proxy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Proxy is the class that supports to create a remote reference to an actor and invoke its methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>actor</strong> (<a class="reference internal" href="#pyactor.actor.Actor" title="pyactor.actor.Actor"><em>Actor</em></a>) &#8211; the actor the proxy will manage.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.proxy.TellWrapper">
+<em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">TellWrapper</code><span class="sig-paren">(</span><em>channel</em>, <em>method</em>, <em>actor_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.TellWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for Tell type queries to the proxy. Creates the request and sends it through the channel.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>channel</strong> (<a class="reference internal" href="#pyactor.actor.Channel" title="pyactor.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the querie.</li>
+<li><strong>method</strong> (<em>str.</em>) &#8211; name of the method this querie is gonna invoke.</li>
+<li><strong>actor_url</strong> (<em>str.</em>) &#8211; URL address where the actor is set.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyactor.context">
+<span id="context"></span><h2>Context<a class="headerlink" href="#module-pyactor.context" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="pyactor.context.Host">
+<em class="property">class </em><code class="descclassname">pyactor.context.</code><code class="descname">Host</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Host is the container of the actors. It manages the spawn and elimination of actors and their communication
+through channels. Also configures the TCP socket where the actors will be able to recieve queries remotely.</p>
+<dl class="method">
+<dt id="pyactor.context.Host.is_local">
+<code class="descname">is_local</code><span class="sig-paren">(</span><em>aurl</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.is_local" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sync method.
+Tells if the address given is from this host.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>aurl</strong> (<em>ParseResult</em>) &#8211; address to analyze.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(<em>Bool.</em>) If is local (<strong>True</strong>) or not (<strong>False</strong>).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.load_transport">
+<code class="descname">load_transport</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.load_transport" title="Permalink to this definition">¶</a></dt>
+<dd><p>For TCP communication. Sets the communication socket of the host at the address and port specified.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>str.</em>) &#8211; URL where to bind the host. Must be provided in the tipical format: &#8216;scheme://address:port/hierarchical_path&#8217;</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.lookup">
+<code class="descname">lookup</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.lookup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sync method.
+Gets a new proxy that references to the actor of the host identified by the given ID.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>id</strong> (<em>str.</em>) &#8211; identifier of the actor you want.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the actor requiered.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.lookup_url">
+<code class="descname">lookup_url</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.lookup_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sync method.
+Gets a proxy reference to the actor indicated by the URL in the parameters. It can be a local reference
+or a TCP direction.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>url</strong> (<em>srt.</em>) &#8211; address that identifies an actor.</li>
+<li><strong>klass</strong> (<em>class</em>) &#8211; class type of the actor to lookup.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the actor requested.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raise:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">NotFound</span></code>, if the URL specified do not correspond to any actor in the host.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.shutdown">
+<code class="descname">shutdown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Async method.
+Stops the Host, stopping at the same time all its actors.
+Should be called at the end of its usage, to finish correctly all the connections.</p>
+<div class="admonition-todo admonition" id="index-0">
+<p class="first admonition-title">Todo</p>
+<p class="last">Problem to be solved. spawn_n and sample3.py.</p>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.spawn">
+<code class="descname">spawn</code><span class="sig-paren">(</span><em>id</em>, <em>klass</em>, <em>args=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.spawn" title="Permalink to this definition">¶</a></dt>
+<dd><p>This sync method creates an actor attached to this host. It will be an instance of the class <em>klass</em> it will
+be assigned an ID that identifies it among the host.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>id</strong> (<em>str.</em>) &#8211; identifier for the spawning actor. Unique within the host.</li>
+<li><strong>klass</strong> (<em>class</em>) &#8211; class type of the spawning actor.</li>
+<li><strong>args</strong> (<em>list</em>) &#8211; arguments for the init function of the spawning actor class.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the actor spawned.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">AlreadyExists</span></code>, if the ID specified is already in use.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.spawn_n">
+<code class="descname">spawn_n</code><span class="sig-paren">(</span><em>n</em>, <em>id</em>, <em>klass</em>, <em>args=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.spawn_n" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sync method.
+Spwns n actors at a time as a group. All the actors will have the same ID and channel.
+All the communications will proceed to all the actors of the grup at a time.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>n</strong> (<em>int</em>) &#8211; Number of actors to spawn in the group.</li>
+<li><strong>id</strong> (<em>str.</em>) &#8211; identifier for this actors; must be unique within the other actors of the host.</li>
+<li><strong>klass</strong> (<em>class</em>) &#8211; class type of the actors to be spawned.</li>
+<li><strong>args</strong> (<em>list</em>) &#8211; arguments to the init function of the class  <em>klass</em>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of one of the actors, which will also communicate whit all the others.</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">AlreadyExists</span></code>, if the ID specified is already in use.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.context.init_host">
+<code class="descclassname">pyactor.context.</code><code class="descname">init_host</code><span class="sig-paren">(</span><em>url='local://local:6666/host'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.init_host" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the main function to create a new Host to which you can spawn actors. It will be set by default
+at local address if no parameter <em>url</em> is given.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>str.</em>) &#8211; URL where to start and bind the host.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the host.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.context.launch_actor">
+<code class="descclassname">pyactor.context.</code><code class="descname">launch_actor</code><span class="sig-paren">(</span><em>id</em>, <em>actor</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.launch_actor" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function makes an actor alive to start processing queries.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> (<em>str.</em>) &#8211; identifier of the actor.</li>
+<li><strong>actor</strong> (<a class="reference internal" href="#pyactor.actor.Actor" title="pyactor.actor.Actor"><em>Actor</em></a>) &#8211; instance of the actor.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.context.serve_forever">
+<code class="descclassname">pyactor.context.</code><code class="descname">serve_forever</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.serve_forever" title="Permalink to this definition">¶</a></dt>
+<dd><p>This allows the host to keep alive indefinitely so its actors can receive queries at any time.
+To kill the execution, press Ctrl+C.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.context.signal_handler">
+<code class="descclassname">pyactor.context.</code><code class="descname">signal_handler</code><span class="sig-paren">(</span><em>signal</em>, <em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.signal_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>This gets the signal of Ctrl+C and stops the host. It also ends the execution.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>signal</strong> &#8211; SIGINT signal interruption sent with a Ctrl+C.</li>
+<li><strong>frame</strong> &#8211; the current stack frame. (not used)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-pyactor.util">
+<span id="util"></span><h2>Util<a class="headerlink" href="#module-pyactor.util" title="Permalink to this headline">¶</a></h2>
+<p>Samples requests:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">msg</span> <span class="o">=</span> <span class="n">TellRequest</span><span class="p">(</span><span class="n">TELL</span><span class="p">,</span><span class="s1">&#39;echo&#39;</span><span class="p">,[],</span><span class="n">url</span><span class="p">)</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="n">AskRequest</span><span class="p">(</span><span class="n">ASK</span><span class="p">,</span><span class="s1">&#39;echo&#39;</span><span class="p">,[],</span><span class="n">future_channel</span><span class="p">,</span><span class="n">url</span><span class="p">)</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="n">AskResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="n">msg</span> <span class="o">=</span> <span class="n">FutureRequest</span><span class="p">(</span><span class="n">FUTURE</span><span class="p">,</span><span class="s1">&#39;get_x&#39;</span><span class="p">,[],</span><span class="s1">&#39;on_result&#39;</span><span class="p">,</span><span class="n">future_channel</span><span class="p">,</span><span class="n">url_to</span><span class="p">,</span><span class="n">url_from</span><span class="p">)</span>
+</pre></div>
+</div>
+<dl class="docutils">
+<dt>Defined constants:</dt>
+<dd>FROM, TO, TYPE, METHOD, PARAMS, FUTURE, ASK, TELL, SRC</dd>
+</dl>
+<dl class="class">
+<dt id="pyactor.util.AskRequest">
+<em class="property">class </em><code class="descclassname">pyactor.util.</code><code class="descname">AskRequest</code><span class="sig-paren">(</span><em>type</em>, <em>method</em>, <em>params</em>, <em>channel</em>, <em>to_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.util.AskRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>A namedtuple for the ask requests.</p>
+<dl class="attribute">
+<dt id="pyactor.util.AskRequest.channel">
+<code class="descname">channel</code><a class="headerlink" href="#pyactor.util.AskRequest.channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.AskRequest.method">
+<code class="descname">method</code><a class="headerlink" href="#pyactor.util.AskRequest.method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.AskRequest.params">
+<code class="descname">params</code><a class="headerlink" href="#pyactor.util.AskRequest.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.AskRequest.to_url">
+<code class="descname">to_url</code><a class="headerlink" href="#pyactor.util.AskRequest.to_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.AskRequest.type">
+<code class="descname">type</code><a class="headerlink" href="#pyactor.util.AskRequest.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.util.AskResponse">
+<em class="property">class </em><code class="descclassname">pyactor.util.</code><code class="descname">AskResponse</code><span class="sig-paren">(</span><em>result</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.util.AskResponse" title="Permalink to this definition">¶</a></dt>
+<dd><p>A namedtuple for the responses of the requests <a class="reference internal" href="#pyactor.util.AskRequest" title="pyactor.util.AskRequest"><code class="xref py py-class docutils literal"><span class="pre">AskRequest</span></code></a>.</p>
+<dl class="attribute">
+<dt id="pyactor.util.AskResponse.result">
+<code class="descname">result</code><a class="headerlink" href="#pyactor.util.AskResponse.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.util.FutureRequest">
+<em class="property">class </em><code class="descclassname">pyactor.util.</code><code class="descname">FutureRequest</code><span class="sig-paren">(</span><em>type</em>, <em>method</em>, <em>params</em>, <em>callback</em>, <em>channel</em>, <em>to_url</em>, <em>from_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.util.FutureRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>A namedtuple for the future requests.</p>
+<dl class="attribute">
+<dt id="pyactor.util.FutureRequest.callback">
+<code class="descname">callback</code><a class="headerlink" href="#pyactor.util.FutureRequest.callback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.FutureRequest.channel">
+<code class="descname">channel</code><a class="headerlink" href="#pyactor.util.FutureRequest.channel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.FutureRequest.from_url">
+<code class="descname">from_url</code><a class="headerlink" href="#pyactor.util.FutureRequest.from_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.FutureRequest.method">
+<code class="descname">method</code><a class="headerlink" href="#pyactor.util.FutureRequest.method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.FutureRequest.params">
+<code class="descname">params</code><a class="headerlink" href="#pyactor.util.FutureRequest.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.FutureRequest.to_url">
+<code class="descname">to_url</code><a class="headerlink" href="#pyactor.util.FutureRequest.to_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.FutureRequest.type">
+<code class="descname">type</code><a class="headerlink" href="#pyactor.util.FutureRequest.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.util.TellRequest">
+<em class="property">class </em><code class="descclassname">pyactor.util.</code><code class="descname">TellRequest</code><span class="sig-paren">(</span><em>type</em>, <em>method</em>, <em>params</em>, <em>to_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.util.TellRequest" title="Permalink to this definition">¶</a></dt>
+<dd><p>A namedtuple for the tell requests.</p>
+<dl class="attribute">
+<dt id="pyactor.util.TellRequest.method">
+<code class="descname">method</code><a class="headerlink" href="#pyactor.util.TellRequest.method" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.TellRequest.params">
+<code class="descname">params</code><a class="headerlink" href="#pyactor.util.TellRequest.params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.TellRequest.to_url">
+<code class="descname">to_url</code><a class="headerlink" href="#pyactor.util.TellRequest.to_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyactor.util.TellRequest.type">
+<code class="descname">type</code><a class="headerlink" href="#pyactor.util.TellRequest.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Main Code</a><ul>
+<li><a class="reference internal" href="#first-steps">First steps:</a></li>
+<li><a class="reference internal" href="#module-pyactor.actor">Actor</a></li>
+<li><a class="reference internal" href="#module-pyactor.proxy">Proxy</a></li>
+<li><a class="reference internal" href="#module-pyactor.context">Context</a></li>
+<li><a class="reference internal" href="#module-pyactor.util">Util</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to PyActor&#8217;s documentation!</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/code.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyActor’s documentation!"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">PyActor 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2016, URV.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.
+    </div>
+  </body>
+</html>

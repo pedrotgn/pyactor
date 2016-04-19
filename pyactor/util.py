@@ -1,3 +1,16 @@
+"""
+Samples requests::
+
+    msg = TellRequest(TELL,'echo',[],url)
+    msg = AskRequest(ASK,'echo',[],future_channel,url)
+    msg = AskResponse(result)
+    msg = FutureRequest(FUTURE,'get_x',[],'on_result',future_channel,url_to,url_from)
+
+Defined constants:
+    FROM, TO, TYPE, METHOD, PARAMS, FUTURE, ASK, TELL, SRC
+
+"""
+
 from threading import current_thread
 import collections
 
@@ -23,18 +36,25 @@ def get_current():
 
 class Timeout(Exception):pass
 
+class AlreadyExists(Exception):pass
+class NotFound(Exception):pass
+
 TellRequest = collections.namedtuple('TellRequest', 'type method params to_url')
+#class TellRequest (collections.namedtuple('TellRequest', 'type method params to_url')):
+'''
+A namedtuple for the tell requests.
+'''
 AskRequest = collections.namedtuple('AskRequest', 'type method params channel to_url')
+'''
+A namedtuple for the ask requests.
+'''
 AskResponse = collections.namedtuple('AskResponse', 'result')
+'''
+A namedtuple for the responses of the requests :class:`AskRequest`.
+'''
 FutureRequest = collections.namedtuple('FutureRequest', 'type method params callback channel to_url from_url')
+'''
+A namedtuple for the future requests.
+'''
 
 #global AskRequest, TellRquest, AskResponse, FutureRequest
-
-"""
-Samples requests:
-msg = TellRequest(TELL,'echo',[],url)
-msg = AskRequest(ASK,'echo',[],future_channel,url)
-msg = AskResponse(result)
-msg = FutureRequest(FUTURE,'get_x',[],'on_result',future_channel,url_to,url_from)
-
-"""

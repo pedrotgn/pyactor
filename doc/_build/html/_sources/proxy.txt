@@ -1,0 +1,44 @@
+.. _proxy:
+
+Proxy
+=====
+
+.. py:class:: Proxy
+
+    Proxy des
+
+
+.. py:class:: Future
+
+    Extends object
+
+    .. py:method:: get(timeout)
+
+        Description
+
+        :param timeout: Timeout in secs for the request. Default to 1.
+
+        :return: The instance of the call.
+
+    .. py:method:: add_callback(callback)
+
+        Description
+
+        :param callback: Which method to callback.
+
+
+.. py:class:: TellWrapper
+
+    Wrapper for tell queries
+
+.. py:class:: AskWrapper
+
+    Wrapper for ask queries
+
+
+
+Go to:
+
+* :ref:`main`
+* :ref:`genindex`
+* :ref:`search`
