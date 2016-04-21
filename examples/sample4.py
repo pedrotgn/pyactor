@@ -1,3 +1,6 @@
+'''
+Timeout smaple.
+'''
 from pyactor.context import init_host
 from time import sleep
 from pyactor.util import Timeout

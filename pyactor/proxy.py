@@ -11,6 +11,7 @@ class Proxy:
     def __init__(self, actor):
         self.__channel = actor.channel
         self.actor = actor
+        self.id=actor.id
         for method in actor.tell:
             setattr(self, method, TellWrapper(self.__channel,method,actor.url))
         for method in actor.ask:
@@ -19,6 +20,8 @@ class Proxy:
     def __repr__(self):
         return 'Proxy(actor=%s, tell=%s, ask = %s)' % (self.actor, self.actor.tell,self.actor.ask)
 
+    def get_proxy(self):
+        return Proxy(self.actor)
 
 
 

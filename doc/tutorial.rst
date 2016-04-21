@@ -1,0 +1,300 @@
+.. _tutorial:
+
+Turorial
+*********
+
+A quik guide on how to use the PyActor library through examples.
+
+
+.. _first:
+
+First steps:
+============
+
+This library allows the creation and management of actors in a distributed system using Python.
+The core of the library is implemented in the three modules explained in this page. That contains
+the actors, the proxys that allows them to be accessed from remote locations and the hosts that
+put it all together.
+
+First of all, a :class:`~.context.Host` is needed in order to create some actors. To create a host, use the
+function :func:`~.context.init_host` which returns the proxy of a host. Then, use this proxy to spawn
+actors by giving the class type of the actor to create. The :meth:`~.context.Host.spawn` method will return the proxy (:class:`~.proxy.Proxy`)
+that manages that actor, but you will need to use the *.get()* to obtain it from the Future created for the query when called
+the :meth:`~.context.Host.spawn` which is actualy an ask method of the host actor. See example::
+
+    h = init_host()
+    actor1 = h.spawn('id1',MyClass).get()
+
+The class of an actor must have defined its methods in the _tell and _ask lists so they can be called through the proxy.
+In the _tell list will be named those methods meant to be asynchronous and in the _ask list, the synchronous ones.
+In this example we have a class MyClass with a sync method *ask_me()* and an async method *tell_me()*::
+
+    class MyClass:
+        _tell =['tell_me']
+        _ask = ['ask_me']
+        def tell_me(self,msg):
+            print msg
+        def ask_me(self):
+            return 'hello back'
+
+As you can see, the async method recieves a message and simply prints it while the sync method returns a result.
+More basic examples can be found in the 'pyactor/examples' directory of the project: sample1.py, sample2.py, sample3.py and sample4.p.
+They are also explained below.
+
+
+Sample 1
+============
+
+This example shows and tests the most basic elements of this library. It creates a :class:`~.Host` and adds an actor to it.
+Then, queries an async method of this actor. This is the full code of this sample, which you can find and test in
+``pyactor\examples\sample1.py``::
+
+    from pyactor.context import init_host
+    from time import sleep
+
+    class Echo:
+        _tell =['echo']
+        _ask = []
+        def echo(self,msg):
+            print msg
+
+    h = init_host()
+    e1 = h.spawn('echo1',Echo).get()
+    e1.echo('hello there !!')
+    sleep(1)
+    h.shutdown()
+
+This example is similar to the one shown above in :ref:`first`, but here we'll explain it more carefully.
+
+In this case, we need to import the :func:`~.init_host` function from the project in order to use it.
+We also import the *sleep* function to give time to the actor to work.
+
+The actor to create in this example will be an :class:`Echo`. This class only has one method which prints
+the message *msg*, given by parameter. As you can see, the classes destinated to be actors must have below
+his definition the statements ``_tell=[]`` and ``_ask=[]`` that include the names of the methods that can be
+remotely invoked in an asynchronous or synchronous way, respectively. In this sample we have the echo method,
+which is async, as no response from it is needed.
+
+To begin the execution we'll need a :class:`~.Host` to contain the actors. For that, we create a new variable
+by using the function we imported before. ::
+
+    h = init_host()
+
+Now we have a :class:`~.Host` in the 'h' variable. It can create actors atached to itself. To do that, we use
+the :meth:`~.Host.spawn` method. The first parameter is a string with the id of the actor that will identifie it
+among the host so no repeated values allowed. The second is the class the actor will be instance of. In this case
+we create an actor which will be an :class:`Echo` and with the id 'echo1'::
+
+    e1 = h.spawn('echo1',Echo).get()
+
+The use of *.get()* at the end is necessary since 'h' is actually a reference to the :class:`Proxy` of the host
+that acts like an actor and :meth:`~.spawn` is treated like an async method which result has to be obtained.
+'e1' will now represent that actor (the :class:`Proxy` that manages it).
+
+As we have the actor, we can invoke his methods as we would do normally since the proxy will redirect the queries
+to the actual ubication of it. If we didn't have specified the methods in the statements appointed before (_tell and _ask),
+we would't be able to do this now.
+The execution shold work properly and print on screen::
+
+    hello there !!
+
+Then, the sleep gives time to the actor for doing the work and finall, we close the host, which will stop all
+its actors. This function (:meth:`~.shutdown`) should be allways called at the end::
+
+    h.shutdown()
+
+.. note:: The host is actualy an actor itself, so it can recieve remote queries and has sync and async methods.
+
+Sample 2
+============
+
+This example extends the content of the previous one by including sync queries. It still creates a :class:`~.Host`
+and adds an actor to it. This is the full code of this sample, which you can find and test in
+``pyactor\examples\sample2.py``::
+
+    from pyactor.context import init_host
+    from time import sleep
+
+    class Echo:
+        _tell =['echo','bye']
+        _ask = ['say_something']
+        def echo(self,msg):
+            print msg
+        def bye(self):
+            print 'bye'
+        def say_something(self):
+            return 'something'
+
+    h = init_host()
+    e1 = h.spawn('echo1',Echo).get()
+    e1.echo('hello there !!')
+    e1.bye()
+
+    print e1.say_something().get()
+
+    sleep(1)
+    h.shutdown()
+
+Now :class:`Echo` has two new methods, :meth:`bye` and :meth:`say_something`. The first one is async like
+the previous :meth:`echo`, but the other one is synchronous.
+
+In this example we see that, when invoking a synchronous method is needed to add the *.get()* in order to actually
+execute the method and obtain a result from it. If you forget to use it, the function will return a :class:`~.Future`
+which is a the formulation of the query, but it has not been invoked yet.
+
+The correct output for this sample is the following::
+
+    hello there !!
+    bye
+    something
+
+
+Sample 3
+=================
+
+This example tries the functionality of the callback element of the synchronous queries. This is the full code of this
+sample, which you can find and test in ``pyactor\examples\sample3.py``::
+
+    from pyactor.context import init_host
+    from time import sleep
+
+    class Echo:
+        _tell =['echo','bye']
+        _ask = ['say_something']
+        def echo(self,msg):
+            print msg
+        def bye(self):
+            print 'bye'
+        def say_something(self):
+            return 'something'
+
+    class Bot:
+        _tell =['set_echo','ping','pong']
+        _ask = []
+        def set_echo(self,echo):
+            self.echo = echo
+        def ping(self):
+            future = self.echo.say_something()
+            future.add_callback('pong')
+            print 'pinging..'
+        def pong(self,msg):
+            print 'callback',msg
+
+    h = init_host()
+    e1 = h.spawn('echo1',Echo).get()
+    bot = h.spawn('bot',Bot).get()
+    bot.set_echo(e1)
+    bot.ping()
+
+    sleep(1)
+    h.shutdown()
+
+This time we keep having the same initialitzation as before, but now threre is a new class. :class:`Bot` has three async
+methods that will allow to prove the correctness of the callback functionality. :meth:`set_echo` registers an :class:`Echo`
+to the Bot so it can call it. :math:`ping` creates the query to the :meth:`say_something` method and sets the callback for this
+to his other method :meth:`pong`. This second will recieve the result of the execution of the :meth:`say_something` method.
+
+.. note:: :meth:`~.add_callback` needs to be called from an actor to another actor, specifing a method of the first one that has
+    one parameter, which will be the result of the method invoked.
+
+The correct output for this sample is the following::
+
+    pinging...
+    callback something
+
+
+Sample 4
+=================
+
+This example tests the raising of timeouts. This is the full code of this sample, which you can find and test in
+``pyactor\examples\sample4.py``::
+
+    from pyactor.context import init_host
+    from time import sleep
+    from pyactor.util import Timeout
+
+    class Echo:
+        _tell =['echo','bye']
+        _ask = ['say_something']
+        def echo(self,msg):
+            print msg
+        def bye(self):
+            print 'bye'
+        def say_something(self):
+            sleep(2)
+            return 'something'
+
+    h = init_host()
+    e1 = h.spawn('echo1',Echo).get()
+    e1.echo('hello there !!')
+    e1.bye()
+
+    try:
+        x = e1.say_something().get(1)
+    except Timeout:
+        print 'timeout catched'
+    sleep(1)
+    h.shutdown()
+
+Now we have the same :class:`Echo` class but in the sync method we added a sleep of 2 seconds. Also, we sorrounded
+the call of the method by a try structure catching a :class:`~.Timeout` exception. Since we are giving to the invocation
+a expire time of 1 second, the timeout will be reached and the exception rised.
+
+.. note:: The parameter of the .get() method is the time, in seconds, that is given as a timeout to the querie. The
+    default one, in case none is specified, is 1 second.
+
+The correct output for this sample is the following::
+
+    hello there !!
+    bye
+    timeout catched
+
+
+Sample 5
+=================
+
+This example tests the reference to actors id and proxy. This is the full code of this sample, which you can find and test in
+``pyactor\examples\sample5.py``::
+
+    from pyactor.context import init_host
+    from time import sleep
+    from pyactor.util import Timeout
+
+    class Echo:
+        _tell =['echo','bye']
+        _ask = ['say_something']
+        def echo(self,msg):
+            print msg
+        def bye(self):
+            print 'bye'
+        def say_something(self):
+            return 'something'
+
+
+    h = init_host()
+    e1 = h.spawn('echo1',Echo).get()
+    print e1.id
+    e1.echo('hello there !!')
+    e1.bye()
+    sleep(1)
+    e2 = e1.get_proxy()
+    print e2.id
+    print e2.say_something().get()
+
+    sleep(1)
+    h.shutdown()
+
+This sample demonstrates how to get references from an actor. With ``e1.id`` we obtain the string that identifies
+the actor in the host it is located.
+Then, with ``e1.get_proxy()`` you can get a reference to a new proxy managing the same actor so you can give it to
+another function, class or module.
+
+.. note:: If you actually want the same proxy instance, 'e1' whould do.
+
+The correct output for this sample is the following::
+
+    echo1
+    hello there !!
+    bye
+    echo1
+    something

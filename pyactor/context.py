@@ -55,7 +55,7 @@ class Host(object):
         if actors.has_key(url):
             raise AlreadyExists()
         else:
-            new_actor = Actor(url,klass,args)
+            new_actor = Actor(url,klass,args,id)
             launch_actor(url,new_actor)
             return Proxy(new_actor)
 

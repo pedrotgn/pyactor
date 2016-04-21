@@ -25,6 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="PyActor 0.1 documentation" href="index.html" />
+    <link rel="next" title="Turorial" href="tutorial.html" />
     <link rel="prev" title="Welcome to PyActor’s documentation!" href="index.html" /> 
   </head>
   <body role="document">
@@ -37,6 +38,9 @@
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Turorial"
+             accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to PyActor’s documentation!"
              accesskey="P">previous</a> |</li>
@@ -52,41 +56,11 @@
   <div class="section" id="module-pyactor">
 <span id="main-code"></span><span id="code"></span><h1>Main Code<a class="headerlink" href="#module-pyactor" title="Permalink to this headline">¶</a></h1>
 <p>PyActor: Python Actorlibrary</p>
-<div class="section" id="first-steps">
-<h2>First steps:<a class="headerlink" href="#first-steps" title="Permalink to this headline">¶</a></h2>
-<p>This library allows the creation and management of actors in a distributed system using Python.
-The core of the library is implemented in the three modules explained in this page. That contains
-the actors, the proxys that allows them to be accessed from remote locations and the hosts that
-put it all together.</p>
-<p>First of all, a Host (<a class="reference internal" href="#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">context.Host</span></code></a>) is needed in order to create some actors. To create a host, use the
-function <a class="reference internal" href="#pyactor.context.init_host" title="pyactor.context.init_host"><code class="xref py py-func docutils literal"><span class="pre">context.init_host()</span></code></a> which returns the proxy of a host. Then, use this proxy to spawn
-actors by giving the class type of the actor to create. The <a class="reference internal" href="#pyactor.context.Host.spawn" title="pyactor.context.Host.spawn"><code class="xref py py-meth docutils literal"><span class="pre">context.Host.spawn()</span></code></a> method will return the proxy (<a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">proxy.Proxy</span></code></a>)
-that manages that actor, but you will need to use the .get() to obtain it from the Future created for the querie when called
-the :meth:<a href="#id1"><span class="problematic" id="id2">`</span></a>context.Host.spawn`which is actualy an ask method of the host actor. See example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">h</span> <span class="o">=</span> <span class="n">init_host</span><span class="p">()</span>
-<span class="n">actor1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;id1&#39;</span><span class="p">,</span><span class="n">MyClass</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
-</pre></div>
-</div>
-<p>The class of an actor must have defined its methods in the _tell and _ask lists so they can be called through the proxy.
-In the _tell list will be named those methods meant to be asynchronous and in the _ask list, the synchronous ones.
-In this example we have a class MyClass with a sync method <em>ask_me()</em> and a async method <em>tell_me()</em>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;tell_me&#39;</span><span class="p">]</span>
-    <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ask_me&#39;</span><span class="p">]</span>
-    <span class="k">def</span> <span class="nf">tell_me</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="n">msg</span>
-    <span class="k">def</span> <span class="nf">ask_me</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;hello back&#39;</span>
-</pre></div>
-</div>
-<p>As you can see, the async method recieves a message and simply prints it while the sync method returns a result.
-More basic examples can be found in the &#8216;pyactor/examples&#8217; directory of the project: sample1.py, sample2.py and sample3.py.</p>
-</div>
 <div class="section" id="module-pyactor.actor">
 <span id="actor"></span><h2>Actor<a class="headerlink" href="#module-pyactor.actor" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="pyactor.actor.Actor">
-<em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">Actor</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>args=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">Actor</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>args=[]</em>, <em>id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Actor is the instance of an object to which is possible to acces and invoke its methods remotely.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -667,7 +641,6 @@ To kill the execution, press Ctrl+C.</p>
   <h3><a href="index.html">Table Of Contents</a></h3>
   <ul>
 <li><a class="reference internal" href="#">Main Code</a><ul>
-<li><a class="reference internal" href="#first-steps">First steps:</a></li>
 <li><a class="reference internal" href="#module-pyactor.actor">Actor</a></li>
 <li><a class="reference internal" href="#module-pyactor.proxy">Proxy</a></li>
 <li><a class="reference internal" href="#module-pyactor.context">Context</a></li>
@@ -679,6 +652,9 @@ To kill the execution, press Ctrl+C.</p>
   <h4>Previous topic</h4>
   <p class="topless"><a href="index.html"
                         title="previous chapter">Welcome to PyActor&#8217;s documentation!</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tutorial.html"
+                        title="next chapter">Turorial</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -709,6 +685,9 @@ To kill the execution, press Ctrl+C.</p>
         <li class="right" >
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
+        <li class="right" >
+          <a href="tutorial.html" title="Turorial"
+             >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to PyActor’s documentation!"
              >previous</a> |</li>

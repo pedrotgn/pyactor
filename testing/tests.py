@@ -50,20 +50,24 @@ class TestBasic(unittest.TestCase):
 
         self.assertTrue(e1.actor.is_alive())
 
-        #Changed except in proxy.Future.get() to reraise an AlreadyExists Exception.
         with self.assertRaises(AlreadyExists):
             e2=h.spawn('echo1',Echo).get()
+
+        self.assertEqual(e1.id, 'echo1')
+        e2 = e1.get_proxy()
+        self.assertEqual(e2.id, 'echo1')
+        self.assertEqual(str(e1),str(e2))
 
     def test_3queries(self):
         global h
         global e1
 
         self.assertEqual(e1.echo.__class__.__name__,'TellWrapper')
-        s=e1.echo('hola amigo !!')
+        s=e1.echo('hello there!!')
         self.assertEqual(s,None)
         global out
         sleep(0.1)
-        self.assertEqual(out,'hola amigo !!')
+        self.assertEqual(out,'hello there!!')
         ask=e1.say_something()
         self.assertEqual(ask.__class__.__name__,'Future')
         self.assertEqual(ask.get(),'something')

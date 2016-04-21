@@ -63,7 +63,7 @@ class Actor(ActorRef):
     :param class klass: class type for the actor.
     :param list args: arguments for the *klass* class if appropriate.
     '''
-    def __init__(self, url, klass, args=[]):
+    def __init__(self, url, klass, args=[], id=None):
         super(Actor,self).__init__(url,klass)
         #self.url = url
         #self.channel = Channel()
@@ -71,6 +71,9 @@ class Actor(ActorRef):
         #self.__obj = klass(*args)
         #self.tell = klass._tell
         #self.ask = klass._ask
+        if id == None:
+            id = url
+        self.id = id
         self.tell.append('stop')
         self.running = True
 

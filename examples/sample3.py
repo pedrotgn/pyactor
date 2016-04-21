@@ -1,3 +1,6 @@
+'''
+Callback sample.
+'''
 from pyactor.context import init_host
 from time import sleep
 
