@@ -256,7 +256,7 @@ Sample 5
 This example tests the reference to actors id and proxy. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample5.py``::
 
-    from pyactor.context import init_host
+    from pyactor.context import init_host, serve_forever
     from time import sleep
     from pyactor.util import Timeout
 
@@ -282,7 +282,7 @@ This example tests the reference to actors id and proxy. This is the full code o
     print e2.say_something().get()
 
     sleep(1)
-    h.shutdown()
+    serve_forever()
 
 This sample demonstrates how to get references from an actor. With ``e1.id`` we obtain the string that identifies
 the actor in the host it is located.
@@ -298,3 +298,63 @@ The correct output for this sample is the following::
     bye
     echo1
     something
+
+In this sample, we also see the usage of the :func:`~.serve_forever` function wich is very useful in remote communication
+in order to keep a host alive as another one send queries to his actors. The usage is very simple, instead of shuting
+the host down at the end, we call::
+
+    serve_forever()
+
+This will maintain the host alive in lower process consumption until the user presses ``Ctrl+C``.
+
+
+Sample 6
+=========
+
+This example shows the usage of the lookup methods applied to a host. This is the full code of this sample, which
+you can find and test in ``pyactor\examples\sample6.py``::
+
+    from pyactor.context import init_host
+    from time import sleep
+
+    class Echo:
+        _tell =['echo','bye']
+        _ask = ['say_something']
+        def echo(self,msg):
+            print msg
+        def bye(self):
+            print 'bye'
+        def say_something(self):
+            return 'something'
+
+
+    h = init_host()
+    e1 = h.spawn('echo1',Echo).get()
+
+    e = h.lookup('echo1').get()
+    print e.say_something().get()
+
+    ee = h.lookup_url('local://local:6666/echo1', Echo).get()
+    print ee.say_something().get()
+
+    sleep(1)
+    h.shutdown()
+
+We have two ways to get the reference of one already existing actor of a host. If it is local, of the same host,
+it is fine to use the method :meth:`~.lookup` giving by parameter only the id of the actor you wish::
+
+    e = h.lookup('echo1').get()
+
+If you are working remotly, you could need :meth:`~.lookup_url` to get the reference. In this example, it is used
+also to get a local reference giving the standard local url at which the host is initialized by default::
+
+    ee = h.lookup_url('local://local:6666/echo1', Echo).get()
+
+This second way, requieres also to specify the class of the actor to lookup in the second parameter.
+
+Intervals
+===========
+
+
+Parallel??
+==========

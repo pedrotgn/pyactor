@@ -58,7 +58,7 @@
 The core of the library is implemented in the three modules explained in this page. That contains
 the actors, the proxys that allows them to be accessed from remote locations and the hosts that
 put it all together.</p>
-<p>First of all, a Host (<a class="reference internal" href="code.html#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a>) is needed in order to create some actors. To create a host, use the
+<p>First of all, a <a class="reference internal" href="code.html#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a> is needed in order to create some actors. To create a host, use the
 function <a class="reference internal" href="code.html#pyactor.context.init_host" title="pyactor.context.init_host"><code class="xref py py-func docutils literal"><span class="pre">init_host()</span></code></a> which returns the proxy of a host. Then, use this proxy to spawn
 actors by giving the class type of the actor to create. The <a class="reference internal" href="code.html#pyactor.context.Host.spawn" title="pyactor.context.Host.spawn"><code class="xref py py-meth docutils literal"><span class="pre">spawn()</span></code></a> method will return the proxy (<a class="reference internal" href="code.html#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a>)
 that manages that actor, but you will need to use the <em>.get()</em> to obtain it from the Future created for the query when called
@@ -69,7 +69,7 @@ the <a class="reference internal" href="code.html#pyactor.context.Host.spawn" ti
 </div>
 <p>The class of an actor must have defined its methods in the _tell and _ask lists so they can be called through the proxy.
 In the _tell list will be named those methods meant to be asynchronous and in the _ask list, the synchronous ones.
-In this example we have a class MyClass with a sync method <em>ask_me()</em> and a async method <em>tell_me()</em>:</p>
+In this example we have a class MyClass with a sync method <em>ask_me()</em> and an async method <em>tell_me()</em>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
     <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;tell_me&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ask_me&#39;</span><span class="p">]</span>
@@ -290,7 +290,7 @@ timeout catched
 <h2>Sample 5<a class="headerlink" href="#sample-5" title="Permalink to this headline">¶</a></h2>
 <p>This example tests the reference to actors id and proxy. This is the full code of this sample, which you can find and test in
 <code class="docutils literal"><span class="pre">pyactor\examples\sample5.py</span></code>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">init_host</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">init_host</span><span class="p">,</span> <span class="n">serve_forever</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">pyactor.util</span> <span class="k">import</span> <span class="n">Timeout</span>
 
@@ -316,7 +316,7 @@ timeout catched
 <span class="nb">print</span> <span class="n">e2</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 
 <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+<span class="n">serve_forever</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>This sample demonstrates how to get references from an actor. With <code class="docutils literal"><span class="pre">e1.id</span></code> we obtain the string that identifies
@@ -335,6 +335,56 @@ echo1
 something
 </pre></div>
 </div>
+<p>In this sample, we also see the usage of the <a class="reference internal" href="code.html#pyactor.context.serve_forever" title="pyactor.context.serve_forever"><code class="xref py py-func docutils literal"><span class="pre">serve_forever()</span></code></a> function wich is very useful in remote communication
+in order to keep a host alive as another one send queries to his actors. The usage is very simple, instead of shuting
+the host down at the end, we call:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">serve_forever</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This will maintain the host alive in lower process consumption until the user presses <code class="docutils literal"><span class="pre">Ctrl+C</span></code>.</p>
+</div>
+<div class="section" id="sample-6">
+<h2>Sample 6<a class="headerlink" href="#sample-6" title="Permalink to this headline">¶</a></h2>
+<p>This example shows the usage of the lookup methods applied to a host. This is the full code of this sample, which
+you can find and test in <code class="docutils literal"><span class="pre">pyactor\examples\sample6.py</span></code>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">init_host</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
+
+<span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
+    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span><span class="s1">&#39;bye&#39;</span><span class="p">]</span>
+    <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;say_something&#39;</span><span class="p">]</span>
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="n">msg</span>
+    <span class="k">def</span> <span class="nf">bye</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s1">&#39;bye&#39;</span>
+    <span class="k">def</span> <span class="nf">say_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;something&#39;</span>
+
+
+<span class="n">h</span> <span class="o">=</span> <span class="n">init_host</span><span class="p">()</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+<span class="n">e</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="nb">print</span> <span class="n">e</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+<span class="n">ee</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">lookup_url</span><span class="p">(</span><span class="s1">&#39;local://local:6666/echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="nb">print</span> <span class="n">ee</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+<span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We have two ways to get the reference of one already existing actor of a host. If it is local, of the same host,
+it is fine to use the method <a class="reference internal" href="code.html#pyactor.context.Host.lookup" title="pyactor.context.Host.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> giving by parameter only the id of the actor you wish:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">e</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>If you are working remotly, you could need <a class="reference internal" href="code.html#pyactor.context.Host.lookup_url" title="pyactor.context.Host.lookup_url"><code class="xref py py-meth docutils literal"><span class="pre">lookup_url()</span></code></a> to get the reference. In this example, it is used
+also to get a local reference giving the standard local url at which the host is initialized by default:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ee</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">lookup_url</span><span class="p">(</span><span class="s1">&#39;local://local:6666/echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>This second way, requieres also to specify the class of the actor to lookup in the second parameter.</p>
 </div>
 </div>
 
@@ -353,6 +403,7 @@ something
 <li><a class="reference internal" href="#sample-3">Sample 3</a></li>
 <li><a class="reference internal" href="#sample-4">Sample 4</a></li>
 <li><a class="reference internal" href="#sample-5">Sample 5</a></li>
+<li><a class="reference internal" href="#sample-6">Sample 6</a></li>
 </ul>
 </li>
 </ul>

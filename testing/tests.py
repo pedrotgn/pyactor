@@ -1,3 +1,6 @@
+'''
+unittest module
+'''
 import unittest, sys
 from pyactor.context import *
 from pyactor.actor import *
@@ -47,9 +50,7 @@ class TestBasic(unittest.TestCase):
         e1=r.get()
         self.assertEqual(r.__class__.__name__, 'Future')
         self.assertEqual(e1.__class__.__name__, 'Proxy')
-
         self.assertTrue(e1.actor.is_alive())
-
         with self.assertRaises(AlreadyExists):
             e2=h.spawn('echo1',Echo).get()
 
@@ -82,7 +83,6 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(Timeout):
             e1.say_something_slow().get()
 
-
     def test_4lookup(self):
         global h
         global e1
@@ -97,6 +97,15 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(NotFound):
             e = h.lookup('echo2').get()
 
+        ee = h.lookup_url('local://local:6666/echo1', Echo).get()
+        self.assertEqual(ee.actor.klass.__name__,'Echo')
+        self.assertEqual(ee.actor,e1.actor)
+        ee.echo('hello')
+        #global out
+        sleep(1)
+        self.assertEqual(out,'hello')
+        with self.assertRaises(NotFound):
+            e = h.lookup_url('local://local:6666/echo2', Echo).get()
 
     def test_5shutdown(self):
         global h
@@ -106,12 +115,8 @@ class TestBasic(unittest.TestCase):
         #Now the actor is not running, invoking a method should raise Timeout.
         with self.assertRaises(Timeout):
             e1.say_something().get()
-
         #The actor should not be alive.
         self.assertFalse(e1.actor.is_alive())
-
-
-
 
 
 
