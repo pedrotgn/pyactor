@@ -8,6 +8,7 @@ from pyactor.proxy import *
 from pyactor.util import *
 from time import sleep
 
+
 class Echo:
     _tell =['echo']
     _ask = ['say_something','say_something_slow']
@@ -51,6 +52,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(r.__class__.__name__, 'Future')
         self.assertEqual(e1.__class__.__name__, 'Proxy')
         self.assertTrue(e1.actor.is_alive())
+
         with self.assertRaises(AlreadyExists):
             e2=h.spawn('echo1',Echo).get()
 

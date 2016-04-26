@@ -10,8 +10,9 @@ from time import sleep
 
 class Host(object):
     '''
-    Host is the container of the actors. It manages the spawn and elimination of actors and their communication
-    through channels. Also configures the TCP socket where the actors will be able to recieve queries remotely.
+    Host is the container of the actors. It manages the spawn and elimination of
+    actors and their communication through channels. Also configures the TCP socket
+    where the actors will be able to recieve queries remotely.
     '''
     _tell = ['shutdown']
     _ask = ['spawn','lookup','spawn_n','lookup_url']
@@ -21,9 +22,11 @@ class Host(object):
 
     def load_transport(self, url):
         '''
-        For TCP communication. Sets the communication socket of the host at the address and port specified.
+        For TCP communication. Sets the communication socket of the host at the
+        address and port specified.
 
-        :param str. url: URL where to bind the host. Must be provided in the tipical format: 'scheme://address:port/hierarchical_path'
+        :param str. url: URL where to bind the host. Must be provided in the
+            tipical format: 'scheme://address:port/hierarchical_path'
         '''
         aurl = urlparse(url)
         addrl = aurl.netloc.split(':')
@@ -42,8 +45,9 @@ class Host(object):
 
     def spawn(self,id,klass,args=[]):
         '''
-        This sync method creates an actor attached to this host. It will be an instance of the class *klass* it will
-        be assigned an ID that identifies it among the host.
+        This sync method creates an actor attached to this host. It will be an
+        instance of the class *klass* it will be assigned an ID that identifies
+        it among the host.
 
         :param str. id: identifier for the spawning actor. Unique within the host.
         :param class klass: class type of the spawning actor.
@@ -62,30 +66,34 @@ class Host(object):
 
     def spawn_n(self,n,id,klass,args=[]):
         '''Sync method.
-        Spwns n actors at a time as a group. All the actors will have the same ID and channel.
-        All the communications will proceed to all the actors of the grup at a time.
+        Spwns n actors at a time as a group. All the actors will have the same
+        ID and channel. All the communications will proceed to all the actors of
+        the grup at a time.
 
         :param int n: Number of actors to spawn in the group.
-        :param str. id: identifier for this actors; must be unique within the other actors of the host.
+        :param str. id: identifier for this actors; must be unique within the
+            other actors of the host.
         :param class klass: class type of the actors to be spawned.
         :param list args: arguments to the init function of the class  *klass*.
-        :return: :class:`~.Proxy` of one of the actors, which will also communicate whit all the others.
+        :return: :class:`~.Proxy` of one of the actors, which will also
+            communicate whit all the others.
         :raises: :class:`AlreadyExists`, if the ID specified is already in use.
         '''
-      #  url = 'local://name/'+id
-        if actors.has_key(id):
+        url = '%s://%s/%s' % (self.transport,self.host_url.netloc,id)
+        if actors.has_key(url):
             raise AlreadyExists()
         else:
-            group  = [Actor(id,klass,args) for i in range(n)]
+            group  = [Actor(url,klass,args,id) for i in range(n)]
             for elem in group[1:]:
                 elem.channel = group[0].channel
             for new_actor in group:
-                launch_actor(id,new_actor)
+                launch_actor(url,new_actor)
             return Proxy(new_actor)
 
     def lookup(self,id):
         '''Sync method.
-        Gets a new proxy that references to the actor of the host identified by the given ID.
+        Gets a new proxy that references to the actor of the host identified by
+        the given ID.
 
         :param str. id: identifier of the actor you want.
         :return: :class:`~.Proxy` of the actor requiered.
@@ -100,7 +108,9 @@ class Host(object):
     def shutdown(self):
         '''Async method.
         Stops the Host, stopping at the same time all its actors.
-        Should be called at the end of its usage, to finish correctly all the connections.
+        Should be called at the end of its usage, to finish correctly all the
+        connections.
+        When the actors stop running, they can't be started again.
 
         ..  todo:: Problem to be solved. spawn_n and sample3.py.
 
@@ -111,13 +121,14 @@ class Host(object):
 
     def lookup_url(self, url,klass):
         '''Sync method.
-        Gets a proxy reference to the actor indicated by the URL in the parameters. It can be a local reference
-        or a TCP direction.
+        Gets a proxy reference to the actor indicated by the URL in the parameters.
+        It can be a local reference or a TCP direction.
 
         :param srt. url: address that identifies an actor.
         :param class klass: class type of the actor to lookup.
         :return: :class:`~.Proxy` of the actor requested.
-        :raise: :class:`NotFound`, if the URL specified do not correspond to any actor in the host.
+        :raise: :class:`NotFound`, if the URL specified do not correspond to any
+            actor in the host.
         '''
         aurl = urlparse(url)
         if self.is_local(aurl):
@@ -149,22 +160,22 @@ class Host(object):
 
 
 
-def launch_actor(id,actor):
+def launch_actor(url,actor):
     '''
     This function makes an actor alive to start processing queries.
 
-    :param str. id: identifier of the actor.
+    :param str. url: identifier of the actor.
     :param Actor actor: instance of the actor.
     '''
     actor.run()
-    actors[id] = actor
-    threads[actor.thread] = id
+    actors[url] = actor
+    threads[actor.thread] = url
 
 
 def init_host(url='local://local:6666/host'):
     '''
-    This is the main function to create a new Host to which you can spawn actors. It will be set by default
-    at local address if no parameter *url* is given.
+    This is the main function to create a new Host to which you can spawn actors.
+    It will be set by default at local address if no parameter *url* is given.
 
     :param str. url: URL where to start and bind the host.
     :return: :class:`~.Proxy` of the host.
@@ -190,8 +201,11 @@ def signal_handler(signal, frame):
 
 def serve_forever():
     '''
-    This allows the host to keep alive indefinitely so its actors can receive queries at any time.
+    This allows the host to keep alive indefinitely so its actors can receive
+    queries at any time.
     To kill the execution, press Ctrl+C.
+
+    See usage example in :ref:`sample5`.
     '''
     signal.signal(signal.SIGINT, signal_handler)
     print 'Press Ctrl+C to kill the execution'

@@ -41,28 +41,17 @@ As you can see, the async method recieves a message and simply prints it while t
 More basic examples can be found in the 'pyactor/examples' directory of the project: sample1.py, sample2.py, sample3.py and sample4.p.
 They are also explained below.
 
+-- _sample1:
 
 Sample 1
 ============
 
 This example shows and tests the most basic elements of this library. It creates a :class:`~.Host` and adds an actor to it.
 Then, queries an async method of this actor. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample1.py``::
+``pyactor\examples\sample1.py``:
 
-    from pyactor.context import init_host
-    from time import sleep
-
-    class Echo:
-        _tell =['echo']
-        _ask = []
-        def echo(self,msg):
-            print msg
-
-    h = init_host()
-    e1 = h.spawn('echo1',Echo).get()
-    e1.echo('hello there !!')
-    sleep(1)
-    h.shutdown()
+.. literalinclude:: ..\examples\sample1.py
+    :linenos:
 
 This example is similar to the one shown above in :ref:`first`, but here we'll explain it more carefully.
 
@@ -105,35 +94,17 @@ its actors. This function (:meth:`~.shutdown`) should be allways called at the e
 
 .. note:: The host is actualy an actor itself, so it can recieve remote queries and has sync and async methods.
 
+.. _sample2:
+
 Sample 2
 ============
 
 This example extends the content of the previous one by including sync queries. It still creates a :class:`~.Host`
 and adds an actor to it. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample2.py``::
+``pyactor\examples\sample2.py``:
 
-    from pyactor.context import init_host
-    from time import sleep
-
-    class Echo:
-        _tell =['echo','bye']
-        _ask = ['say_something']
-        def echo(self,msg):
-            print msg
-        def bye(self):
-            print 'bye'
-        def say_something(self):
-            return 'something'
-
-    h = init_host()
-    e1 = h.spawn('echo1',Echo).get()
-    e1.echo('hello there !!')
-    e1.bye()
-
-    print e1.say_something().get()
-
-    sleep(1)
-    h.shutdown()
+.. literalinclude:: ..\examples\sample2.py
+    :linenos:
 
 Now :class:`Echo` has two new methods, :meth:`bye` and :meth:`say_something`. The first one is async like
 the previous :meth:`echo`, but the other one is synchronous.
@@ -149,45 +120,16 @@ The correct output for this sample is the following::
     something
 
 
+.. _sample3:
+
 Sample 3
 =================
 
 This example tries the functionality of the callback element of the synchronous queries. This is the full code of this
-sample, which you can find and test in ``pyactor\examples\sample3.py``::
+sample, which you can find and test in ``pyactor\examples\sample3.py``:
 
-    from pyactor.context import init_host
-    from time import sleep
-
-    class Echo:
-        _tell =['echo','bye']
-        _ask = ['say_something']
-        def echo(self,msg):
-            print msg
-        def bye(self):
-            print 'bye'
-        def say_something(self):
-            return 'something'
-
-    class Bot:
-        _tell =['set_echo','ping','pong']
-        _ask = []
-        def set_echo(self,echo):
-            self.echo = echo
-        def ping(self):
-            future = self.echo.say_something()
-            future.add_callback('pong')
-            print 'pinging..'
-        def pong(self,msg):
-            print 'callback',msg
-
-    h = init_host()
-    e1 = h.spawn('echo1',Echo).get()
-    bot = h.spawn('bot',Bot).get()
-    bot.set_echo(e1)
-    bot.ping()
-
-    sleep(1)
-    h.shutdown()
+.. literalinclude:: ..\examples\sample3.py
+    :linenos:
 
 This time we keep having the same initialitzation as before, but now threre is a new class. :class:`Bot` has three async
 methods that will allow to prove the correctness of the callback functionality. :meth:`set_echo` registers an :class:`Echo`
@@ -202,39 +144,16 @@ The correct output for this sample is the following::
     pinging...
     callback something
 
+.. _sample4:
 
 Sample 4
 =================
 
 This example tests the raising of timeouts. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample4.py``::
+``pyactor\examples\sample4.py``:
 
-    from pyactor.context import init_host
-    from time import sleep
-    from pyactor.util import Timeout
-
-    class Echo:
-        _tell =['echo','bye']
-        _ask = ['say_something']
-        def echo(self,msg):
-            print msg
-        def bye(self):
-            print 'bye'
-        def say_something(self):
-            sleep(2)
-            return 'something'
-
-    h = init_host()
-    e1 = h.spawn('echo1',Echo).get()
-    e1.echo('hello there !!')
-    e1.bye()
-
-    try:
-        x = e1.say_something().get(1)
-    except Timeout:
-        print 'timeout catched'
-    sleep(1)
-    h.shutdown()
+.. literalinclude:: ..\examples\sample4.py
+    :linenos:
 
 Now we have the same :class:`Echo` class but in the sync method we added a sleep of 2 seconds. Also, we sorrounded
 the call of the method by a try structure catching a :class:`~.Timeout` exception. Since we are giving to the invocation
@@ -250,39 +169,16 @@ The correct output for this sample is the following::
     timeout catched
 
 
+.. _sample5:
+
 Sample 5
 =================
 
 This example tests the reference to actors id and proxy. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample5.py``::
+``pyactor\examples\sample5.py``:
 
-    from pyactor.context import init_host, serve_forever
-    from time import sleep
-    from pyactor.util import Timeout
-
-    class Echo:
-        _tell =['echo','bye']
-        _ask = ['say_something']
-        def echo(self,msg):
-            print msg
-        def bye(self):
-            print 'bye'
-        def say_something(self):
-            return 'something'
-
-
-    h = init_host()
-    e1 = h.spawn('echo1',Echo).get()
-    print e1.id
-    e1.echo('hello there !!')
-    e1.bye()
-    sleep(1)
-    e2 = e1.get_proxy()
-    print e2.id
-    print e2.say_something().get()
-
-    sleep(1)
-    serve_forever()
+.. literalinclude:: ..\examples\sample5.py
+    :linenos:
 
 This sample demonstrates how to get references from an actor. With ``e1.id`` we obtain the string that identifies
 the actor in the host it is located.
@@ -308,37 +204,16 @@ the host down at the end, we call::
 This will maintain the host alive in lower process consumption until the user presses ``Ctrl+C``.
 
 
+.. _sample6:
+
 Sample 6
 =========
 
 This example shows the usage of the lookup methods applied to a host. This is the full code of this sample, which
-you can find and test in ``pyactor\examples\sample6.py``::
+you can find and test in ``pyactor\examples\sample6.py``:
 
-    from pyactor.context import init_host
-    from time import sleep
-
-    class Echo:
-        _tell =['echo','bye']
-        _ask = ['say_something']
-        def echo(self,msg):
-            print msg
-        def bye(self):
-            print 'bye'
-        def say_something(self):
-            return 'something'
-
-
-    h = init_host()
-    e1 = h.spawn('echo1',Echo).get()
-
-    e = h.lookup('echo1').get()
-    print e.say_something().get()
-
-    ee = h.lookup_url('local://local:6666/echo1', Echo).get()
-    print ee.say_something().get()
-
-    sleep(1)
-    h.shutdown()
+.. literalinclude:: ..\examples\sample6.py
+    :linenos:
 
 We have two ways to get the reference of one already existing actor of a host. If it is local, of the same host,
 it is fine to use the method :meth:`~.lookup` giving by parameter only the id of the actor you wish::
