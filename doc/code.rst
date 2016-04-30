@@ -9,7 +9,7 @@ Main Code
 Actor
 =====
 
-:ref:`see source <actor_source>`
+:ref:`See source <actor_source>`
 
 .. automodule:: pyactor.actor
     :members:
@@ -17,7 +17,7 @@ Actor
 Proxy
 =====
 
-:ref:`see source <proxy_source>`
+:ref:`See source <proxy_source>`
 
 .. automodule:: pyactor.proxy
     :members:
@@ -25,7 +25,7 @@ Proxy
 Context
 =======
 
-:ref:`see source <context_source>`
+:ref:`See source <context_source>`
 
 .. automodule:: pyactor.context
     :members:

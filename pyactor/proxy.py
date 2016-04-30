@@ -12,7 +12,6 @@ class Proxy:
     def __init__(self, actor):
         self.__channel = actor.channel
         self.actor = actor
-        self.id=actor.id
         for method in actor.tell:
             setattr(self, method, TellWrapper(self.__channel,method,actor.url))
         for method in actor.ask:
@@ -21,14 +20,6 @@ class Proxy:
     def __repr__(self):
         return 'Proxy(actor=%s, tell=%s, ask = %s)' % (self.actor, self.actor.tell,self.actor.ask)
 
-    '''
-    Creates a new proxy to the same actor. This is the safer way to get copies of
-    the proxy reference.
-
-    :return: reference to the proxy.
-    '''
-    def get_proxy(self):
-        return Proxy(self.actor)
 
 
 
@@ -43,6 +34,9 @@ class Future(object):
         self.__params = params
         self.__actor_channel = actor_channel
         self.__target = actor_url
+
+    def __getattr__(self, name):
+        raise Exception("'Future' object has no attribute %r. Remember to call get() after an ask querie." % name)
 
     def get(self,timeout=1):
         '''

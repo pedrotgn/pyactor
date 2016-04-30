@@ -21,7 +21,7 @@ class Echo:
 
 h = init_host()
 e1 = h.spawn('echo1',Echo).get()
-e1.echo('hola amigo !!')
+e1.echo('hello there !!')
 e1.bye()
 
 try:

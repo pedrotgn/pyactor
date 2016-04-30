@@ -64,18 +64,16 @@ class Actor(ActorRef):
 
     :param str. url: URL where the actor is running.
     :param class klass: class type for the actor.
-    :param list args: arguments for the *klass* class if appropriate.
+    :param klass obj: instance of the *klass* class to attach to the actor.
     '''
-    def __init__(self, url, klass, args=[], id=None):
+    def __init__(self, url, klass, obj):
         super(Actor,self).__init__(url,klass)
         #self.url = url
         #self.channel = Channel()
-        self.__obj = klass(*args)
+        self.__obj = obj
+        self.id = obj.id
         #self.tell = klass._tell
         #self.ask = klass._ask
-        if id == None:
-            id = url
-        self.id = id
         self.tell.append('stop')
         self.running = True
 
@@ -116,14 +114,14 @@ class Actor(ActorRef):
             except Exception, e:
                 result = e
                 print result
-            if msg.type == ASK:
-                response = AskResponse(result)
-                msg.channel.send(response)
-            if msg.type == FUTURE:
-                response = TellRequest(TELL,msg.callback,[result],msg.from_url)
-                #response = (msg[TO],msg[FROM],TELL, msg[FUTURE],[result])
-                #response = TellRequest(TELL,msg.callback,[result],msg.from)
-                msg.channel.send(response)
+        if msg.type == ASK:
+            response = AskResponse(result)
+            msg.channel.send(response)
+        if msg.type == FUTURE:
+            response = TellRequest(TELL,msg.callback,[result],msg.from_url)
+            #response = (msg[TO],msg[FROM],TELL, msg[FUTURE],[result])
+            #response = TellRequest(TELL,msg.callback,[result],msg.from)
+            msg.channel.send(response)
 
 
     def run(self):

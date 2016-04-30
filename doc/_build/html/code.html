@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="PyActor 0.1 documentation" href="index.html" />
-    <link rel="next" title="Turorial" href="tutorial.html" />
+    <link rel="next" title="Tutorial" href="tutorial.html" />
     <link rel="prev" title="Welcome to PyActor’s documentation!" href="index.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="tutorial.html" title="Turorial"
+          <a href="tutorial.html" title="Tutorial"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to PyActor’s documentation!"
@@ -58,10 +58,10 @@
 <p>PyActor: Python Actorlibrary</p>
 <div class="section" id="actor">
 <h2>Actor<a class="headerlink" href="#actor" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="source.html#actor-source"><span class="std std-ref">see source</span></a></p>
+<p><a class="reference internal" href="source.html#actor-source"><span class="std std-ref">See source</span></a></p>
 <span class="target" id="module-pyactor.actor"></span><dl class="class">
 <dt id="pyactor.actor.Actor">
-<em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">Actor</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>args=[]</em>, <em>id=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">Actor</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Actor is the instance of an object to which is possible to acces and invoke
 its methods remotely.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -71,7 +71,7 @@ its methods remotely.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>url</strong> (<em>str.</em>) &#8211; URL where the actor is running.</li>
 <li><strong>klass</strong> (<em>class</em>) &#8211; class type for the actor.</li>
-<li><strong>args</strong> (<em>list</em>) &#8211; arguments for the <em>klass</em> class if appropriate.</li>
+<li><strong>obj</strong> (<em>klass</em>) &#8211; instance of the <em>klass</em> class to attach to the actor.</li>
 </ul>
 </td>
 </tr>
@@ -178,7 +178,7 @@ in util.py (<a class="reference internal" href="#module-pyactor.util" title="pya
 </div>
 <div class="section" id="proxy">
 <h2>Proxy<a class="headerlink" href="#proxy" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="source.html#proxy-source"><span class="std std-ref">see source</span></a></p>
+<p><a class="reference internal" href="source.html#proxy-source"><span class="std std-ref">See source</span></a></p>
 <span class="target" id="module-pyactor.proxy"></span><dl class="class">
 <dt id="pyactor.proxy.AskWrapper">
 <em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">AskWrapper</code><span class="sig-paren">(</span><em>channel</em>, <em>method</em>, <em>actor_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.AskWrapper" title="Permalink to this definition">¶</a></dt>
@@ -303,7 +303,7 @@ through the channel.</p>
 </div>
 <div class="section" id="context">
 <h2>Context<a class="headerlink" href="#context" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference internal" href="source.html#context-source"><span class="std std-ref">see source</span></a></p>
+<p><a class="reference internal" href="source.html#context-source"><span class="std std-ref">See source</span></a></p>
 <span class="target" id="module-pyactor.context"></span><dl class="class">
 <dt id="pyactor.context.Host">
 <em class="property">class </em><code class="descclassname">pyactor.context.</code><code class="descname">Host</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host" title="Permalink to this definition">¶</a></dt>
@@ -396,17 +396,13 @@ Stops the Host, stopping at the same time all its actors.
 Should be called at the end of its usage, to finish correctly all the
 connections.
 When the actors stop running, they can&#8217;t be started again.</p>
-<div class="admonition-todo admonition" id="index-0">
-<p class="first admonition-title">Todo</p>
-<p class="last">Problem to be solved. spawn_n and sample3.py.</p>
-</div>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyactor.context.Host.spawn">
 <code class="descname">spawn</code><span class="sig-paren">(</span><em>id</em>, <em>klass</em>, <em>args=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.spawn" title="Permalink to this definition">¶</a></dt>
 <dd><p>This sync method creates an actor attached to this host. It will be an
-instance of the class <em>klass</em> it will be assigned an ID that identifies
+instance of the class <em>klass</em> and it will be assigned an ID that identifies
 it among the host.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -689,7 +685,7 @@ To kill the execution, press Ctrl+C.</p>
                         title="previous chapter">Welcome to PyActor&#8217;s documentation!</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="tutorial.html"
-                        title="next chapter">Turorial</a></p>
+                        title="next chapter">Tutorial</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -721,7 +717,7 @@ To kill the execution, press Ctrl+C.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="tutorial.html" title="Turorial"
+          <a href="tutorial.html" title="Tutorial"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to PyActor’s documentation!"

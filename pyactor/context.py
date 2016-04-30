@@ -46,7 +46,7 @@ class Host(object):
     def spawn(self,id,klass,args=[]):
         '''
         This sync method creates an actor attached to this host. It will be an
-        instance of the class *klass* it will be assigned an ID that identifies
+        instance of the class *klass* and it will be assigned an ID that identifies
         it among the host.
 
         :param str. id: identifier for the spawning actor. Unique within the host.
@@ -59,7 +59,11 @@ class Host(object):
         if actors.has_key(url):
             raise AlreadyExists()
         else:
-            new_actor = Actor(url,klass,args,id)
+            obj = klass(*args)
+            obj.id = str(id)
+            new_actor = Actor(url,klass,obj)
+            obj.proxy = Proxy(new_actor)
+            obj.host = self.proxy
             launch_actor(url,new_actor)
             return Proxy(new_actor)
 
@@ -104,15 +108,13 @@ class Host(object):
         else:
             raise NotFound()
 
-    # problem with spawn_n and sample3.py.
+    # problem with spawn_n and sample3.py.?
     def shutdown(self):
         '''Async method.
         Stops the Host, stopping at the same time all its actors.
         Should be called at the end of its usage, to finish correctly all the
         connections.
         When the actors stop running, they can't be started again.
-
-        ..  todo:: Problem to be solved. spawn_n and sample3.py.
 
         '''
         for actor in actors.values():
@@ -133,7 +135,7 @@ class Host(object):
         aurl = urlparse(url)
         if self.is_local(aurl):
             if not actors.has_key(url):
-                raise NotFound(url)
+                raise NotFound()
             else:
                 return Proxy(actors[url])
         else:
@@ -180,7 +182,10 @@ def init_host(url='local://local:6666/host'):
     :param str. url: URL where to start and bind the host.
     :return: :class:`~.Proxy` of the host.
     '''
-    host = Actor(url,Host,[url])
+    host_obj = Host(url)
+    host_obj.id = url
+    host = Actor(url,Host,host_obj)
+    host_obj.proxy = Proxy(host)
     launch_actor(url,host)
     global _host
     _host = Proxy(host)

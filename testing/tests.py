@@ -23,7 +23,13 @@ class Echo:
 
 class Bot:
     _tell =['set_echo','ping','pong']
-    _ask = []
+    _ask = ['get_name','get_proxy','get_host']
+    def get_name(self):
+        return self.id
+    def get_proxy(self):
+        return self.proxy
+    def get_host(self):
+        return self.host
     def set_echo(self,echo):
         self.echo = echo
     def ping(self):
@@ -56,10 +62,11 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(AlreadyExists):
             e2=h.spawn('echo1',Echo).get()
 
-        self.assertEqual(e1.id, 'echo1')
-        e2 = e1.get_proxy()
-        self.assertEqual(e2.id, 'echo1')
-        self.assertEqual(str(e1),str(e2))
+        b1 = h.spawn('bot1', Bot).get()
+        self.assertEqual(b1.get_name().get(), 'bot1')
+        self.assertEqual(str(b1.get_proxy().get()), str(b1))
+        self.assertEqual(str(b1.get_host().get()), str(h))
+
 
     def test_3queries(self):
         global h

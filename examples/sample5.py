@@ -1,9 +1,8 @@
 '''
-Self references sample. Actor id/proxy. + serve_forever
+Lookup sample.
 '''
-from pyactor.context import init_host, serve_forever
+from pyactor.context import init_host
 from time import sleep
-from pyactor.util import Timeout
 
 class Echo:
     _tell =['echo','bye']
@@ -18,13 +17,12 @@ class Echo:
 
 h = init_host()
 e1 = h.spawn('echo1',Echo).get()
-print e1.id
-e1.echo('hola amigo !!')
-e1.bye()
-sleep(1)
-e2 = e1.get_proxy()
-print e2.id
-print e2.say_something().get()
+
+e = h.lookup('echo1').get()
+print e.say_something().get()
+
+ee = h.lookup_url('local://local:6666/echo1', Echo).get()
+print ee.say_something().get()
 
 sleep(1)
-serve_forever()
+h.shutdown()

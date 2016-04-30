@@ -182,9 +182,7 @@
 131
 132
 133
-134
-135
-136</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Queue</span><span class="p">,</span><span class="n">Empty</span>
+134</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Queue</span><span class="p">,</span><span class="n">Empty</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">util</span> <span class="k">import</span> <span class="o">*</span>
 
@@ -250,18 +248,16 @@
 
 <span class="sd">    :param str. url: URL where the actor is running.</span>
 <span class="sd">    :param class klass: class type for the actor.</span>
-<span class="sd">    :param list args: arguments for the *klass* class if appropriate.</span>
+<span class="sd">    :param klass obj: instance of the *klass* class to attach to the actor.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[],</span> <span class="nb">id</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Actor</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">)</span>
         <span class="c1">#self.url = url</span>
         <span class="c1">#self.channel = Channel()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__obj</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__obj</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">id</span>
         <span class="c1">#self.tell = klass._tell</span>
         <span class="c1">#self.ask = klass._ask</span>
-        <span class="k">if</span> <span class="nb">id</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="nb">id</span> <span class="o">=</span> <span class="n">url</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;stop&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -302,14 +298,14 @@
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">e</span>
                 <span class="nb">print</span> <span class="n">result</span>
-            <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">ASK</span><span class="p">:</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="n">AskResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-                <span class="n">msg</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">FUTURE</span><span class="p">:</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="n">TellRequest</span><span class="p">(</span><span class="n">TELL</span><span class="p">,</span><span class="n">msg</span><span class="o">.</span><span class="n">callback</span><span class="p">,[</span><span class="n">result</span><span class="p">],</span><span class="n">msg</span><span class="o">.</span><span class="n">from_url</span><span class="p">)</span>
-                <span class="c1">#response = (msg[TO],msg[FROM],TELL, msg[FUTURE],[result])</span>
-                <span class="c1">#response = TellRequest(TELL,msg.callback,[result],msg.from)</span>
-                <span class="n">msg</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">ASK</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">AskResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">FUTURE</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">TellRequest</span><span class="p">(</span><span class="n">TELL</span><span class="p">,</span><span class="n">msg</span><span class="o">.</span><span class="n">callback</span><span class="p">,[</span><span class="n">result</span><span class="p">],</span><span class="n">msg</span><span class="o">.</span><span class="n">from_url</span><span class="p">)</span>
+            <span class="c1">#response = (msg[TO],msg[FROM],TELL, msg[FUTURE],[result])</span>
+            <span class="c1">#response = TellRequest(TELL,msg.callback,[result],msg.from)</span>
+            <span class="n">msg</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
 
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -465,16 +461,7 @@
 138
 139
 140
-141
-142
-143
-144
-145
-146
-147
-148
-149
-150</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">actor</span> <span class="k">import</span> <span class="n">Channel</span>
+141</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">actor</span> <span class="k">import</span> <span class="n">Channel</span>
 <span class="kn">from</span> <span class="nn">util</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
 
@@ -488,7 +475,6 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__channel</span> <span class="o">=</span> <span class="n">actor</span><span class="o">.</span><span class="n">channel</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor</span> <span class="o">=</span> <span class="n">actor</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="o">=</span><span class="n">actor</span><span class="o">.</span><span class="n">id</span>
         <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">actor</span><span class="o">.</span><span class="n">tell</span><span class="p">:</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">TellWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="p">,</span><span class="n">method</span><span class="p">,</span><span class="n">actor</span><span class="o">.</span><span class="n">url</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">actor</span><span class="o">.</span><span class="n">ask</span><span class="p">:</span>
@@ -497,14 +483,6 @@
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;Proxy(actor=</span><span class="si">%s</span><span class="s1">, tell=</span><span class="si">%s</span><span class="s1">, ask = </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">tell</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ask</span><span class="p">)</span>
 
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Creates a new proxy to the same actor. This is the safer way to get copies of</span>
-<span class="sd">    the proxy reference.</span>
-
-<span class="sd">    :return: reference to the proxy.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">def</span> <span class="nf">get_proxy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Proxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">)</span>
 
 
 
@@ -841,7 +819,12 @@
 210
 211
 212
-213</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>
+213
+214
+215
+216
+217
+218</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>
 <span class="kn">from</span> <span class="nn">actor</span> <span class="k">import</span> <span class="n">Actor</span><span class="p">,</span><span class="n">ActorRef</span>
 <span class="kn">from</span> <span class="nn">proxy</span> <span class="k">import</span> <span class="n">Proxy</span>
 <span class="kn">from</span> <span class="nn">tcp_server</span> <span class="k">import</span> <span class="n">Server</span>
@@ -889,7 +872,7 @@
     <span class="k">def</span> <span class="nf">spawn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="nb">id</span><span class="p">,</span><span class="n">klass</span><span class="p">,</span><span class="n">args</span><span class="o">=</span><span class="p">[]):</span>
         <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        This sync method creates an actor attached to this host. It will be an</span>
-<span class="sd">        instance of the class *klass* it will be assigned an ID that identifies</span>
+<span class="sd">        instance of the class *klass* and it will be assigned an ID that identifies</span>
 <span class="sd">        it among the host.</span>
 
 <span class="sd">        :param str. id: identifier for the spawning actor. Unique within the host.</span>
@@ -902,7 +885,11 @@
         <span class="k">if</span> <span class="n">actors</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">AlreadyExists</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">new_actor</span> <span class="o">=</span> <span class="n">Actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">,</span><span class="n">args</span><span class="p">,</span><span class="nb">id</span><span class="p">)</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+            <span class="n">new_actor</span> <span class="o">=</span> <span class="n">Actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">,</span><span class="n">obj</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">Proxy</span><span class="p">(</span><span class="n">new_actor</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span>
             <span class="n">launch_actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">new_actor</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Proxy</span><span class="p">(</span><span class="n">new_actor</span><span class="p">)</span>
 
@@ -947,15 +934,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">NotFound</span><span class="p">()</span>
 
-    <span class="c1"># problem with spawn_n and sample3.py.</span>
+    <span class="c1"># problem with spawn_n and sample3.py.?</span>
     <span class="k">def</span> <span class="nf">shutdown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Async method.</span>
 <span class="sd">        Stops the Host, stopping at the same time all its actors.</span>
 <span class="sd">        Should be called at the end of its usage, to finish correctly all the</span>
 <span class="sd">        connections.</span>
 <span class="sd">        When the actors stop running, they can&#39;t be started again.</span>
-
-<span class="sd">        ..  todo:: Problem to be solved. spawn_n and sample3.py.</span>
 
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">for</span> <span class="n">actor</span> <span class="ow">in</span> <span class="n">actors</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
@@ -1023,7 +1008,10 @@
 <span class="sd">    :param str. url: URL where to start and bind the host.</span>
 <span class="sd">    :return: :class:`~.Proxy` of the host.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="n">host</span> <span class="o">=</span> <span class="n">Actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">Host</span><span class="p">,[</span><span class="n">url</span><span class="p">])</span>
+    <span class="n">host_obj</span> <span class="o">=</span> <span class="n">Host</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">host_obj</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">url</span>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">Actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">Host</span><span class="p">,</span><span class="n">host_obj</span><span class="p">)</span>
+    <span class="n">host_obj</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">Proxy</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
     <span class="n">launch_actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">host</span><span class="p">)</span>
     <span class="k">global</span> <span class="n">_host</span>
     <span class="n">_host</span> <span class="o">=</span> <span class="n">Proxy</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>

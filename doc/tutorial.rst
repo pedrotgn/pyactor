@@ -1,20 +1,30 @@
 .. _tutorial:
 
-Turorial
+Tutorial
 *********
 
 A quik guide on how to use the PyActor library through examples.
 
 
-.. _first:
+.. _install:
 
-First steps:
-============
+Installation
+================================================================================
 
-This library allows the creation and management of actors in a distributed system using Python.
-The core of the library is implemented in the three modules explained in this page. That contains
-the actors, the proxys that allows them to be accessed from remote locations and the hosts that
-put it all together.
+This library allows the creation and management of actors in a distributed system using Python. It follows the
+classic actor model and tries to be a simple way to get two remote objects to quickly commnicate.
+
+To install the library use::
+
+    python setup.py install
+
+You can check that works with the examples explained in this page.
+
+
+.. _global:
+
+Global indications
+================================================================================
 
 First of all, a :class:`~.context.Host` is needed in order to create some actors. To create a host, use the
 function :func:`~.context.init_host` which returns the proxy of a host. Then, use this proxy to spawn
@@ -38,13 +48,13 @@ In this example we have a class MyClass with a sync method *ask_me()* and an asy
             return 'hello back'
 
 As you can see, the async method recieves a message and simply prints it while the sync method returns a result.
-More basic examples can be found in the 'pyactor/examples' directory of the project: sample1.py, sample2.py, sample3.py and sample4.p.
-They are also explained below.
+More detailed examples can be found in the 'pyactor/examples' directory of the project.
+They are also explained below as a tutorial for this library.
 
--- _sample1:
+.. _sample1:
 
 Sample 1
-============
+================================================================================
 
 This example shows and tests the most basic elements of this library. It creates a :class:`~.Host` and adds an actor to it.
 Then, queries an async method of this actor. This is the full code of this sample, which you can find and test in
@@ -53,7 +63,7 @@ Then, queries an async method of this actor. This is the full code of this sampl
 .. literalinclude:: ..\examples\sample1.py
     :linenos:
 
-This example is similar to the one shown above in :ref:`first`, but here we'll explain it more carefully.
+This example is similar to the one shown above in :ref:`global`, but here we'll explain it more carefully.
 
 In this case, we need to import the :func:`~.init_host` function from the project in order to use it.
 We also import the *sleep* function to give time to the actor to work.
@@ -97,7 +107,7 @@ its actors. This function (:meth:`~.shutdown`) should be allways called at the e
 .. _sample2:
 
 Sample 2
-============
+================================================================================
 
 This example extends the content of the previous one by including sync queries. It still creates a :class:`~.Host`
 and adds an actor to it. This is the full code of this sample, which you can find and test in
@@ -123,7 +133,7 @@ The correct output for this sample is the following::
 .. _sample3:
 
 Sample 3
-=================
+================================================================================
 
 This example tries the functionality of the callback element of the synchronous queries. This is the full code of this
 sample, which you can find and test in ``pyactor\examples\sample3.py``:
@@ -144,10 +154,12 @@ The correct output for this sample is the following::
     pinging...
     callback something
 
+
+
 .. _sample4:
 
 Sample 4
-=================
+================================================================================
 
 This example tests the raising of timeouts. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample4.py``:
@@ -172,47 +184,12 @@ The correct output for this sample is the following::
 .. _sample5:
 
 Sample 5
-=================
-
-This example tests the reference to actors id and proxy. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample5.py``:
-
-.. literalinclude:: ..\examples\sample5.py
-    :linenos:
-
-This sample demonstrates how to get references from an actor. With ``e1.id`` we obtain the string that identifies
-the actor in the host it is located.
-Then, with ``e1.get_proxy()`` you can get a reference to a new proxy managing the same actor so you can give it to
-another function, class or module.
-
-.. note:: If you actually want the same proxy instance, 'e1' whould do.
-
-The correct output for this sample is the following::
-
-    echo1
-    hello there !!
-    bye
-    echo1
-    something
-
-In this sample, we also see the usage of the :func:`~.serve_forever` function wich is very useful in remote communication
-in order to keep a host alive as another one send queries to his actors. The usage is very simple, instead of shuting
-the host down at the end, we call::
-
-    serve_forever()
-
-This will maintain the host alive in lower process consumption until the user presses ``Ctrl+C``.
-
-
-.. _sample6:
-
-Sample 6
-=========
+================================================================================
 
 This example shows the usage of the lookup methods applied to a host. This is the full code of this sample, which
-you can find and test in ``pyactor\examples\sample6.py``:
+you can find and test in ``pyactor\examples\sample5.py``:
 
-.. literalinclude:: ..\examples\sample6.py
+.. literalinclude:: ..\examples\sample5.py
     :linenos:
 
 We have two ways to get the reference of one already existing actor of a host. If it is local, of the same host,
@@ -226,6 +203,52 @@ also to get a local reference giving the standard local url at which the host is
     ee = h.lookup_url('local://local:6666/echo1', Echo).get()
 
 This second way, requieres also to specify the class of the actor to lookup in the second parameter.
+
+
+.. _sample6:
+
+Sample 6
+================================================================================
+
+This example tests the self references to actors id and proxy. This is the full code of this sample, which you can find and test in
+``pyactor\examples\sample6.py``:
+
+.. literalinclude:: ..\examples\sample6.py
+    :linenos:
+
+This sample demonstrates how to get references to an actor from the actor itself. With ``self.id`` we obtain the string
+that identifies the actor in the host it is located.
+Then, with ``self.proxy`` you can get a reference to a proxy managing the actor so you can give it to
+another function, class or module in a safe and easy way.
+
+It is also possible to use ``self.host``, which will give a proxy to the host in which the actor is
+so you can :meth:`~.lookup` other actors from there.
+
+In the example, we use these three calls to send various salutations from a :class:`Bot` to an :class:`Echo`
+giving by parameter also a proxy from the Bot so the Echo can call one of Bot's methods in order to get its id.
+Also, the :meth:`set_echo` method, in this case, do not recieve the Echo by parameter. It uses the inside reference
+it also has to call a :meth:`~.lookup` to the host and get the wanted reference.
+
+The correct output for this sample is the following::
+
+    hello from: bot1
+    hi from: bot1
+    hey from: bot1
+    what`s up? from: bot1
+    Press Ctrl+C to kill the execution
+
+In this sample, we also see the usage of the :func:`~.serve_forever` function wich is very useful in remote communication
+in order to keep a host alive as another one send queries to his actors. The usage is very simple, instead of shuting
+the host down at the end, we call::
+
+    serve_forever()
+
+This will maintain the host alive in lower process consumption until the user presses ``Ctrl+C`` allowing other hosts
+to lookup and call methods from actors in this host.
+
+
+
+
 
 Intervals
 ===========
