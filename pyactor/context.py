@@ -131,9 +131,8 @@ class Host(object):
 
         '''
         for actor in self.actors.values():
-            if actor.id != self.id:
-                Proxy(actor).stop()
-                actor.thread.join()
+            Proxy(actor).stop()
+            actor.thread.join()
 
         self.actors.clear()
         self.online=False
