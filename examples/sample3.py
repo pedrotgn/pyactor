@@ -1,7 +1,7 @@
 '''
 Callback sample.
 '''
-from pyactor.context import init_host
+from pyactor.context import create_host
 from time import sleep
 
 class Echo:
@@ -26,10 +26,12 @@ class Bot:
     def pong(self,msg):
         print 'callback',msg
 
-h = init_host()
+h = create_host().proxy
+print 'init'
 e1 = h.spawn('echo1',Echo).get()
 bot = h.spawn('bot',Bot).get()
 bot.set_echo(e1)
+print 'spawn'
 bot.ping()
 
 sleep(1)

@@ -7,6 +7,7 @@ from pyactor.actor import *
 from pyactor.proxy import *
 from pyactor.util import *
 from time import sleep
+import os, signal
 
 
 class Echo:
@@ -41,94 +42,114 @@ class Bot:
         out = msg
         #print 'callback',msg
 
+'''class TestForever(unittest.TestCase):
+    def __killme(self):
+        sleep(1)
+        os.kill(os.getpid().ppid(), signal.SIGINT)
+
+    def setUp(self):
+        self.bu=sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+    def test_forever(self):
+        self.h=init_host()
+        self.thread = Thread(target=self.__killme)
+        self.thread.start()
+        serve_forever()
+
+    def tearDown(self):
+        #self.h.shutdown()
+        sys.stdout = self.bu'''
+
 class TestBasic(unittest.TestCase):
+    def setUp(self):
+        self.bu=sys.stdout
+        sys.stdout = open(os.devnull, 'w')
+        #self.out=""
+        self.hr=create_host()
+        self.h=self.hr.proxy
+        self.e1=self.h.spawn('echo1',Echo).get()
+    def tearDown(self):
+        #check=self.h.sync_shutdown().get(2)
+        #self.assertEqual(check, 0)
+        self.hr.shutdown()
+        #sleep(1)
+        sys.stdout = self.bu
+
     def test_1hostcreation(self):
-        global h
-        h=init_host()
-        self.assertEqual(h.__class__.__name__, 'Proxy')
-        self.assertEqual(h.actor.klass.__name__, 'Host')
-        self.assertEqual(h.actor.tell, ['shutdown', 'stop'])
-        self.assertEqual(h.actor.ask, ['spawn','lookup','spawn_n','lookup_url'])
+        self.assertEqual(self.h.__class__.__name__, 'Proxy')
+        self.assertEqual(self.h.actor.klass.__name__, 'Host')
+        self.assertEqual(self.h.actor.tell, ['stop'])
+        self.assertEqual(self.h.actor.ask, ['spawn','lookup','spawn_n','lookup_url'])
 
     def test_2spawning(self):
-        global h
-        global e1
-        r=h.spawn('echo1',Echo)
-        e1=r.get()
-        self.assertEqual(r.__class__.__name__, 'Future')
-        self.assertEqual(e1.__class__.__name__, 'Proxy')
-        self.assertTrue(e1.actor.is_alive())
+        global out
+        out=""
+        self.assertEqual(self.e1.__class__.__name__, 'Proxy')
+        self.assertTrue(self.e1.actor.is_alive())
 
         with self.assertRaises(AlreadyExists):
-            e2=h.spawn('echo1',Echo).get()
+            e2=self.h.spawn('echo1',Echo).get()
 
-        b1 = h.spawn('bot1', Bot).get()
+        b1 = self.h.spawn('bot1', Bot).get()
         self.assertEqual(b1.get_name().get(), 'bot1')
         self.assertEqual(str(b1.get_proxy().get()), str(b1))
-        self.assertEqual(str(b1.get_host().get()), str(h))
+        self.assertEqual(str(b1.get_host().get()), str(self.h))
 
 
     def test_3queries(self):
-        global h
-        global e1
-
-        self.assertEqual(e1.echo.__class__.__name__,'TellWrapper')
-        s=e1.echo('hello there!!')
-        self.assertEqual(s,None)
         global out
+        self.assertEqual(self.e1.echo.__class__.__name__,'TellWrapper')
+        s=self.e1.echo('hello there!!')
+        self.assertEqual(s,None)
         sleep(0.1)
         self.assertEqual(out,'hello there!!')
-        ask=e1.say_something()
+        ask=self.e1.say_something()
         self.assertEqual(ask.__class__.__name__,'Future')
         self.assertEqual(ask.get(),'something')
 
-        bot = h.spawn('bot',Bot).get()
-        bot.set_echo(e1)
+        bot = self.h.spawn('bot',Bot).get()
+        bot.set_echo(self.e1)
         bot.ping()
-        #global out
         sleep(0.1)
         self.assertEqual(out, 'something')
 
         with self.assertRaises(Timeout):
-            e1.say_something_slow().get()
+            self.e1.say_something_slow().get()
 
     def test_4lookup(self):
-        global h
-        global e1
-        e = h.lookup('echo1').get()
-        self.assertEqual(e.actor.klass.__name__,'Echo')
-        self.assertEqual(e.actor,e1.actor)
-        e.echo('hello')
         global out
-        sleep(1)
+        e = self.h.lookup('echo1').get()
+        self.assertEqual(e.actor.klass.__name__,'Echo')
+        self.assertEqual(e.actor,self.e1.actor)
+        e.echo('hello')
+        sleep(2)
         self.assertEqual(out,'hello')
 
         with self.assertRaises(NotFound):
-            e = h.lookup('echo2').get()
+            e = self.h.lookup('echo2').get()
 
-        ee = h.lookup_url('local://local:6666/echo1', Echo).get()
+        ee = self.h.lookup_url('local://local:6666/echo1', Echo).get()
         self.assertEqual(ee.actor.klass.__name__,'Echo')
-        self.assertEqual(ee.actor,e1.actor)
+        self.assertEqual(ee.actor,self.e1.actor)
         ee.echo('hello')
-        #global out
         sleep(1)
         self.assertEqual(out,'hello')
         with self.assertRaises(NotFound):
-            e = h.lookup_url('local://local:6666/echo2', Echo).get()
+            e = self.h.lookup_url('local://local:6666/echo2', Echo).get()
 
     def test_5shutdown(self):
-        global h
-        global e1
-        h.shutdown()
-        sleep(0.1)
+        self.hr.shutdown()
+        #sleep(0.1)
         #Now the actor is not running, invoking a method should raise Timeout.
         with self.assertRaises(Timeout):
-            e1.say_something().get()
+            self.e1.say_something().get()
         #The actor should not be alive.
-        self.assertFalse(e1.actor.is_alive())
+        self.assertFalse(self.e1.actor.is_alive())
 
 
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBasic)
     unittest.TextTestRunner(verbosity=2).run(suite)
+    '''suite = unittest.TestLoader().loadTestsFromTestCase(TestForever)
+    unittest.TextTestRunner(verbosity=2).run(suite)'''

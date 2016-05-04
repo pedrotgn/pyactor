@@ -24,15 +24,15 @@ ASK = 6
 TELL = 7
 SRC = 8
 
-global actors
-global threads
-actors = {}
-threads = {}
+global host
+host = [None]
 
+def get_host():
+    return host[0]
 def get_current():
     current = current_thread()
-    if threads.has_key(current):
-        return threads[current]
+    if host[0].threads.has_key(current):
+        return host[0].actors[host[0].threads[current]]
 
 class Timeout(Exception):pass
 

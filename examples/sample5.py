@@ -1,7 +1,7 @@
 '''
 Lookup sample.
 '''
-from pyactor.context import init_host
+from pyactor.context import create_host
 from time import sleep
 
 class Echo:
@@ -15,7 +15,7 @@ class Echo:
         return 'something'
 
 
-h = init_host()
+h = create_host().proxy
 e1 = h.spawn('echo1',Echo).get()
 
 e = h.lookup('echo1').get()

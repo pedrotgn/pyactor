@@ -1,7 +1,7 @@
 '''
 Timeout smaple.
 '''
-from pyactor.context import init_host
+from pyactor.context import create_host
 from time import sleep
 from pyactor.util import Timeout
 
@@ -19,7 +19,7 @@ class Echo:
 
 
 
-h = init_host()
+h = create_host().proxy
 e1 = h.spawn('echo1',Echo).get()
 e1.echo('hello there !!')
 e1.bye()

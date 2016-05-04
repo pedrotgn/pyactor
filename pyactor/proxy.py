@@ -95,8 +95,7 @@ class Future(object):
 
         :param str. callback: name of the function where to send the response.
         '''
-        _from = get_current()
-        from_actor = actors[_from]
+        from_actor = get_current()
         ##  SENDING MESSAGE FUTURE
         #msg = (_from, self.target, FUTURE, self.method,self.params,callback,actors[_from].channel)
         msg = FutureRequest(FUTURE,self.__method,self.__params,callback,

@@ -104,6 +104,7 @@ class Actor(ActorRef):
         '''
         if msg.method=='stop':
                 self.running = False
+
         else:
             result = None
             try:

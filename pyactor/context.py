@@ -1,12 +1,18 @@
 from urlparse import urlparse
 from actor import Actor,ActorRef
 from proxy import Proxy
-from tcp_server import Server
 from util import *
 import signal, sys
 from time import sleep
+import threading
 
-
+def create_host(url='local://local:6666/host'):
+    global host
+    if host[0]:
+        raise Exception('Host already created. Only one host can be ran at a time.')
+    else:
+        host[0] = Host(url)
+        return host[0]
 
 class Host(object):
     '''
@@ -14,11 +20,16 @@ class Host(object):
     actors and their communication through channels. Also configures the TCP socket
     where the actors will be able to recieve queries remotely.
     '''
-    _tell = ['shutdown']
+    _tell = []
     _ask = ['spawn','lookup','spawn_n','lookup_url']
 
     def __init__(self,url):
+        self.actors = {}
+        self.threads = {}
+        self.url = url
+        self.online = False
         self.load_transport(url)
+        self.init_host()
 
     def load_transport(self, url):
         '''
@@ -34,11 +45,11 @@ class Host(object):
         self.transport = aurl.scheme
         self.host_url = aurl
 
-
+        '''
         if aurl.scheme == 'tcp':
             self.tcp = Server(self.addr)
             dispatcher = self.tcp.get_dispatcher(self.addr)
-            launch_actor(self.addr,dispatcher)
+            launch_actor(self.addr,dispatcher)'''
 
             #self.aref = 'atom://' + self.dispatcher.name + '/controller/Host/0'
             #self.name = self.dispatcher.name
@@ -56,15 +67,18 @@ class Host(object):
         :raises: :class:`AlreadyExists`, if the ID specified is already in use.
         '''
         url = '%s://%s/%s' % (self.transport,self.host_url.netloc,id)
-        if actors.has_key(url):
+        if self.actors.has_key(url):
             raise AlreadyExists()
         else:
             obj = klass(*args)
             obj.id = str(id)
             new_actor = Actor(url,klass,obj)
             obj.proxy = Proxy(new_actor)
-            obj.host = self.proxy
-            launch_actor(url,new_actor)
+            if self.online:
+                obj.host = self.proxy
+            else:
+                obj.host = Exception("Host is not an active actor. Use 'init_host' to make it alive.")
+            self.launch_actor(url,new_actor)
             return Proxy(new_actor)
 
 
@@ -84,14 +98,14 @@ class Host(object):
         :raises: :class:`AlreadyExists`, if the ID specified is already in use.
         '''
         url = '%s://%s/%s' % (self.transport,self.host_url.netloc,id)
-        if actors.has_key(url):
+        if self.actors.has_key(url):
             raise AlreadyExists()
         else:
             group  = [Actor(url,klass,args,id) for i in range(n)]
             for elem in group[1:]:
                 elem.channel = group[0].channel
             for new_actor in group:
-                launch_actor(url,new_actor)
+                self.launch_actor(url,new_actor)
             return Proxy(new_actor)
 
     def lookup(self,id):
@@ -103,12 +117,11 @@ class Host(object):
         :return: :class:`~.Proxy` of the actor requiered.
         '''
         url =  '%s://%s/%s' % (self.transport,self.host_url.netloc,id)
-        if actors.has_key(url):
-            return Proxy(actors[url])
+        if self.actors.has_key(url):
+            return Proxy(self.actors[url])
         else:
             raise NotFound()
 
-    # problem with spawn_n and sample3.py.?
     def shutdown(self):
         '''Async method.
         Stops the Host, stopping at the same time all its actors.
@@ -117,8 +130,15 @@ class Host(object):
         When the actors stop running, they can't be started again.
 
         '''
-        for actor in actors.values():
-            Proxy(actor).stop()
+        for actor in self.actors.values():
+            if actor.id != self.id:
+                Proxy(actor).stop()
+                actor.thread.join()
+
+        self.actors.clear()
+        self.online=False
+        host[0] = None
+
 
 
     def lookup_url(self, url,klass):
@@ -134,12 +154,13 @@ class Host(object):
         '''
         aurl = urlparse(url)
         if self.is_local(aurl):
-            if not actors.has_key(url):
+            if not self.actors.has_key(url):
                 raise NotFound()
             else:
-                return Proxy(actors[url])
+                return Proxy(self.actors[url])
         else:
-            addrl = aurl.netloc.split(':')
+            raise Exception("TCPthing")
+            '''addrl = aurl.netloc.split(':')
             addr = addrl[0],addrl[1]
             if actors.has_key(addr):
                 dispatcher = actors[addr]
@@ -147,7 +168,7 @@ class Host(object):
                 dispatcher = self.tcp.get_dispatcher(addr)
                 launch_actor(addr,dispatcher)
             remote_actor = ActorRef(url,klass,dispatcher.channel)
-            return Proxy(remote_actor)
+            return Proxy(remote_actor)'''
 
 
     def is_local(self,aurl):
@@ -160,59 +181,58 @@ class Host(object):
         return self.host_url.netloc == aurl.netloc
 
 
+    def launch_actor(self, url,actor):
+        '''
+        This function makes an actor alive to start processing queries.
+
+        :param str. url: identifier of the actor.
+        :param Actor actor: instance of the actor.
+        '''
+        actor.run()
+        self.actors[url] = actor
+        self.threads[actor.thread] = url
 
 
-def launch_actor(url,actor):
-    '''
-    This function makes an actor alive to start processing queries.
+    def init_host(self):
+        '''
+        This is the main function to create a new Host to which you can spawn actors.
+        It will be set by default at local address if no parameter *url* is given.
 
-    :param str. url: identifier of the actor.
-    :param Actor actor: instance of the actor.
-    '''
-    actor.run()
-    actors[url] = actor
-    threads[actor.thread] = url
-
-
-def init_host(url='local://local:6666/host'):
-    '''
-    This is the main function to create a new Host to which you can spawn actors.
-    It will be set by default at local address if no parameter *url* is given.
-
-    :param str. url: URL where to start and bind the host.
-    :return: :class:`~.Proxy` of the host.
-    '''
-    host_obj = Host(url)
-    host_obj.id = url
-    host = Actor(url,Host,host_obj)
-    host_obj.proxy = Proxy(host)
-    launch_actor(url,host)
-    global _host
-    _host = Proxy(host)
-    return _host
+        :param str. url: URL where to start and bind the host.
+        :return: :class:`~.Proxy` of the host.
+        '''
+        self.id = self.url
+        host = Actor(self.url,Host,self)
+        self.proxy = Proxy(host)
+        self.launch_actor(self.url,host)
+        self.online = True
 
 
-def signal_handler(signal, frame):
-    '''
-    This gets the signal of Ctrl+C and stops the host. It also ends the execution.
 
-    :param signal: SIGINT signal interruption sent with a Ctrl+C.
-    :param frame: the current stack frame. (not used)
-    '''
-    print 'You pressed Ctrl+C!'
-    _host.shutdown()
-    sys.exit(0)
+    def signal_handler(self, signal, frame):
+        '''
+        This gets the signal of Ctrl+C and stops the host. It also ends the execution.
+
+        :param signal: SIGINT signal interruption sent with a Ctrl+C.
+        :param frame: the current stack frame. (not used)
+        '''
+        print 'You pressed Ctrl+C!'
+        self.shutdown()
+
+        #sys.exit(0)
 
 
-def serve_forever():
-    '''
-    This allows the host to keep alive indefinitely so its actors can receive
-    queries at any time.
-    To kill the execution, press Ctrl+C.
+    def serve_forever(self):
+        '''
+        This allows the host to keep alive indefinitely so its actors can receive
+        queries at any time.
+        To kill the execution, press Ctrl+C.
 
-    See usage example in :ref:`sample5`.
-    '''
-    signal.signal(signal.SIGINT, signal_handler)
-    print 'Press Ctrl+C to kill the execution'
-    while True:
-        sleep(1)
+        See usage example in :ref:`sample5`.
+        '''
+        self.running = True
+        signal.signal(signal.SIGINT, self.signal_handler)
+        print 'Press Ctrl+C to kill the execution'
+        while self.running:
+            sleep(1)
+        print 'BYE!'
