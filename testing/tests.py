@@ -6,6 +6,7 @@ from pyactor.context import *
 from pyactor.actor import *
 from pyactor.proxy import *
 from pyactor.util import *
+from pyactor.intervals import *
 from time import sleep
 import os, signal
 
@@ -42,23 +43,42 @@ class Bot:
         out = msg
         #print 'callback',msg
 
+class Counter:
+    _ask = []
+    _tell = ['count', 'init_start']
+
+    def init_start(self):
+        self.interval1 = interval_host(self.host, 1, self.count)
+        later(5, self.stop_interval)
+
+    def stop_interval(self):
+        self.interval1.set()
+
+    def count(self):
+        global cnt
+        cnt = cnt+1
+
 '''class TestForever(unittest.TestCase):
-    def __killme(self):
-        sleep(1)
-        os.kill(os.getpid().ppid(), signal.SIGINT)
+    def __serve(self):
+        self.h=create_host()
+        self.h.serve_forever()
+
 
     def setUp(self):
-        self.bu=sys.stdout
-        sys.stdout = open(os.devnull, 'w')
+        pass
+        #self.bu=sys.stdout
+        #sys.stdout = open(os.devnull, 'w')
     def test_forever(self):
-        self.h=init_host()
-        self.thread = Thread(target=self.__killme)
-        self.thread.start()
-        serve_forever()
+        t = Thread(target=self.__serve)
+        t.start()
+        sleep(1)
+        os.kill(t.pid, signal.SIGINT)
+        t.join()
 
     def tearDown(self):
         #self.h.shutdown()
-        sys.stdout = self.bu'''
+        pass
+        #sys.stdout = self.bu'''
 
 class TestBasic(unittest.TestCase):
     def setUp(self):
@@ -78,7 +98,7 @@ class TestBasic(unittest.TestCase):
     def test_1hostcreation(self):
         self.assertEqual(self.h.__class__.__name__, 'Proxy')
         self.assertEqual(self.h.actor.klass.__name__, 'Host')
-        self.assertEqual(self.h.actor.tell, ['stop'])
+        self.assertEqual(self.h.actor.tell, ['attach_interval', 'detach_interval','stop'])
         self.assertEqual(self.h.actor.ask, ['spawn','lookup','spawn_n','lookup_url'])
 
     def test_2spawning(self):
@@ -94,6 +114,9 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(b1.get_name().get(), 'bot1')
         self.assertEqual(str(b1.get_proxy().get()), str(b1))
         self.assertEqual(str(b1.get_host().get()), str(self.h))
+
+        g = self.h.spawn_n(3,'echog',Echo)
+
 
 
     def test_3queries(self):
@@ -146,7 +169,13 @@ class TestBasic(unittest.TestCase):
         #The actor should not be alive.
         self.assertFalse(self.e1.actor.is_alive())
 
-
+    def test_6intervals(self):
+        global cnt
+        cnt = 0
+        c = self.hr.spawn('count', Counter)
+        c.init_start()
+        sleep(6)
+        self.assertEqual(cnt, 5)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBasic)

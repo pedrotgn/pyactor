@@ -16,8 +16,8 @@ class Echo:
 
 
 
-h = create_host().proxy
-e1 = h.spawn('echo1',Echo).get()
+h = create_host()
+e1 = h.spawn('echo1',Echo)
 e1.echo('hello there !!')
 e1.bye()
 

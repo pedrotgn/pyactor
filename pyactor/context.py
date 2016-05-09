@@ -1,4 +1,5 @@
 from urlparse import urlparse
+from copy import copy
 from actor import Actor,ActorRef
 from proxy import Proxy
 from util import *
@@ -7,6 +8,13 @@ from time import sleep
 import threading
 
 def create_host(url='local://local:6666/host'):
+    '''
+    This is the main function to create a new Host to which you can spawn actors.
+    It will be set by default at local address if no parameter *url* is given.
+
+    :param str. url: URL where to start and bind the host.
+    :return: :class:`~.Host` created.
+    '''
     global host
     if host[0]:
         raise Exception('Host already created. Only one host can be ran at a time.')
@@ -20,14 +28,15 @@ class Host(object):
     actors and their communication through channels. Also configures the TCP socket
     where the actors will be able to recieve queries remotely.
     '''
-    _tell = []
+    _tell = ['attach_interval','detach_interval']
     _ask = ['spawn','lookup','spawn_n','lookup_url']
 
     def __init__(self,url):
         self.actors = {}
         self.threads = {}
+        self.interval = {}
         self.url = url
-        self.online = False
+        self.running = False
         self.load_transport(url)
         self.init_host()
 
@@ -71,10 +80,11 @@ class Host(object):
             raise AlreadyExists()
         else:
             obj = klass(*args)
-            obj.id = str(id)
+            obj.id = id
             new_actor = Actor(url,klass,obj)
             obj.proxy = Proxy(new_actor)
-            if self.online:
+            #obj._host = self
+            if self.running:
                 obj.host = self.proxy
             else:
                 obj.host = Exception("Host is not an active actor. Use 'init_host' to make it alive.")
@@ -101,11 +111,21 @@ class Host(object):
         if self.actors.has_key(url):
             raise AlreadyExists()
         else:
-            group  = [Actor(url,klass,args,id) for i in range(n)]
+            group = [None for i in range(n)]
+            for i in range(n):
+                obj = klass(*args)
+                obj.id = str(id)
+                group[i]  = Actor(url,klass,copy(obj))
+                obj.proxy = Proxy(group[i])
+                if self.running:
+                    obj.host = self.proxy
+                else:
+                    obj.host = Exception("Host is not an active actor. Use 'init_host' to make it alive.")
             for elem in group[1:]:
                 elem.channel = group[0].channel
             for new_actor in group:
                 self.launch_actor(url,new_actor)
+            print group
             return Proxy(new_actor)
 
     def lookup(self,id):
@@ -130,12 +150,16 @@ class Host(object):
         When the actors stop running, they can't be started again.
 
         '''
+        #Problem with spawn_n
         for actor in self.actors.values():
             Proxy(actor).stop()
             actor.thread.join()
 
+        for interval_event in self.interval.values():
+            interval_event.set()
+
         self.actors.clear()
-        self.online=False
+        self.running=False
         host[0] = None
 
 
@@ -194,17 +218,13 @@ class Host(object):
 
     def init_host(self):
         '''
-        This is the main function to create a new Host to which you can spawn actors.
-        It will be set by default at local address if no parameter *url* is given.
-
-        :param str. url: URL where to start and bind the host.
-        :return: :class:`~.Proxy` of the host.
+        This method creates an actor for the Host so it can spawn actors remotely.
         '''
         self.id = self.url
         host = Actor(self.url,Host,self)
         self.proxy = Proxy(host)
         self.launch_actor(self.url,host)
-        self.online = True
+        self.running = True
 
 
 
@@ -217,8 +237,7 @@ class Host(object):
         '''
         print 'You pressed Ctrl+C!'
         self.shutdown()
-
-        #sys.exit(0)
+        self.online = False
 
 
     def serve_forever(self):
@@ -229,9 +248,17 @@ class Host(object):
 
         See usage example in :ref:`sample5`.
         '''
-        self.running = True
+        self.online = True
         signal.signal(signal.SIGINT, self.signal_handler)
         print 'Press Ctrl+C to kill the execution'
         while self.running:
-            sleep(1)
+            try:
+                sleep(1)
+            except Exception:
+                pass
         print 'BYE!'
+
+    def attach_interval(self, interval_id, interval_event):
+        self.interval[interval_id] = interval_event
+    def detach_interval(self, interval_id):
+        del self.interval[interval_id]

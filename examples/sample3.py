@@ -26,12 +26,10 @@ class Bot:
     def pong(self,msg):
         print 'callback',msg
 
-h = create_host().proxy
-print 'init'
-e1 = h.spawn('echo1',Echo).get()
-bot = h.spawn('bot',Bot).get()
+h = create_host()
+e1 = h.spawn('echo1',Echo)
+bot = h.spawn('bot',Bot)
 bot.set_echo(e1)
-print 'spawn'
 bot.ping()
 
 sleep(1)

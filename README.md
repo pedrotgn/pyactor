@@ -2,7 +2,7 @@
 -----------------------------
 
 [![Build Status](https://travis-ci.org/pedrotgn/pyactor.svg?branch=master)](https://travis-ci.org/pedrotgn/pyactor)
-[![codecov](https://codecov.io/gh/pedrotgn/pyactor/branch/master/graph/badge.svg)](https://codecov.io/gh/pedrotgn/pyactor)
+[![Coverage Status](https://codecov.io/gh/pedrotgn/pyactor/branch/master/graph/badge.svg)](https://codecov.io/gh/pedrotgn/pyactor)
 
 
 PyActor is a python actor library constructed with the idea of getting two remote objects
@@ -18,7 +18,7 @@ cd examples
 python sample1.py
 ...
 
-Also see the documentation in doc/_build/html/index.html
+Also see the documentation in doc/_build/html/index.html (outdated)
 
 
 

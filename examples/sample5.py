@@ -15,14 +15,17 @@ class Echo:
         return 'something'
 
 
-h = create_host().proxy
-e1 = h.spawn('echo1',Echo).get()
+h = create_host()
+e1 = h.spawn('echo1',Echo)
 
-e = h.lookup('echo1').get()
+e = h.lookup('echo1')
 print e.say_something().get()
 
-ee = h.lookup_url('local://local:6666/echo1', Echo).get()
+ee = h.lookup_url('local://local:6666/echo1', Echo)
 print ee.say_something().get()
+
+'''eg = h.spawn_n(3,'echog',Echo)
+eg.echo('hello')'''
 
 sleep(1)
 h.shutdown()

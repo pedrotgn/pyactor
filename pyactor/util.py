@@ -27,8 +27,8 @@ SRC = 8
 global host
 host = [None]
 
-def get_host():
-    return host[0]
+'''def get_host():
+    return host[0]'''
 def get_current():
     current = current_thread()
     if host[0].threads.has_key(current):
