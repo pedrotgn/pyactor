@@ -51,6 +51,7 @@ class ActorRef(object):
             self.channel = Channel()
         self.tell = klass._tell
         self.ask = klass._ask
+        #self.ref = klass._ref
         self.klass = klass
 
     def __repr__(self):

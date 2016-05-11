@@ -25,15 +25,28 @@ class Echo:
 
 class Bot:
     _tell =['set_echo','ping','pong']
-    _ask = ['get_name','get_proxy','get_host']
+    _ask = ['get_name','get_proxy','get_host', 'get_echo', 'get_echo_ref', 'check_ref']
     def get_name(self):
         return self.id
+    @ref
     def get_proxy(self):
         return self.proxy
+    @ref
     def get_host(self):
         return self.host
+    @ref
     def set_echo(self,echo):
         self.echo = echo
+
+    def get_echo(self):
+        return self.echo
+    @ref
+    def get_echo_ref(self):
+        return self.echo
+    @ref
+    def check_ref(self, ref):
+        return ref
+
     def ping(self):
         future = self.echo.say_something()
         future.add_callback('pong')
@@ -49,14 +62,15 @@ class Counter:
 
     def init_start(self):
         self.interval1 = interval_host(self.host, 1, self.count)
-        later(5, self.stop_interval)
+        later(4, self.stop_interval)
 
     def stop_interval(self):
         self.interval1.set()
 
     def count(self):
         global cnt
-        cnt = cnt+1
+        if cnt != 4 :
+            cnt += 1
 
 '''class TestForever(unittest.TestCase):
     def __serve(self):
@@ -89,17 +103,19 @@ class TestBasic(unittest.TestCase):
         self.h=self.hr.proxy
         self.e1=self.h.spawn('echo1',Echo).get()
     def tearDown(self):
-        #check=self.h.sync_shutdown().get(2)
-        #self.assertEqual(check, 0)
         self.hr.shutdown()
         #sleep(1)
         sys.stdout = self.bu
 
     def test_1hostcreation(self):
+        self.assertEqual(self.hr.__class__.__name__, 'Host')
         self.assertEqual(self.h.__class__.__name__, 'Proxy')
         self.assertEqual(self.h.actor.klass.__name__, 'Host')
         self.assertEqual(self.h.actor.tell, ['attach_interval', 'detach_interval','stop'])
         self.assertEqual(self.h.actor.ask, ['spawn','lookup','spawn_n','lookup_url'])
+        with self.assertRaises(Exception):
+            h2=create_host()
+        self.assertEqual(self.hr, get_host())
 
     def test_2spawning(self):
         global out
@@ -113,9 +129,15 @@ class TestBasic(unittest.TestCase):
         b1 = self.h.spawn('bot1', Bot).get()
         self.assertEqual(b1.get_name().get(), 'bot1')
         self.assertEqual(str(b1.get_proxy().get()), str(b1))
+        self.assertNotEqual(b1.get_proxy().get(), b1)
         self.assertEqual(str(b1.get_host().get()), str(self.h))
+        self.assertNotEqual(b1.get_host().get(), self.h)
 
-        g = self.h.spawn_n(3,'echog',Echo)
+        self.assertNotEqual(b1.check_ref([{'e':self.e1}]).get()[0]['e'], self.e1)
+
+        #g = self.h.spawn_n(3,'echog',Echo).get()
+        #self.assertTrue(isinstance(g, Proxy))
+        #TODO spawn n
 
 
 
@@ -132,8 +154,10 @@ class TestBasic(unittest.TestCase):
 
         bot = self.h.spawn('bot',Bot).get()
         bot.set_echo(self.e1)
+        self.assertNotEqual(self.e1, bot.get_echo().get())
+        self.assertNotEqual(bot.get_echo().get(), bot.get_echo_ref().get())
         bot.ping()
-        sleep(0.1)
+        sleep(1)
         self.assertEqual(out, 'something')
 
         with self.assertRaises(Timeout):
@@ -143,7 +167,8 @@ class TestBasic(unittest.TestCase):
         global out
         e = self.h.lookup('echo1').get()
         self.assertEqual(e.actor.klass.__name__,'Echo')
-        self.assertEqual(e.actor,self.e1.actor)
+        self.assertEqual(e.actor,self.e1.actor) # !!!!!
+        self.assertNotEqual(e, self.e1)
         e.echo('hello')
         sleep(2)
         self.assertEqual(out,'hello')
@@ -151,18 +176,24 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(NotFound):
             e = self.h.lookup('echo2').get()
 
-        ee = self.h.lookup_url('local://local:6666/echo1', Echo).get()
+        ee = self.h.lookup_url('local://local:6666/echo1').get()
         self.assertEqual(ee.actor.klass.__name__,'Echo')
         self.assertEqual(ee.actor,self.e1.actor)
+        self.assertNotEqual(ee, self.e1)
         ee.echo('hello')
         sleep(1)
         self.assertEqual(out,'hello')
         with self.assertRaises(NotFound):
-            e = self.h.lookup_url('local://local:6666/echo2', Echo).get()
+            e = self.h.lookup_url('local://local:6666/echo2').get()
 
     def test_5shutdown(self):
         self.hr.shutdown()
         #sleep(0.1)
+        self.assertEqual(get_host(), None)
+        with self.assertRaises(Exception):
+            self.hr.spawn('bot',Bot)
+        with self.assertRaises(Timeout):
+            self.h.spawn('bot',Bot).get()
         #Now the actor is not running, invoking a method should raise Timeout.
         with self.assertRaises(Timeout):
             self.e1.say_something().get()
@@ -175,7 +206,7 @@ class TestBasic(unittest.TestCase):
         c = self.hr.spawn('count', Counter)
         c.init_start()
         sleep(6)
-        self.assertEqual(cnt, 5)
+        self.assertEqual(cnt, 4)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBasic)

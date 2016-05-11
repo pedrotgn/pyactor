@@ -3,6 +3,7 @@ from copy import copy
 from actor import Actor,ActorRef
 from proxy import Proxy
 from util import *
+import util
 import signal, sys
 from time import sleep
 import threading
@@ -15,12 +16,11 @@ def create_host(url='local://local:6666/host'):
     :param str. url: URL where to start and bind the host.
     :return: :class:`~.Host` created.
     '''
-    global host
-    if host[0]:
+    if util.host:
         raise Exception('Host already created. Only one host can be ran at a time.')
     else:
-        host[0] = Host(url)
-        return host[0]
+        util.host = Host(url)
+        return util.host
 
 class Host(object):
     '''
@@ -37,6 +37,7 @@ class Host(object):
         self.interval = {}
         self.url = url
         self.running = False
+        self.alive = True
         self.load_transport(url)
         self.init_host()
 
@@ -75,6 +76,8 @@ class Host(object):
         :return: :class:`~.Proxy` of the actor spawned.
         :raises: :class:`AlreadyExists`, if the ID specified is already in use.
         '''
+        if not self.alive:
+            raise Exception("Spawning on a dead host?")
         url = '%s://%s/%s' % (self.transport,self.host_url.netloc,id)
         if self.actors.has_key(url):
             raise AlreadyExists()
@@ -107,10 +110,12 @@ class Host(object):
             communicate whit all the others.
         :raises: :class:`AlreadyExists`, if the ID specified is already in use.
         '''
+        if not self.alive:
+            raise Exception("Spawning on a dead host?")
         url = '%s://%s/%s' % (self.transport,self.host_url.netloc,id)
         if self.actors.has_key(url):
             raise AlreadyExists()
-        else:
+        '''else:
             group = [None for i in range(n)]
             for i in range(n):
                 obj = klass(*args)
@@ -126,7 +131,7 @@ class Host(object):
             for new_actor in group:
                 self.launch_actor(url,new_actor)
             print group
-            return Proxy(new_actor)
+            return Proxy(new_actor)'''
 
     def lookup(self,id):
         '''Sync method.
@@ -150,21 +155,23 @@ class Host(object):
         When the actors stop running, they can't be started again.
 
         '''
-        #Problem with spawn_n
-        for actor in self.actors.values():
-            Proxy(actor).stop()
-            actor.thread.join()
+        if self.alive:
+            #Problem with spawn_n
+            for actor in self.actors.values():
+                Proxy(actor).stop()
+                actor.thread.join()
 
-        for interval_event in self.interval.values():
-            interval_event.set()
+            for interval_event in self.interval.values():
+                interval_event.set()
 
-        self.actors.clear()
-        self.running=False
-        host[0] = None
+            self.actors.clear()
+            self.running = False
+            self.alive = False
+            util.host = None
 
 
 
-    def lookup_url(self, url,klass):
+    def lookup_url(self, url):
         '''Sync method.
         Gets a proxy reference to the actor indicated by the URL in the parameters.
         It can be a local reference or a TCP direction.
@@ -248,10 +255,12 @@ class Host(object):
 
         See usage example in :ref:`sample5`.
         '''
+        if not self.alive:
+            raise Exception("This host is already shutted down.")
         self.online = True
         signal.signal(signal.SIGINT, self.signal_handler)
         print 'Press Ctrl+C to kill the execution'
-        while self.running:
+        while self.online:
             try:
                 sleep(1)
             except Exception:
@@ -262,3 +271,30 @@ class Host(object):
         self.interval[interval_id] = interval_event
     def detach_interval(self, interval_id):
         del self.interval[interval_id]
+
+    def _dumps(self, param):
+        if isinstance(param, Proxy):
+            return Proxy(param.actor)
+        elif isinstance(param, list):
+            return [self._dumps(elem) for elem in param]
+        elif isinstance(param, dict):
+            new_dict=param
+            for key in new_dict.keys():
+                new_dict[key] = self._dumps(new_dict[key])
+            return new_dict
+        else:
+            return param
+
+
+    def _loads(self, param):
+        if isinstance(param, Proxy):
+            return self.lookup_url(param.actor.url)
+        elif isinstance(param, list):
+            return [self._loads(elem) for elem in param]
+        elif isinstance(param, dict):
+            new_dict=param
+            for key in new_dict.keys():
+                new_dict[key] = self._dumps(new_dict[key])
+            return new_dict
+        else:
+            return param

@@ -21,7 +21,7 @@ e1 = h.spawn('echo1',Echo)
 e = h.lookup('echo1')
 print e.say_something().get()
 
-ee = h.lookup_url('local://local:6666/echo1', Echo)
+ee = h.lookup_url('local://local:6666/echo1')
 print ee.say_something().get()
 
 '''eg = h.spawn_n(3,'echog',Echo)

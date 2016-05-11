@@ -1,6 +1,7 @@
 from actor import Channel
 from util import *
 from Queue import Empty
+from functools import wraps
 
 class Proxy:
     '''
@@ -12,6 +13,8 @@ class Proxy:
     def __init__(self, actor):
         self.__channel = actor.channel
         self.actor = actor
+        #refAsync = set(actor.tell) & set(actor.ref)
+
         for method in actor.tell:
             setattr(self, method, TellWrapper(self.__channel,method,actor.url))
         for method in actor.ask:
@@ -21,6 +24,16 @@ class Proxy:
         return 'Proxy(actor=%s, tell=%s, ask = %s)' % (self.actor, self.actor.tell,self.actor.ask)
 
 
+def ref(func):
+    @wraps(func)
+    def ref_wrapper(*args, **kwargs):
+        new_args = get_host()._dumps(list(args))
+        result = func(*new_args, **kwargs)
+        if result != None:
+            return get_host()._loads(result)
+        else:
+            return result
+    return ref_wrapper
 
 
 class Future(object):

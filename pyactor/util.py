@@ -10,7 +10,6 @@ Defined constants:
     FROM, TO, TYPE, METHOD, PARAMS, FUTURE, ASK, TELL, SRC
 
 """
-
 from threading import current_thread
 import collections
 
@@ -24,15 +23,13 @@ ASK = 6
 TELL = 7
 SRC = 8
 
-global host
-host = [None]
-
-'''def get_host():
-    return host[0]'''
+host = None
+def get_host():
+    return host
 def get_current():
     current = current_thread()
-    if host[0].threads.has_key(current):
-        return host[0].actors[host[0].threads[current]]
+    if host.threads.has_key(current):
+        return host.actors[host.threads[current]]
 
 class Timeout(Exception):pass
 
