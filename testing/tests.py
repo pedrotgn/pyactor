@@ -135,11 +135,6 @@ class TestBasic(unittest.TestCase):
 
         self.assertNotEqual(b1.check_ref([{'e':self.e1}]).get()[0]['e'], self.e1)
 
-        #g = self.h.spawn_n(3,'echog',Echo).get()
-        #self.assertTrue(isinstance(g, Proxy))
-        #TODO spawn n
-
-
 
     def test_3queries(self):
         global out

@@ -63,7 +63,8 @@
 <dt id="pyactor.actor.Actor">
 <em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">Actor</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Actor is the instance of an object to which is possible to acces and invoke
-its methods remotely.</p>
+its methods remotely. Main element of the model. The host is the one to create
+them (spawning -&gt; see <a class="reference internal" href="#pyactor.context.Host.spawn" title="pyactor.context.Host.spawn"><code class="xref py py-meth docutils literal"><span class="pre">spawn()</span></code></a>).</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -94,12 +95,13 @@ it is running.</td>
 <dl class="method">
 <dt id="pyactor.actor.Actor.receive">
 <code class="descname">receive</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.Actor.receive" title="Permalink to this definition">¶</a></dt>
-<dd><p>The message received from the queue specify a method of the class of the
-actor. This invokes it. If the communication is an <a class="reference internal" href="#pyactor.util.AskRequest" title="pyactor.util.AskRequest"><code class="xref py py-class docutils literal"><span class="pre">AskRequest</span></code></a>,
-sends the result back to the channel named in the message as an
-<a class="reference internal" href="#pyactor.util.AskResponse" title="pyactor.util.AskResponse"><code class="xref py py-class docutils literal"><span class="pre">AskResponse</span></code></a>.
-If it is a FUTURE, generates a <a class="reference internal" href="#pyactor.util.TellRequest" title="pyactor.util.TellRequest"><code class="xref py py-class docutils literal"><span class="pre">TellRequest</span></code></a> to send the result
-to the sender&#8217;s method specified in the callback field of the tuple.</p>
+<dd><p>The message received from the queue specify a method of the class the
+actor represents. This invokes it. If the communication is an
+<a class="reference internal" href="#pyactor.util.AskRequest" title="pyactor.util.AskRequest"><code class="xref py py-class docutils literal"><span class="pre">AskRequest</span></code></a>, sends the result back to the channel included in
+the message as an <a class="reference internal" href="#pyactor.util.AskResponse" title="pyactor.util.AskResponse"><code class="xref py py-class docutils literal"><span class="pre">AskResponse</span></code></a>.
+If it is a <a class="reference internal" href="#pyactor.proxy.Future" title="pyactor.proxy.Future"><code class="xref py py-class docutils literal"><span class="pre">Future</span></code></a>, generates a <a class="reference internal" href="#pyactor.util.TellRequest" title="pyactor.util.TellRequest"><code class="xref py py-class docutils literal"><span class="pre">TellRequest</span></code></a> to send
+the result to the sender&#8217;s method specified in the callback field of the
+tuple.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -124,8 +126,8 @@ actor <a class="reference internal" href="#pyactor.actor.Actor.is_alive" title="
 <dt id="pyactor.actor.ActorRef">
 <em class="property">class </em><code class="descclassname">pyactor.actor.</code><code class="descname">ActorRef</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>channel=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.actor.ActorRef" title="Permalink to this definition">¶</a></dt>
 <dd><p>ActorRef contains the main components of an actor. These are the URL where it
-is located, the communication channel and the class of the actor as also the
-synchronous and asynchronous methods the class implements.
+is located, the communication <a class="reference internal" href="#pyactor.actor.Channel" title="pyactor.actor.Channel"><code class="xref py py-class docutils literal"><span class="pre">Channel</span></code></a> and the class of the actor
+as also the synchronous and asynchronous methods the class implements.
 When no channel is specified a new one will be created wich is also the
 default procedure.</p>
 <div class="admonition note">
@@ -189,8 +191,8 @@ manage the result reply.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>channel</strong> (<a class="reference internal" href="#pyactor.actor.Channel" title="pyactor.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the querie.</li>
-<li><strong>method</strong> (<em>str.</em>) &#8211; name of the method this querie is gonna invoke.</li>
+<li><strong>channel</strong> (<a class="reference internal" href="#pyactor.actor.Channel" title="pyactor.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the query.</li>
+<li><strong>method</strong> (<em>str.</em>) &#8211; name of the method this query is gonna invoke.</li>
 <li><strong>actor_url</strong> (<em>str.</em>) &#8211; URL address where the actor is set.</li>
 </ul>
 </td>
@@ -210,12 +212,12 @@ Mostly for ask requests.</p>
 <dd><p>Sets a callback on the Future. This will generate a new
 <a class="reference internal" href="#pyactor.util.FutureRequest" title="pyactor.util.FutureRequest"><code class="xref py py-class docutils literal"><span class="pre">FutureRequest</span></code></a> sent to the actor that will invoke
 the callback function with the result by parameter.</p>
-<p>In <a class="reference internal" href="tutorial.html#sample3"><span class="std std-ref">Sample 3</span></a> you can see how to use it:</p>
+<p>In <a class="reference internal" href="tutorial.html#sample3"><span class="std std-ref">Sample 3 - Callback</span></a> you can see how to use it:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span>
 <span class="n">future</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="s1">&#39;pong&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>pong is a method of the same class that receives the result of the querie
+<p>pong is a method of the same class that receives the result of the query
 in parameter <em>msg</em>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
     <span class="nb">print</span> <span class="s1">&#39;callback&#39;</span><span class="p">,</span><span class="n">msg</span>
@@ -234,20 +236,20 @@ in parameter <em>msg</em>:</p>
 <dl class="method">
 <dt id="pyactor.proxy.Future.get">
 <code class="descname">get</code><span class="sig-paren">(</span><em>timeout=1</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.Future.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Invokes the method sending a querie through the channel and obtains the
+<dd><p>Invokes the method sending a query through the channel and obtains the
 result of this method.</p>
-<p>It is necessary to invoke this method with a synchronous querie in order
-to get the result. As in <a class="reference internal" href="tutorial.html#sample2"><span class="std std-ref">Sample 2</span></a>:</p>
+<p>It is necessary to invoke this method with a synchronous query in order
+to get the result. As in <a class="reference internal" href="tutorial.html#sample2"><span class="std std-ref">Sample 2 - Sync</span></a>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">e1</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Unless you use this method, you will get the future itself, which means
-the method has not been invoked yet, like in <a class="reference internal" href="tutorial.html#sample3"><span class="std std-ref">Sample 3</span></a>:</p>
+the method has not been invoked yet, like in <a class="reference internal" href="tutorial.html#sample3"><span class="std std-ref">Sample 3 - Callback</span></a>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>In this case, you could set a callback with <a class="reference internal" href="#pyactor.proxy.Future.add_callback" title="pyactor.proxy.Future.add_callback"><code class="xref py py-meth docutils literal"><span class="pre">add_callback()</span></code></a>, so the
-result will be sent to the method ou specify.</p>
+result will be sent to the method you specify.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -290,14 +292,20 @@ through the channel.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>channel</strong> (<a class="reference internal" href="#pyactor.actor.Channel" title="pyactor.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the querie.</li>
-<li><strong>method</strong> (<em>str.</em>) &#8211; name of the method this querie is gonna invoke.</li>
+<li><strong>channel</strong> (<a class="reference internal" href="#pyactor.actor.Channel" title="pyactor.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the query.</li>
+<li><strong>method</strong> (<em>str.</em>) &#8211; name of the method this query is gonna invoke.</li>
 <li><strong>actor_url</strong> (<em>str.</em>) &#8211; URL address where the actor is set.</li>
 </ul>
 </td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.proxy.ref">
+<code class="descclassname">pyactor.proxy.</code><code class="descname">ref</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.ref" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator for the methods that include Proxys in their parameters or returns.</p>
 </dd></dl>
 
 </div>
@@ -309,11 +317,44 @@ through the channel.</p>
 <em class="property">class </em><code class="descclassname">pyactor.context.</code><code class="descname">Host</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host" title="Permalink to this definition">¶</a></dt>
 <dd><p>Host is the container of the actors. It manages the spawn and elimination of
 actors and their communication through channels. Also configures the TCP socket
-where the actors will be able to recieve queries remotely.</p>
+where the actors will be able to recieve queries remotely.
+Additionaly, controls the correct management of the threads and intervals of
+its actors.</p>
+<p>The host can be managed as a simple object, but it also is an actor itself so
+you can get its <a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> (with <code class="docutils literal"><span class="pre">host.proxy</span></code>) and pass it to another
+host to spawn remotely.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>str.</em>) &#8211; URL that identifies the host.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="pyactor.context.Host.attach_interval">
+<code class="descname">attach_interval</code><span class="sig-paren">(</span><em>interval_id</em>, <em>interval_event</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.attach_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers an interval to the host.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.detach_interval">
+<code class="descname">detach_interval</code><span class="sig-paren">(</span><em>interval_id</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.detach_interval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes an interval from the host registry.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.init_host">
+<code class="descname">init_host</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.init_host" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method creates an actor for the Host so it can spawn actors remotely.
+Called always from the init function of the host, so no need for calling
+this directly.</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="pyactor.context.Host.is_local">
 <code class="descname">is_local</code><span class="sig-paren">(</span><em>aurl</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.is_local" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sync method.
+<dd><p>Private method.
 Tells if the address given is from this host.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -328,9 +369,29 @@ Tells if the address given is from this host.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pyactor.context.Host.launch_actor">
+<code class="descname">launch_actor</code><span class="sig-paren">(</span><em>url</em>, <em>actor</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.launch_actor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Private method.
+This function makes an actor alive to start processing queries.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>url</strong> (<em>str.</em>) &#8211; identifier of the actor.</li>
+<li><strong>actor</strong> (<a class="reference internal" href="#pyactor.actor.Actor" title="pyactor.actor.Actor"><em>Actor</em></a>) &#8211; instance of the actor.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
 <dt id="pyactor.context.Host.load_transport">
 <code class="descname">load_transport</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.load_transport" title="Permalink to this definition">¶</a></dt>
-<dd><p>For TCP communication. Sets the communication socket of the host at the
+<dd><p>### Not yet functional
+For TCP communication. Sets the communication socket of the host at the
 address and port specified.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -346,9 +407,9 @@ tipical format: &#8216;scheme://address:port/hierarchical_path&#8217;</td>
 <dl class="method">
 <dt id="pyactor.context.Host.lookup">
 <code class="descname">lookup</code><span class="sig-paren">(</span><em>id</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.lookup" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sync method.
-Gets a new proxy that references to the actor of the host identified by
+<dd><p>Gets a new proxy that references to the actor of this host identified by
 the given ID.</p>
+<p>This method can be called remotely synchronously.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -357,31 +418,67 @@ the given ID.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the actor requiered.</td>
 </tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body">Exception if the host is down.</td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyactor.context.Host.lookup_url">
-<code class="descname">lookup_url</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.lookup_url" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sync method.
-Gets a proxy reference to the actor indicated by the URL in the parameters.
+<code class="descname">lookup_url</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.lookup_url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a proxy reference to the actor indicated by the URL in the parameters.
 It can be a local reference or a TCP direction.</p>
+<p>This method can be called remotely synchronously.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>url</strong> (<em>srt.</em>) &#8211; address that identifies an actor.</li>
-<li><strong>klass</strong> (<em>class</em>) &#8211; class type of the actor to lookup.</li>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>srt.</em>) &#8211; address that identifies an actor.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the actor requested.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raise:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">NotFound</span></code>, if the URL specified do not correspond to any
+actor in the host.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.serve_forever">
+<code class="descname">serve_forever</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.serve_forever" title="Permalink to this definition">¶</a></dt>
+<dd><p>This allows the host to keep alive indefinitely so its actors can receive
+queries at any time.
+To kill the execution, press Ctrl+C.</p>
+<p>See usage example in <a class="reference internal" href="tutorial.html#sample6"><span class="std std-ref">Sample 6 - self.id, proxy and host</span></a>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.shutdown">
+<code class="descname">shutdown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.shutdown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stops the Host, stopping at the same time all its actors.
+Should be called at the end of its usage, to finish correctly all the
+connections and threads.
+When the actors stop running, they can&#8217;t be started again and the host
+can&#8217;t process new spaws. You might need to create a new host
+(<a class="reference internal" href="#pyactor.context.create_host" title="pyactor.context.create_host"><code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code></a>).</p>
+<p>This method can&#8217;t be called remotely.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.signal_handler">
+<code class="descname">signal_handler</code><span class="sig-paren">(</span><em>signal</em>, <em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.signal_handler" title="Permalink to this definition">¶</a></dt>
+<dd><p>This gets the signal of Ctrl+C and stops the host. It also ends the execution.
+Needs the invocation of <a class="reference internal" href="#pyactor.context.Host.serve_forever" title="pyactor.context.Host.serve_forever"><code class="xref py py-meth docutils literal"><span class="pre">serve_forever()</span></code></a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>signal</strong> &#8211; SIGINT signal interruption sent with a Ctrl+C.</li>
+<li><strong>frame</strong> &#8211; the current stack frame. (not used)</li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the actor requested.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raise:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">NotFound</span></code>, if the URL specified do not correspond to any
-actor in the host.</p>
 </td>
 </tr>
 </tbody>
@@ -389,21 +486,12 @@ actor in the host.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pyactor.context.Host.shutdown">
-<code class="descname">shutdown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.shutdown" title="Permalink to this definition">¶</a></dt>
-<dd><p>Async method.
-Stops the Host, stopping at the same time all its actors.
-Should be called at the end of its usage, to finish correctly all the
-connections.
-When the actors stop running, they can&#8217;t be started again.</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="pyactor.context.Host.spawn">
 <code class="descname">spawn</code><span class="sig-paren">(</span><em>id</em>, <em>klass</em>, <em>args=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.spawn" title="Permalink to this definition">¶</a></dt>
-<dd><p>This sync method creates an actor attached to this host. It will be an
+<dd><p>This method creates an actor attached to this host. It will be an
 instance of the class <em>klass</em> and it will be assigned an ID that identifies
 it among the host.</p>
+<p>This method can be called remotely synchronously.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -418,38 +506,10 @@ it among the host.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the actor spawned.</p>
 </td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">AlreadyExists</span></code>, if the ID specified is already in use.</p>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">AlreadyExists</span></code>, if the ID specified is already in use.</p>
 </td>
 </tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyactor.context.Host.spawn_n">
-<code class="descname">spawn_n</code><span class="sig-paren">(</span><em>n</em>, <em>id</em>, <em>klass</em>, <em>args=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.spawn_n" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sync method.
-Spwns n actors at a time as a group. All the actors will have the same
-ID and channel. All the communications will proceed to all the actors of
-the grup at a time.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>n</strong> (<em>int</em>) &#8211; Number of actors to spawn in the group.</li>
-<li><strong>id</strong> (<em>str.</em>) &#8211; identifier for this actors; must be unique within the
-other actors of the host.</li>
-<li><strong>klass</strong> (<em>class</em>) &#8211; class type of the actors to be spawned.</li>
-<li><strong>args</strong> (<em>list</em>) &#8211; arguments to the init function of the class  <em>klass</em>.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of one of the actors, which will also
-communicate whit all the others.</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">AlreadyExists</span></code>, if the ID specified is already in use.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">Exception if the host is down.</p>
 </td>
 </tr>
 </tbody>
@@ -459,62 +519,22 @@ communicate whit all the others.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="pyactor.context.init_host">
-<code class="descclassname">pyactor.context.</code><code class="descname">init_host</code><span class="sig-paren">(</span><em>url='local://local:6666/host'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.init_host" title="Permalink to this definition">¶</a></dt>
+<dt id="pyactor.context.create_host">
+<code class="descclassname">pyactor.context.</code><code class="descname">create_host</code><span class="sig-paren">(</span><em>url='local://local:6666/host'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.create_host" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the main function to create a new Host to which you can spawn actors.
-It will be set by default at local address if no parameter <em>url</em> is given.</p>
+It will be set by default at local address if no parameter <em>url</em> is given.
+This function shuould be called onece for execution or after callig
+<a class="reference internal" href="#pyactor.context.Host.shutdown" title="pyactor.context.Host.shutdown"><code class="xref py py-meth docutils literal"><span class="pre">shutdown()</span></code></a> to the previous host. Only one host can be alive at a time,
+trying to create more than one will raise an exception.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> (<em>str.</em>) &#8211; URL where to start and bind the host.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the host.</td>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a> created.</td>
 </tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyactor.context.launch_actor">
-<code class="descclassname">pyactor.context.</code><code class="descname">launch_actor</code><span class="sig-paren">(</span><em>url</em>, <em>actor</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.launch_actor" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function makes an actor alive to start processing queries.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>url</strong> (<em>str.</em>) &#8211; identifier of the actor.</li>
-<li><strong>actor</strong> (<a class="reference internal" href="#pyactor.actor.Actor" title="pyactor.actor.Actor"><em>Actor</em></a>) &#8211; instance of the actor.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyactor.context.serve_forever">
-<code class="descclassname">pyactor.context.</code><code class="descname">serve_forever</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.serve_forever" title="Permalink to this definition">¶</a></dt>
-<dd><p>This allows the host to keep alive indefinitely so its actors can receive
-queries at any time.
-To kill the execution, press Ctrl+C.</p>
-<p>See usage example in <a class="reference internal" href="tutorial.html#sample5"><span class="std std-ref">Sample 5</span></a>.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyactor.context.signal_handler">
-<code class="descclassname">pyactor.context.</code><code class="descname">signal_handler</code><span class="sig-paren">(</span><em>signal</em>, <em>frame</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.signal_handler" title="Permalink to this definition">¶</a></dt>
-<dd><p>This gets the signal of Ctrl+C and stops the host. It also ends the execution.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>signal</strong> &#8211; SIGINT signal interruption sent with a Ctrl+C.</li>
-<li><strong>frame</strong> &#8211; the current stack frame. (not used)</li>
-</ul>
-</td>
+<tr class="field-odd field"><th class="field-name">Rise:</th><td class="field-body">Exception if there is a host already created.</td>
 </tr>
 </tbody>
 </table>

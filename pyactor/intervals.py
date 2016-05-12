@@ -2,12 +2,28 @@ from threading import Thread, Timer, Event, currentThread
 import time as timep
 
 def later(timeout,f,*args, **kwargs):
+    '''
+    Sets a timer that will call the *f* function past *timeout* seconds.
+    Used to stop intervals. See example in :ref:`sample_inter`
+    '''
     t = Timer(timeout, f, args)
     t.start()
     return t
 
 
 def interval_host(host, time, f, *args, **kwargs):
+    '''
+    Creats an Event that attached to the *host* that will execute the *f* function
+    every *time* seconds.
+
+    See example in :ref:`sample_inter`
+
+    :param Proxy host: proxy of the host. Can be obtained from inside a class
+        with ``self.host``.
+    :param int time: seconds for the intervals.
+    :param func f: function to be called every *time* seconds.
+    :param list args: arguments for *f*.
+    '''
     def wrap(*args, **kwargs):
         thread = currentThread()
         thread.getName()

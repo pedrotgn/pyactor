@@ -35,8 +35,8 @@ class Channel(Queue):
 class ActorRef(object):
     '''
     ActorRef contains the main components of an actor. These are the URL where it
-    is located, the communication channel and the class of the actor as also the
-    synchronous and asynchronous methods the class implements.
+    is located, the communication :class:`~.Channel` and the class of the actor
+    as also the synchronous and asynchronous methods the class implements.
     When no channel is specified a new one will be created wich is also the
     default procedure.
 
@@ -61,7 +61,8 @@ class ActorRef(object):
 class Actor(ActorRef):
     '''
     Actor is the instance of an object to which is possible to acces and invoke
-    its methods remotely.
+    its methods remotely. Main element of the model. The host is the one to create
+    them (spawning -> see :meth:`~.spawn`).
 
     :param str. url: URL where the actor is running.
     :param class klass: class type for the actor.
@@ -93,12 +94,13 @@ class Actor(ActorRef):
 
     def receive(self,msg):
         '''
-        The message received from the queue specify a method of the class of the
-        actor. This invokes it. If the communication is an :class:`~.AskRequest`,
-        sends the result back to the channel named in the message as an
-        :class:`~.AskResponse`.
-        If it is a FUTURE, generates a :class:`~.TellRequest` to send the result
-        to the sender's method specified in the callback field of the tuple.
+        The message received from the queue specify a method of the class the
+        actor represents. This invokes it. If the communication is an
+        :class:`~.AskRequest`, sends the result back to the channel included in
+        the message as an :class:`~.AskResponse`.
+        If it is a :class:`~.Future`, generates a :class:`~.TellRequest` to send
+        the result to the sender's method specified in the callback field of the
+        tuple.
 
         :param msg: The message is a namedtuple of the defined in util.py
             (:class:`~.AskRequest`, :class:`~.TellRequest`, :class:`~.FutureRequest`).
@@ -133,4 +135,3 @@ class Actor(ActorRef):
         '''
         self.thread = Thread(target=self.__processQueue)
         self.thread.start()
-        #threads[self.thread] = self.aref

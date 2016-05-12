@@ -26,3 +26,11 @@ Context
 
 .. literalinclude:: ..\pyactor\context.py
     :linenos:
+
+.. _intervals_source:
+
+Intervals
+=========
+
+.. literalinclude:: ..\pyactor\intervals.py
+    :linenos:

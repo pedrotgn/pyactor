@@ -1,5 +1,5 @@
 from pyactor.context import create_host
-from pyactor.intervals import interval, interval_host, later
+from pyactor.intervals import interval_host, later
 
 class Registry():
     _ask = []

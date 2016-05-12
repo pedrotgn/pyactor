@@ -25,6 +25,8 @@ class Proxy:
 
 
 def ref(func):
+    '''Decorator for the methods that include Proxys in their parameters or returns.
+    '''
     @wraps(func)
     def ref_wrapper(*args, **kwargs):
         new_args = get_host()._dumps(list(args))
@@ -49,14 +51,14 @@ class Future(object):
         self.__target = actor_url
 
     def __getattr__(self, name):
-        raise Exception("'Future' object has no attribute %r. Remember to call get() after an ask querie." % name)
+        raise Exception("'Future' object has no attribute %r. Remember to call get() after an ask query." % name)
 
     def get(self,timeout=1):
         '''
-        Invokes the method sending a querie through the channel and obtains the
+        Invokes the method sending a query through the channel and obtains the
         result of this method.
 
-        It is necessary to invoke this method with a synchronous querie in order
+        It is necessary to invoke this method with a synchronous query in order
         to get the result. As in :ref:`sample2`::
 
             e1.say_something().get()
@@ -67,7 +69,7 @@ class Future(object):
             future = self.echo.say_something()
 
         In this case, you could set a callback with :meth:`add_callback`, so the
-        result will be sent to the method ou specify.
+        result will be sent to the method you specify.
 
         :param int timeout: timeout to wait for the result. If not specified,
             it's set to 1 sec.
@@ -100,7 +102,7 @@ class Future(object):
             future = self.echo.say_something()
             future.add_callback('pong')
 
-        pong is a method of the same class that receives the result of the querie
+        pong is a method of the same class that receives the result of the query
         in parameter *msg*::
 
             def pong(self,msg):
@@ -122,8 +124,8 @@ class TellWrapper:
     Wrapper for Tell type queries to the proxy. Creates the request and sends it
     through the channel.
 
-    :param Channel channel: communication way for the querie.
-    :param str. method: name of the method this querie is gonna invoke.
+    :param Channel channel: communication way for the query.
+    :param str. method: name of the method this query is gonna invoke.
     :param str. actor_url: URL address where the actor is set.
     '''
     def __init__(self, channel, method, actor_url):
@@ -143,8 +145,8 @@ class AskWrapper:
     Wrapper for Ask type queries to the proxy. Creates a :class:`Future` to
     manage the result reply.
 
-    :param Channel channel: communication way for the querie.
-    :param str. method: name of the method this querie is gonna invoke.
+    :param Channel channel: communication way for the query.
+    :param str. method: name of the method this query is gonna invoke.
     :param str. actor_url: URL address where the actor is set.
     '''
     def __init__(self, channel, method,actor_url):

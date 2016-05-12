@@ -13,11 +13,14 @@ Install using:
 python setup.py install
 
 Check that works executing the examples:
+
 cd examples
+
 python sample1.py
+
 ...
 
-Also see the documentation in doc/_build/html/index.html (outdated)
+Also see the documentation in doc/_build/html/index.html
 
 
 
