@@ -2,28 +2,29 @@
 Proxy references by parameter sample.
 '''
 from pyactor.context import create_host
-from pyactor.proxy import ref
 from time import sleep
 
 
 class Echo:
     _tell =['echo','echo2', 'echo3']
     _ask = []
-    @ref
+    _ref = ['echo','echo2','echo3']
+
     def echo(self,msg,sender):
-        print msg,'from:',sender.get_name().get()
-    @ref
+        print msg,'from:',sender.get_name().get(), id(sender)
+
     def echo2(self,msg, sndrs):
         for sender in sndrs:
-            print msg,'from:',sender.get_name().get()
-    @ref
+            print msg,'from:',sender.get_name().get(), id(sender)
+
     def echo3(self,msg, sndrs):
         for sender in sndrs.values():
-            print msg,'from:',sender.get_name().get()
+            print msg,'from:',sender.get_name().get(), id(sender)
 
 class Bot:
     _tell =['set_echo','say_hi']
     _ask = ['get_name']
+    _ref = ['get_name']
     def __init__(self):
         self.greetings = ['hello','hi','hey','what`s up?']
     def set_echo(self):
@@ -40,8 +41,9 @@ e1 = h.spawn('echo1',Echo)
 bot = h.spawn('bot1',Bot)
 bot2 = h.spawn('bot2',Bot)
 bot.set_echo()
+bot2.set_echo()
 bot.say_hi()
-e1.echo2('hello there!!',[bot,bot2])
+e1.echo2('hello there!!',[bot2])
 e1.echo3('hello there!!',{'bot1':bot, 'bot2':bot2})
 
 sleep(1)

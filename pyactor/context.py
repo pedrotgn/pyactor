@@ -1,6 +1,7 @@
 from urlparse import urlparse
 from copy import copy
 from actor import Actor,ActorRef
+from parallels import ActorParallel
 from proxy import Proxy
 from util import *
 import util
@@ -46,7 +47,8 @@ class Host(object):
     def __init__(self,url):
         self.actors = {}
         self.threads = {}
-        self.interval = {}
+        self.intervals = {}
+        #self.locks = {}
         self.url = url
         self.running = False
         self.alive = True
@@ -100,13 +102,21 @@ class Host(object):
         else:
             obj = klass(*args)
             obj.id = id
-            new_actor = Actor(url,klass,obj)
+            if hasattr(klass, '_parallel') and klass._parallel:
+                new_actor = ActorParallel(url,klass,obj)
+                #lock = new_actor.get_lock()
+                #self.locks[aref] = lock
+            else:
+                new_actor = Actor(url,klass,obj)
+
             obj.proxy = Proxy(new_actor)
-            #obj._host = self
             if self.running:
                 obj.host = self.proxy
             else:
                 obj.host = Exception("Host is not an active actor. Use 'init_host' to make it alive.")
+
+
+
             self.launch_actor(url,new_actor)
             return Proxy(new_actor)
 
@@ -147,7 +157,7 @@ class Host(object):
                 Proxy(actor).stop()
                 actor.thread.join()
 
-            for interval_event in self.interval.values():
+            for interval_event in self.intervals.values():
                 interval_event.set()
 
             self.actors.clear()
@@ -218,7 +228,7 @@ class Host(object):
         Called always from the init function of the host, so no need for calling
         this directly.
         '''
-        if  not(running) and self.alive:
+        if  not(self.running) and self.alive:
             self.id = self.url
             host = Actor(self.url,Host,self)
             self.proxy = Proxy(host)
@@ -263,11 +273,11 @@ class Host(object):
     def attach_interval(self, interval_id, interval_event):
         '''Registers an interval to the host.
         '''
-        self.interval[interval_id] = interval_event
+        self.intervals[interval_id] = interval_event
     def detach_interval(self, interval_id):
         '''Deletes an interval from the host registry.
         '''
-        del self.interval[interval_id]
+        del self.intervals[interval_id]
 
     def _dumps(self, param):
         '''

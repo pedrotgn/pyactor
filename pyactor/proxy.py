@@ -13,7 +13,11 @@ class Proxy:
     def __init__(self, actor):
         self.__channel = actor.channel
         self.actor = actor
-        #refAsync = set(actor.tell) & set(actor.ref)
+
+        for method in actor.ask_ref:
+            setattr(self, method, AskRefWrapper(self.__channel,method,actor.url))
+        for method in actor.tell_ref:
+            setattr(self, method, TellRefWrapper(self.__channel,method,actor.url))
 
         for method in actor.tell:
             setattr(self, method, TellWrapper(self.__channel,method,actor.url))
@@ -21,21 +25,10 @@ class Proxy:
             setattr(self, method, AskWrapper(self.__channel,method,actor.url))
 
     def __repr__(self):
-        return 'Proxy(actor=%s, tell=%s, ask = %s)' % (self.actor, self.actor.tell,self.actor.ask)
+        return 'Proxy(actor=%s, tell=%s ref=%s, ask=%s ref=%s)' % (self.actor, self.actor.tell,
+                                        self.actor.tell_ref,self.actor.ask, self.actor.ask_ref)
 
 
-def ref(func):
-    '''Decorator for the methods that include Proxys in their parameters or returns.
-    '''
-    @wraps(func)
-    def ref_wrapper(*args, **kwargs):
-        new_args = get_host()._dumps(list(args))
-        result = func(*new_args, **kwargs)
-        if result != None:
-            return get_host()._loads(result)
-        else:
-            return result
-    return ref_wrapper
 
 
 class Future(object):
@@ -117,9 +110,12 @@ class Future(object):
                                 from_actor.channel,self.__target,from_actor.url)
         self.__actor_channel.send(msg)
 
+class FutureRef(Future):
+    def get(self,timeout=1):
+        result = super(FutureRef,self).get(timeout)
+        return get_host()._loads(result)
 
-
-class TellWrapper:
+class TellWrapper(object):
     '''
     Wrapper for Tell type queries to the proxy. Creates the request and sends it
     through the channel.
@@ -140,7 +136,7 @@ class TellWrapper:
         msg = TellRequest(TELL,self.__method,args,self.__target)
         self.__channel.send(msg)
 
-class AskWrapper:
+class AskWrapper(object):
     '''
     Wrapper for Ask type queries to the proxy. Creates a :class:`Future` to
     manage the result reply.
@@ -150,9 +146,19 @@ class AskWrapper:
     :param str. actor_url: URL address where the actor is set.
     '''
     def __init__(self, channel, method,actor_url):
-        self.__channel = channel
-        self.__method = method
+        self._channel = channel
+        self._method = method
         self.target = actor_url
 
     def __call__(self, *args, **kwargs):
-        return Future(self.__channel,self.__method,args, self.target)
+        return Future(self._channel,self._method,args, self.target)
+
+class AskRefWrapper(AskWrapper):
+    def __call__(self, *args, **kwargs):
+        new_args = get_host()._dumps(list(args))
+        return FutureRef(self._channel,self._method,new_args, self.target)
+
+class TellRefWrapper(TellWrapper):
+    def __call__(self, *args, **kwargs):
+        new_args = get_host()._dumps(list(args))
+        result = super(TellRefWrapper,self).__call__(*new_args, **kwargs)

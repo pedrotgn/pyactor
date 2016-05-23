@@ -7,12 +7,13 @@ from pyactor.actor import *
 from pyactor.proxy import *
 from pyactor.util import *
 from pyactor.intervals import *
+from pyactor.parallels import *
 from time import sleep
 import os, signal
 
 
 class Echo:
-    _tell =['echo']
+    _tell = ['echo']
     _ask = ['say_something','say_something_slow']
     def echo(self,msg):
         global out
@@ -24,26 +25,28 @@ class Echo:
         return 'something'
 
 class Bot:
-    _tell =['set_echo','ping','pong']
-    _ask = ['get_name','get_proxy','get_host', 'get_echo', 'get_echo_ref', 'check_ref']
+    _tell = ['set_echo','ping','pong']
+    _ask = ['get_name','get_proxy','get_host','get_echo','get_echo_ref','check_ref']
+    _ref = ['set_echo','get_proxy','get_host','get_echo_ref','check_ref']
+
     def get_name(self):
         return self.id
-    @ref
+
     def get_proxy(self):
         return self.proxy
-    @ref
+
     def get_host(self):
         return self.host
-    @ref
+
     def set_echo(self,echo):
         self.echo = echo
 
     def get_echo(self):
         return self.echo
-    @ref
+
     def get_echo_ref(self):
         return self.echo
-    @ref
+
     def check_ref(self, ref):
         return ref
 
@@ -71,6 +74,69 @@ class Counter:
         global cnt
         if cnt != 4 :
             cnt += 1
+
+class File(object):
+    _ask = ['download']
+    _tell = []
+
+    def download(self,filename):
+        print 'downloading '+ filename
+        sleep(5)
+        return True
+
+class Web(object):
+    _ask = ['list_files','get_file']
+    _tell = ['remote_server']
+    _parallel = ['get_file', 'remote_server']  # Comment this line to check the raise of timeouts if paral are not used.
+    _ref = ["remote_server"]
+
+    def __init__(self):
+        self.files = ['a1.txt','a2.txt','a3.txt','a4.zip']
+    def remote_server(self, file_server):
+        self.server = file_server
+    def list_files(self):
+        return self.files
+    def get_file(self,filename):
+        return self.server.download(filename).get(10)
+
+class WebNP(object):
+    _ask = ['list_files','get_file']
+    _tell = ['remote_server']
+    #_parallel = ['get_file']  # Comment this line to check the raise of timeouts if paral are not used.
+    _ref = ["remote_server"]
+
+    def __init__(self):
+        self.files = ['a1.txt','a2.txt','a3.txt','a4.zip']
+    def remote_server(self, file_server):
+        self.server = file_server
+    def list_files(self):
+        return self.files
+    def get_file(self,filename):
+        return self.server.download(filename).get(10)
+
+class Workload(object):
+    _ask = []
+    _tell = ['launch','download', 'remote_server']
+    _parallel = []
+    _ref = ["remote_server"]
+
+    def launch(self):
+        global cnt
+        for i in range(10):
+            try:
+                print self.server.list_files().get(1)
+            except Timeout as e:
+                print 'timeout'
+                cnt = 1000
+                raise Timeout
+
+    def remote_server(self, web_server):
+        self.server = web_server
+
+    def download(self):
+        self.server.get_file('a1.txt').get(10)
+        print 'download finished'
+
 
 '''class TestForever(unittest.TestCase):
     def __serve(self):
@@ -131,7 +197,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(str(b1.get_proxy().get()), str(b1))
         self.assertNotEqual(b1.get_proxy().get(), b1)
         self.assertEqual(str(b1.get_host().get()), str(self.h))
-        self.assertNotEqual(b1.get_host().get(), self.h)
+        self.assertNotEqual(id(b1.get_host().get()), id(self.h))
 
         self.assertNotEqual(b1.check_ref([{'e':self.e1}]).get()[0]['e'], self.e1)
 
@@ -157,6 +223,9 @@ class TestBasic(unittest.TestCase):
 
         with self.assertRaises(Timeout):
             self.e1.say_something_slow().get()
+
+        with self.assertRaises(Exception):
+            ask.uppercase()
 
     def test_4lookup(self):
         global out
@@ -202,6 +271,32 @@ class TestBasic(unittest.TestCase):
         c.init_start()
         sleep(6)
         self.assertEqual(cnt, 4)
+
+    def test_7parallels(self):
+        global cnt
+        f1 = self.hr.spawn('file1', File)
+        web = self.hr.spawn('web1', Web)
+        web.remote_server(f1)
+        load = self.hr.spawn('wl1', Workload)
+        self.assertEqual(web.actor.__class__.__name__, 'ActorParallel')
+        load.remote_server(web)
+        load2 = self.hr.spawn('wl2', Workload)
+        load2.remote_server(web)
+        load.launch()
+        load2.download()
+        sleep(10)
+
+        web2 = self.hr.spawn('web2', WebNP)
+        web2.remote_server(f1)
+        self.assertNotEqual(web2.actor.__class__.__name__, 'ActorParallel')
+        load.remote_server(web2)
+        load2.remote_server(web2)
+
+        load.launch()
+        load2.download()
+        sleep(10)
+
+        self.assertEqual(cnt, 1000)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBasic)

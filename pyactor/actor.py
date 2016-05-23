@@ -1,6 +1,7 @@
 from Queue import Queue,Empty
 from threading import Thread
 from util import *
+from copy import copy
 
 
 class Channel(Queue):
@@ -49,9 +50,21 @@ class ActorRef(object):
             self.channel = channel
         else:
             self.channel = Channel()
-        self.tell = klass._tell
-        self.ask = klass._ask
-        #self.ref = klass._ref
+        self.tell = copy(klass._tell)
+        self.ask = copy(klass._ask)
+
+
+        if hasattr(klass, '_ref'):
+            self.tell_ref = list(set(self.tell) & set(klass._ref))
+            self.ask_ref = list(set(self.ask) & set(klass._ref))
+            for method in self.ask_ref:
+                self.ask.remove(method)
+            for method in self.tell_ref:
+                self.tell.remove(method)
+        else:
+            self.ask_ref = []
+            self.tell_ref = []
+
         self.klass = klass
 
     def __repr__(self):
@@ -70,12 +83,8 @@ class Actor(ActorRef):
     '''
     def __init__(self, url, klass, obj):
         super(Actor,self).__init__(url,klass)
-        #self.url = url
-        #self.channel = Channel()
-        self.__obj = obj
+        self._obj = obj
         self.id = obj.id
-        #self.tell = klass._tell
-        #self.ask = klass._ask
         self.tell.append('stop')
         self.running = True
 
@@ -106,12 +115,12 @@ class Actor(ActorRef):
             (:class:`~.AskRequest`, :class:`~.TellRequest`, :class:`~.FutureRequest`).
         '''
         if msg.method=='stop':
-                self.running = False
+            self.running = False
 
         else:
             result = None
             try:
-                invoke = getattr(self.__obj, msg.method)
+                invoke = getattr(self._obj, msg.method)
                 params = msg.params
                 result = invoke(*params)
 
