@@ -8,9 +8,6 @@ from time import sleep
 
 class File(object):
     _ask = ['download']
-    _tell = []
-    _parallel = []
-    _ref = []
 
     def download(self,filename):
         print 'downloading '+ filename
@@ -20,7 +17,7 @@ class File(object):
 class Web(object):
     _ask = ['list_files','get_file']
     _tell = ['remote_server']
-    #_parallel = ['get_file']  # Comment this line to check the raise of timeouts if paral are not used.
+    _parallel = ['list_files','get_file', 'remote_server']  # Comment this line to check the raise of timeouts if paral are not used.
     _ref = ["remote_server"]
 
     def __init__(self):

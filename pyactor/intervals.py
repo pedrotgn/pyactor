@@ -4,7 +4,7 @@ import time as timep
 def later(timeout,f,*args, **kwargs):
     '''
     Sets a timer that will call the *f* function past *timeout* seconds.
-    Used to stop intervals. See example in :ref:`sample_inter`
+    See example in :ref:`sample_inter`
     '''
     t = Timer(timeout, f, args)
     t.start()

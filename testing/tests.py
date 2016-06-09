@@ -27,12 +27,12 @@ class Echo:
 class Bot:
     _tell = ['set_echo','ping','pong']
     _ask = ['get_name','get_proxy','get_host','get_echo','get_echo_ref','check_ref']
-    _ref = ['set_echo','get_proxy','get_host','get_echo_ref','check_ref']
+    _ref = ['get_name','set_echo','get_proxy','get_host','get_echo_ref','check_ref']
 
     def get_name(self):
         return self.id
 
-    def get_proxy(self):
+    def get_proxy(self,yo):
         return self.proxy
 
     def get_host(self):
@@ -87,7 +87,7 @@ class File(object):
 class Web(object):
     _ask = ['list_files','get_file']
     _tell = ['remote_server']
-    _parallel = ['get_file', 'remote_server']  # Comment this line to check the raise of timeouts if paral are not used.
+    _parallel = ['get_file', 'remote_server','get_file']  # Comment this line to check the raise of timeouts if paral are not used.
     _ref = ["remote_server"]
 
     def __init__(self):
@@ -138,28 +138,6 @@ class Workload(object):
         print 'download finished'
 
 
-'''class TestForever(unittest.TestCase):
-    def __serve(self):
-        self.h=create_host()
-        self.h.serve_forever()
-
-
-    def setUp(self):
-        pass
-        #self.bu=sys.stdout
-        #sys.stdout = open(os.devnull, 'w')
-    def test_forever(self):
-        t = Thread(target=self.__serve)
-        t.start()
-        sleep(1)
-        os.kill(t.pid, signal.SIGINT)
-        t.join()
-
-    def tearDown(self):
-        #self.h.shutdown()
-        pass
-        #sys.stdout = self.bu'''
-
 class TestBasic(unittest.TestCase):
     def setUp(self):
         self.bu=sys.stdout
@@ -194,8 +172,8 @@ class TestBasic(unittest.TestCase):
 
         b1 = self.h.spawn('bot1', Bot).get()
         self.assertEqual(b1.get_name().get(), 'bot1')
-        self.assertEqual(str(b1.get_proxy().get()), str(b1))
-        self.assertNotEqual(b1.get_proxy().get(), b1)
+        self.assertEqual(str(b1.get_proxy("h").get()), str(b1))
+        self.assertNotEqual(b1.get_proxy("y").get(), b1)
         self.assertEqual(str(b1.get_host().get()), str(self.h))
         self.assertNotEqual(id(b1.get_host().get()), id(self.h))
 
@@ -256,6 +234,10 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(get_host(), None)
         with self.assertRaises(Exception):
             self.hr.spawn('bot',Bot)
+        with self.assertRaises(Exception):
+            self.hr.lookup('echo1').get()
+        with self.assertRaises(Exception):
+            self.hr.lookup_url('local://local:6666/echo1')
         with self.assertRaises(Timeout):
             self.h.spawn('bot',Bot).get()
         #Now the actor is not running, invoking a method should raise Timeout.

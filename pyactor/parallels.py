@@ -1,7 +1,9 @@
 from pyactor.actor import *
+from pyactor.intervals import interval_host
 import uuid
 from threading import Lock
 
+CLEAN_INT = 4
 
 class ActorParallel(Actor):
     '''
@@ -11,14 +13,16 @@ class ActorParallel(Actor):
         super(ActorParallel,self).__init__(url,klass,obj)
         self.pthreads = []
         self.pending = {}
-        self.sync_parallel = set(klass._ask)&set(klass._parallel)
-        self.async_parallel = set(klass._tell)&set(klass._parallel)
+        self.sync_parallel = (set(self.ask)|set(self.ask_ref))&set(klass._parallel)
+        self.async_parallel = (set(self.tell)|set(self.tell_ref))&set(klass._parallel)
 
         self.__lock = Lock()
         for method in self.sync_parallel:
             setattr(self._obj, method, ParallelSyncWraper(getattr(self._obj, method), self, self.__lock))
         for method in self.async_parallel:
             setattr(self._obj, method, ParallelAsyncWraper(getattr(self._obj, method), self, self.__lock))
+
+        self.cleaner = interval_host(get_host(), CLEAN_INT, self.do_clean)
 
     def receive(self,msg):
         '''
@@ -34,6 +38,7 @@ class ActorParallel(Actor):
             (:class:`~.AskRequest`, :class:`~.TellRequest`, :class:`~.FutureRequest`).
         '''
         if msg.method=='stop':
+            self.cleaner.set()
             for t in self.pthreads:
                 t.join()
             self.running = False
@@ -55,9 +60,9 @@ class ActorParallel(Actor):
                     return
 
                 else:
-                    #self.__lock.acquire()
+                    self.__lock.acquire()
                     result = invoke(*params)
-                    #self.__lock.release()
+                    self.__lock.release()
             except Exception, e:
                 result = e
                 print result
@@ -72,11 +77,22 @@ class ActorParallel(Actor):
     def receive_sync(self, result, rpc_id):
         msg = self.pending[rpc_id]
         del self.pending[rpc_id]
-        response = AskResponse(result)
-        msg.channel.send(response)
+        if msg.type == ASK:
+            response = AskResponse(result)
+            msg.channel.send(response)
+        if msg.type == FUTURE:
+            response = TellRequest(TELL,msg.callback,[result],msg.from_url)
+            msg.channel.send(response)
+
 
     def get_lock(self):
         return self.__lock
+
+    def do_clean(self):
+        for t in self.pthreads:
+            if not t.isAlive():
+                get_host().del_parallel(t)
+                self.pthreads.remove(t)
 
 
 class ParallelSyncWraper():
@@ -94,20 +110,21 @@ class ParallelSyncWraper():
             rpc_id = None
         finally:
             if not rpc_id:
-                result = self.__method(*args)
+                result = self.__method(*args,**kwargs)
                 return result
             else:
                 t1 = Thread(target=self.invoke, args=(self.__method,rpc_id, args,kwargs))
                 t1.start()
                 self.__actor.pthreads.append(t1)
+                get_host().new_parallel(self.__actor.url, t1)
 
     def invoke(self, func, rpc_id, args=[], kwargs=[]):
-        #self.__lock.acquire()
+        self.__lock.acquire()
         try:
-            result = func(*args)
+            result = func(*args, **kwargs)
         except Exception,e:
             result= e
-        #self.__lock.release()
+        self.__lock.release()
         self.__actor.receive_sync(result, rpc_id)
 
 
@@ -120,8 +137,9 @@ class ParallelAsyncWraper():
         t1 = Thread(target=self.invoke, args=(self.__method, args, kwargs))
         t1.start()
         self.__actor.pthreads.append(t1)
+        get_host().new_parallel(self.__actor.url, t1)
 
     def invoke(self, func, args=[], kwargs=[]):
-        #self.__lock.acquire()
+        self.__lock.acquire()
         func(*args, **kwargs)
-        #self.__lock.release()
+        self.__lock.release()

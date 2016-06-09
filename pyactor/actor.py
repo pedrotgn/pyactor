@@ -46,12 +46,16 @@ class ActorRef(object):
     '''
     def __init__(self,url,klass,channel=None):
         self.url = url
+        self.tell = []
+        self.ask = []
         if channel:
             self.channel = channel
         else:
             self.channel = Channel()
-        self.tell = copy(klass._tell)
-        self.ask = copy(klass._ask)
+        if hasattr(klass, '_tell') and klass._tell:
+            self.tell = copy(klass._tell)
+        if hasattr(klass, '_ask') and klass._ask:
+            self.ask = copy(klass._ask)
 
 
         if hasattr(klass, '_ref'):

@@ -27,9 +27,25 @@ host = None
 def get_host():
     return host
 def get_current():
-    current = current_thread()
-    if host.threads.has_key(current):
-        return host.actors[host.threads[current]]
+    if host:
+        current = current_thread()
+        if host.threads.has_key(current):
+            return host.actors[host.threads[current]]
+        elif host.pthreads.has_key(current):
+            return host.actors[host.pthreads[current]]
+def get_lock():
+    if host:
+        url = None
+        current = current_thread()
+        if host.threads.has_key(current):
+            url = host.threads[current]
+        elif host.pthreads.has_key(current):
+            url = host.pthreads[current]
+        if host.locks.has_key(url):
+            # print "At locks",url
+            lock = host.locks[url]
+            # print lock
+            return lock
 
 class Timeout(Exception):pass
 
