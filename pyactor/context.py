@@ -47,8 +47,9 @@ class Host(object):
     def __init__(self,url):
         self.actors = {}
         self.threads = {}
+        self.pthreads = {}
         self.intervals = {}
-        #self.locks = {}
+        self.locks = {}
         self.url = url
         self.running = False
         self.alive = True
@@ -102,20 +103,19 @@ class Host(object):
         else:
             obj = klass(*args)
             obj.id = id
+            if self.running:
+                obj.host = self.proxy
+            # else:
+            #     obj.host = Exception("Host is not an active actor. Use 'init_host' to make it alive.")
+
             if hasattr(klass, '_parallel') and klass._parallel:
                 new_actor = ActorParallel(url,klass,obj)
-                #lock = new_actor.get_lock()
-                #self.locks[aref] = lock
+                lock = new_actor.get_lock()
+                self.locks[url] = lock
             else:
                 new_actor = Actor(url,klass,obj)
 
             obj.proxy = Proxy(new_actor)
-            if self.running:
-                obj.host = self.proxy
-            else:
-                obj.host = Exception("Host is not an active actor. Use 'init_host' to make it alive.")
-
-
 
             self.launch_actor(url,new_actor)
             return Proxy(new_actor)
@@ -160,7 +160,10 @@ class Host(object):
             for interval_event in self.intervals.values():
                 interval_event.set()
 
+            self.locks.clear()
             self.actors.clear()
+            self.threads.clear()
+            self.pthreads.clear()
             self.running = False
             self.alive = False
             util.host = None
@@ -247,7 +250,7 @@ class Host(object):
         '''
         print 'You pressed Ctrl+C!'
         self.shutdown()
-        self.online = False
+        self.serving = False
 
 
     def serve_forever(self):
@@ -260,10 +263,10 @@ class Host(object):
         '''
         if not self.alive:
             raise Exception("This host is already shutted down.")
-        self.online = True
+        self.serving = True
         signal.signal(signal.SIGINT, self.signal_handler)
         print 'Press Ctrl+C to kill the execution'
-        while self.online:
+        while self.serving:
             try:
                 sleep(1)
             except Exception:
@@ -313,3 +316,15 @@ class Host(object):
             return new_dict
         else:
             return param
+
+    def new_parallel(self, from_url, pthr):
+        '''
+        Register a new thread executing a parallel method.
+        '''
+        self.pthreads[pthr]=from_url
+
+    def del_parallel(self, pthr):
+        '''
+        Register a new thread executing a parallel method.
+        '''
+        del self.pthreads[pthr]

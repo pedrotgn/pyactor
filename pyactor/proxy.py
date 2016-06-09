@@ -1,4 +1,5 @@
 from actor import Channel
+from parallels import *
 from util import *
 from Queue import Empty
 from functools import wraps
@@ -13,7 +14,8 @@ class Proxy:
     def __init__(self, actor):
         self.__channel = actor.channel
         self.actor = actor
-
+        self.__lock = get_lock()
+        # print "At proxy",self.__lock#, self.actor
         for method in actor.ask_ref:
             setattr(self, method, AskRefWrapper(self.__channel,method,actor.url))
         for method in actor.tell_ref:
@@ -42,6 +44,7 @@ class Future(object):
         self.__params = params
         self.__actor_channel = actor_channel
         self.__target = actor_url
+        self.__lock = get_lock()
 
     def __getattr__(self, name):
         raise Exception("'Future' object has no attribute %r. Remember to call get() after an ask query." % name)
@@ -72,9 +75,14 @@ class Future(object):
         ##  SENDING MESSAGE ASK
         msg = AskRequest(ASK,self.__method,self.__params,self.__channel,self.__target)
         self.__actor_channel.send(msg)
+        if self.__lock:
+            # print "At get, release",self.__lock, self.__method
+            self.__lock.release()
         try:
             response = self.__channel.receive(timeout)
             result = response.result
+            if self.__lock:
+                self.__lock.acquire()
             if isinstance(result, Exception):
                 raise result
             else:
@@ -83,6 +91,7 @@ class Future(object):
             raise ae
         except Empty,e:
             raise Timeout()
+
 
     def add_callback(self,callback):
         '''
