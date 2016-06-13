@@ -36,8 +36,6 @@ class ActorParallel(Actor):
                                         )
                     )
 
-
-
     def receive(self, msg):
         '''
         Overwriting :meth:`Actor.receive`, adds the checks and
@@ -86,8 +84,6 @@ class ActorParallel(Actor):
         :return: :class:`Lock` of the actor.
         '''
         return self.__lock
-
-
 
 
 class ParallelAskWraper():

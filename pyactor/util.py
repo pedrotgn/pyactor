@@ -38,6 +38,7 @@ def get_host():
             return host
     return main_host
 
+
 def get_current():
     current = current_thread()
     for host in hosts.values():

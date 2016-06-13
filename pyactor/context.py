@@ -30,8 +30,8 @@ def create_host(url="local://local:6666/host"):
     :rise: Exception if there is a host already created.
     '''
     if url in util.hosts.keys():
-        raise Exception('Host already created. Only one host can'
-                        + ' be ran with the same url.')
+        raise Exception('Host already created. Only one host can' +
+                        ' be ran with the same url.')
     else:
         if not util.hosts:
             util.main_host = Host(url)
@@ -192,7 +192,8 @@ class Host(object):
 
             del util.hosts[self.url]
             if util.main_host.url == self.url:
-                util.main_host = util.hosts.values()[0] if util.hosts.values() else None
+                util.main_host = (util.hosts.values()[0] if util.hosts.values()
+                                  else None)
 
     def lookup_url(self, url):
         '''
@@ -341,7 +342,6 @@ class Host(object):
         t = threading.Thread(target=invoke, args=param)
         t.start()
         self.pthreads[t] = from_url
-
 
     def do_clean(self):
         '''
