@@ -1,46 +1,53 @@
-from pyactor.actor import *
-from pyactor.intervals import interval_host
 import uuid
 from threading import Lock
 
-CLEAN_INT = 4
+from pyactor.actor import *
+
 
 class ActorParallel(Actor):
     '''
-    Actor with parallel methods.
+    Actor with parallel methods. Parallel methods are invoked in new
+    threads, so their invocation do not block the actor allowing it to
+    process many queries at a time.
+    To aboid concurrence problems, this actors use Locks to guarantee
+    its correct state.
     '''
     def __init__(self, url, klass, obj):
-        super(ActorParallel,self).__init__(url,klass,obj)
-        self.pthreads = []
+        super(ActorParallel, self).__init__(url, klass, obj)
         self.pending = {}
-        self.sync_parallel = (set(self.ask)|set(self.ask_ref))&set(klass._parallel)
-        self.async_parallel = (set(self.tell)|set(self.tell_ref))&set(klass._parallel)
+        self.ask_parallel = list((set(self.ask) | set(self.ask_ref)) &
+                                 set(klass._parallel))
+        self.tell_parallel = list((set(self.tell) | set(self.tell_ref)) &
+                                  set(klass._parallel))
 
         self.__lock = Lock()
-        for method in self.sync_parallel:
-            setattr(self._obj, method, ParallelSyncWraper(getattr(self._obj, method), self, self.__lock))
-        for method in self.async_parallel:
-            setattr(self._obj, method, ParallelAsyncWraper(getattr(self._obj, method), self, self.__lock))
+        for method in self.ask_parallel:
+            setattr(self._obj, method, ParallelAskWraper(
+                                            getattr(self._obj, method),
+                                            self,
+                                            self.__lock
+                                        )
+                    )
+        for method in self.tell_parallel:
+            setattr(self._obj, method, ParallelTellWraper(
+                                            getattr(self._obj, method),
+                                            self,
+                                            self.__lock
+                                        )
+                    )
 
-        self.cleaner = interval_host(get_host(), CLEAN_INT, self.do_clean)
 
-    def receive(self,msg):
+
+    def receive(self, msg):
         '''
-        The message received from the queue specify a method of the class the
-        actor represents. This invokes it. If the communication is an
-        :class:`~.AskRequest`, sends the result back to the channel included in
-        the message as an :class:`~.AskResponse`.
-        If it is a :class:`~.Future`, generates a :class:`~.TellRequest` to send
-        the result to the sender's method specified in the callback field of the
-        tuple.
+        Overwriting :meth:`Actor.receive`, adds the checks and
+        functionalities requiered by parallel methods.
 
-        :param msg: The message is a namedtuple of the defined in util.py
-            (:class:`~.AskRequest`, :class:`~.TellRequest`, :class:`~.FutureRequest`).
+        :param msg: The message is a namedtuple of the defined in
+            util.py (:class:`~.AskRequest`, :class:`~.TellRequest`,
+            :class:`~.FutureRequest`).
         '''
-        if msg.method=='stop':
-            self.cleaner.set()
-            for t in self.pthreads:
-                t.join()
+        if msg.method == 'stop':
             self.running = False
 
         else:
@@ -49,7 +56,7 @@ class ActorParallel(Actor):
                 invoke = getattr(self._obj, msg.method)
                 params = msg.params
 
-                if msg.method in self.sync_parallel:
+                if msg.method in self.ask_parallel:
                     rpc_id = str(uuid.uuid4())
                     # add rpc message to pendent AskResponse s
                     self.pending[rpc_id] = msg
@@ -67,77 +74,67 @@ class ActorParallel(Actor):
                 result = e
                 print result
 
-        if msg.type == ASK:
-            response = AskResponse(result)
-            msg.channel.send(response)
-        if msg.type == FUTURE:
-            response = TellRequest(TELL,msg.callback,[result],msg.from_url)
-            msg.channel.send(response)
+            self.send_response(result, msg)
 
-    def receive_sync(self, result, rpc_id):
+    def receive_from_ask(self, result, rpc_id):
         msg = self.pending[rpc_id]
         del self.pending[rpc_id]
-        if msg.type == ASK:
-            response = AskResponse(result)
-            msg.channel.send(response)
-        if msg.type == FUTURE:
-            response = TellRequest(TELL,msg.callback,[result],msg.from_url)
-            msg.channel.send(response)
-
+        self.send_response(result, msg)
 
     def get_lock(self):
+        '''
+        :return: :class:`Lock` of the actor.
+        '''
         return self.__lock
 
-    def do_clean(self):
-        for t in self.pthreads:
-            if not t.isAlive():
-                get_host().del_parallel(t)
-                self.pthreads.remove(t)
 
 
-class ParallelSyncWraper():
+
+class ParallelAskWraper():
+    '''Wrapper for ask methods that have to be called in a parallel form.'''
     def __init__(self, method, actor, lock):
         self.__method = method
         self.__actor = actor
         self.__lock = lock
+
     def __call__(self, *args, **kwargs):
         try:
             args = list(args)
             rpc_id = args[0]
             del args[0]
             args = tuple(args)
-        except:
+        except Exception:
             rpc_id = None
         finally:
-            if not rpc_id:
-                result = self.__method(*args,**kwargs)
+            if rpc_id is None:
+                result = self.__method(*args, **kwargs)
                 return result
             else:
-                t1 = Thread(target=self.invoke, args=(self.__method,rpc_id, args,kwargs))
-                t1.start()
-                self.__actor.pthreads.append(t1)
-                get_host().new_parallel(self.__actor.url, t1)
+                param = (self.__method, rpc_id, args, kwargs)
+                get_host().new_parallel(self.__actor.url, self.invoke, param)
 
     def invoke(self, func, rpc_id, args=[], kwargs=[]):
         self.__lock.acquire()
         try:
             result = func(*args, **kwargs)
-        except Exception,e:
-            result= e
+        except Exception, e:
+            result = e
         self.__lock.release()
-        self.__actor.receive_sync(result, rpc_id)
+        self.__actor.receive_from_ask(result, rpc_id)
 
 
-class ParallelAsyncWraper():
+class ParallelTellWraper():
+    '''
+    Wrapper for tell methods that have to be called in a parallel form.
+    '''
     def __init__(self, method, actor, lock):
         self.__method = method
         self.__actor = actor
         self.__lock = lock
+
     def __call__(self, *args, **kwargs):
-        t1 = Thread(target=self.invoke, args=(self.__method, args, kwargs))
-        t1.start()
-        self.__actor.pthreads.append(t1)
-        get_host().new_parallel(self.__actor.url, t1)
+        param = (self.__method, args, kwargs)
+        get_host().new_parallel(self.__actor.url, self.invoke, param)
 
     def invoke(self, func, args=[], kwargs=[]):
         self.__lock.acquire()

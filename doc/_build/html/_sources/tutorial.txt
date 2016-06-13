@@ -291,5 +291,5 @@ to stop it after by calling *.set()*.
 In this example we use :func:`~.later` to set a timer that will stop the interval after a certain time.
 
 
-Parallel??
+Parallel
 ==========

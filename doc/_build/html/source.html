@@ -185,9 +185,22 @@
 134
 135
 136
-137</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Queue</span><span class="p">,</span><span class="n">Empty</span>
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Queue</span><span class="p">,</span><span class="n">Empty</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">util</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
 
 
 <span class="k">class</span> <span class="nc">Channel</span><span class="p">(</span><span class="n">Queue</span><span class="p">):</span>
@@ -232,13 +245,29 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">,</span><span class="n">channel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tell</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ask</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">channel</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">channel</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">channel</span> <span class="o">=</span> <span class="n">Channel</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tell</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">_tell</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ask</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">_ask</span>
-        <span class="c1">#self.ref = klass._ref</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">&#39;_tell&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">klass</span><span class="o">.</span><span class="n">_tell</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tell</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">klass</span><span class="o">.</span><span class="n">_tell</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">&#39;_ask&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">klass</span><span class="o">.</span><span class="n">_ask</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ask</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">klass</span><span class="o">.</span><span class="n">_ask</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">&#39;_ref&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tell_ref</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">klass</span><span class="o">.</span><span class="n">_ref</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ask_ref</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ask</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">klass</span><span class="o">.</span><span class="n">_ref</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ask_ref</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ask</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tell_ref</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ask_ref</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tell_ref</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">klass</span> <span class="o">=</span> <span class="n">klass</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -257,12 +286,8 @@
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Actor</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">)</span>
-        <span class="c1">#self.url = url</span>
-        <span class="c1">#self.channel = Channel()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__obj</span> <span class="o">=</span> <span class="n">obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">obj</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">id</span>
-        <span class="c1">#self.tell = klass._tell</span>
-        <span class="c1">#self.ask = klass._ask</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;stop&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -293,27 +318,26 @@
 <span class="sd">            (:class:`~.AskRequest`, :class:`~.TellRequest`, :class:`~.FutureRequest`).</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">method</span><span class="o">==</span><span class="s1">&#39;stop&#39;</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">invoke</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__obj</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+                <span class="n">invoke</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
                 <span class="n">params</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">params</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">invoke</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
 
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">e</span>
                 <span class="nb">print</span> <span class="n">result</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">send_response</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">ASK</span><span class="p">:</span>
             <span class="n">response</span> <span class="o">=</span> <span class="n">AskResponse</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
             <span class="n">msg</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">FUTURE</span><span class="p">:</span>
             <span class="n">response</span> <span class="o">=</span> <span class="n">TellRequest</span><span class="p">(</span><span class="n">TELL</span><span class="p">,</span><span class="n">msg</span><span class="o">.</span><span class="n">callback</span><span class="p">,[</span><span class="n">result</span><span class="p">],</span><span class="n">msg</span><span class="o">.</span><span class="n">from_url</span><span class="p">)</span>
-            <span class="c1">#response = (msg[TO],msg[FROM],TELL, msg[FUTURE],[result])</span>
-            <span class="c1">#response = TellRequest(TELL,msg.callback,[result],msg.from)</span>
             <span class="n">msg</span><span class="o">.</span><span class="n">channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">response</span><span class="p">)</span>
-
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -484,7 +508,25 @@
 155
 156
 157
-158</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">actor</span> <span class="k">import</span> <span class="n">Channel</span>
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">actor</span> <span class="k">import</span> <span class="n">Channel</span>
+<span class="kn">from</span> <span class="nn">parallels</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">util</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
@@ -499,7 +541,12 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">actor</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__channel</span> <span class="o">=</span> <span class="n">actor</span><span class="o">.</span><span class="n">channel</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actor</span> <span class="o">=</span> <span class="n">actor</span>
-        <span class="c1">#refAsync = set(actor.tell) &amp; set(actor.ref)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span> <span class="o">=</span> <span class="n">get_lock</span><span class="p">()</span>
+        <span class="c1"># print &quot;At proxy&quot;,self.__lock#, self.actor</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">actor</span><span class="o">.</span><span class="n">ask_ref</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">AskRefWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="p">,</span><span class="n">method</span><span class="p">,</span><span class="n">actor</span><span class="o">.</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">actor</span><span class="o">.</span><span class="n">tell_ref</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">TellRefWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="p">,</span><span class="n">method</span><span class="p">,</span><span class="n">actor</span><span class="o">.</span><span class="n">url</span><span class="p">))</span>
 
         <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">actor</span><span class="o">.</span><span class="n">tell</span><span class="p">:</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">TellWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="p">,</span><span class="n">method</span><span class="p">,</span><span class="n">actor</span><span class="o">.</span><span class="n">url</span><span class="p">))</span>
@@ -507,21 +554,10 @@
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">AskWrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="p">,</span><span class="n">method</span><span class="p">,</span><span class="n">actor</span><span class="o">.</span><span class="n">url</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;Proxy(actor=</span><span class="si">%s</span><span class="s1">, tell=</span><span class="si">%s</span><span class="s1">, ask = </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">tell</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ask</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">&#39;Proxy(actor=</span><span class="si">%s</span><span class="s1">, tell=</span><span class="si">%s</span><span class="s1"> ref=</span><span class="si">%s</span><span class="s1">, ask=</span><span class="si">%s</span><span class="s1"> ref=</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">tell</span><span class="p">,</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">tell_ref</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ask</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">actor</span><span class="o">.</span><span class="n">ask_ref</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">ref</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Decorator for the methods that include Proxys in their parameters or returns.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-    <span class="k">def</span> <span class="nf">ref_wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">new_args</span> <span class="o">=</span> <span class="n">get_host</span><span class="p">()</span><span class="o">.</span><span class="n">_dumps</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">new_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">result</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">get_host</span><span class="p">()</span><span class="o">.</span><span class="n">_loads</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">result</span>
-    <span class="k">return</span> <span class="n">ref_wrapper</span>
 
 
 <span class="k">class</span> <span class="nc">Future</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -535,6 +571,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">__params</span> <span class="o">=</span> <span class="n">params</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__actor_channel</span> <span class="o">=</span> <span class="n">actor_channel</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__target</span> <span class="o">=</span> <span class="n">actor_url</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span> <span class="o">=</span> <span class="n">get_lock</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;&#39;Future&#39; object has no attribute </span><span class="si">%r</span><span class="s2">. Remember to call get() after an ask query.&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
@@ -565,9 +602,14 @@
         <span class="c1">##  SENDING MESSAGE ASK</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="n">AskRequest</span><span class="p">(</span><span class="n">ASK</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__method</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__params</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__actor_channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
+            <span class="c1"># print &quot;At get, release&quot;,self.__lock, self.__method</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">response</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="o">.</span><span class="n">receive</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">result</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="ne">Exception</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="n">result</span>
             <span class="k">else</span><span class="p">:</span>
@@ -576,6 +618,7 @@
             <span class="k">raise</span> <span class="n">ae</span>
         <span class="k">except</span> <span class="n">Empty</span><span class="p">,</span><span class="n">e</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">Timeout</span><span class="p">()</span>
+
 
     <span class="k">def</span> <span class="nf">add_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">callback</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -603,9 +646,12 @@
                                 <span class="n">from_actor</span><span class="o">.</span><span class="n">channel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__target</span><span class="p">,</span><span class="n">from_actor</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__actor_channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
+<span class="k">class</span> <span class="nc">FutureRef</span><span class="p">(</span><span class="n">Future</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">timeout</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">FutureRef</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">get_host</span><span class="p">()</span><span class="o">.</span><span class="n">_loads</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 
-
-<span class="k">class</span> <span class="nc">TellWrapper</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">TellWrapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Wrapper for Tell type queries to the proxy. Creates the request and sends it</span>
 <span class="sd">    through the channel.</span>
@@ -626,7 +672,7 @@
         <span class="n">msg</span> <span class="o">=</span> <span class="n">TellRequest</span><span class="p">(</span><span class="n">TELL</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__method</span><span class="p">,</span><span class="n">args</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__target</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
 
-<span class="k">class</span> <span class="nc">AskWrapper</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">AskWrapper</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Wrapper for Ask type queries to the proxy. Creates a :class:`Future` to</span>
 <span class="sd">    manage the result reply.</span>
@@ -636,12 +682,24 @@
 <span class="sd">    :param str. actor_url: URL address where the actor is set.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span><span class="n">actor_url</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__channel</span> <span class="o">=</span> <span class="n">channel</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">__method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_channel</span> <span class="o">=</span> <span class="n">channel</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="n">method</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">actor_url</span>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Future</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__channel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">__method</span><span class="p">,</span><span class="n">args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Future</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="p">,</span><span class="n">args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">AskRefWrapper</span><span class="p">(</span><span class="n">AskWrapper</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Wrapper for Ask queries that have a proxy in parameters or returns.&#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">new_args</span> <span class="o">=</span> <span class="n">get_host</span><span class="p">()</span><span class="o">.</span><span class="n">_dumps</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">FutureRef</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_channel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="p">,</span><span class="n">new_args</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">TellRefWrapper</span><span class="p">(</span><span class="n">TellWrapper</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Wrapper for Tell queries that have a proxy in parameters.&#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">new_args</span> <span class="o">=</span> <span class="n">get_host</span><span class="p">()</span><span class="o">.</span><span class="n">_dumps</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">TellRefWrapper</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__call__</span><span class="p">(</span><span class="o">*</span><span class="n">new_args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -951,9 +1009,38 @@
 302
 303
 304
-305</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>
+305
+306
+307
+308
+309
+310
+311
+312
+313
+314
+315
+316
+317
+318
+319
+320
+321
+322
+323
+324
+325
+326
+327
+328
+329
+330
+331
+332
+333</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>
 <span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
 <span class="kn">from</span> <span class="nn">actor</span> <span class="k">import</span> <span class="n">Actor</span><span class="p">,</span><span class="n">ActorRef</span>
+<span class="kn">from</span> <span class="nn">parallels</span> <span class="k">import</span> <span class="n">ActorParallel</span>
 <span class="kn">from</span> <span class="nn">proxy</span> <span class="k">import</span> <span class="n">Proxy</span>
 <span class="kn">from</span> <span class="nn">util</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">util</span>
@@ -965,7 +1052,7 @@
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    This is the main function to create a new Host to which you can spawn actors.</span>
 <span class="sd">    It will be set by default at local address if no parameter *url* is given.</span>
-<span class="sd">    This function shuould be called onece for execution or after callig</span>
+<span class="sd">    This function shuould be called once for execution or after callig</span>
 <span class="sd">    :meth:`~.shutdown` to the previous host. Only one host can be alive at a time,</span>
 <span class="sd">    trying to create more than one will raise an exception.</span>
 
@@ -981,9 +1068,11 @@
 
 <span class="k">class</span> <span class="nc">Host</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Host must be created using the function :func:`~create_host`.</span>
+
 <span class="sd">    Host is the container of the actors. It manages the spawn and elimination of</span>
 <span class="sd">    actors and their communication through channels. Also configures the TCP socket</span>
-<span class="sd">    where the actors will be able to recieve queries remotely.</span>
+<span class="sd">    where the actors will be able to receive queries remotely.</span>
 <span class="sd">    Additionaly, controls the correct management of the threads and intervals of</span>
 <span class="sd">    its actors.</span>
 
@@ -999,7 +1088,9 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">url</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actors</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">threads</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pthreads</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">locks</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">alive</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1043,23 +1134,30 @@
 <span class="sd">        :param list args: arguments for the init function of the spawning actor class.</span>
 <span class="sd">        :return: :class:`~.Proxy` of the actor spawned.</span>
 <span class="sd">        :raises: :class:`AlreadyExists`, if the ID specified is already in use.</span>
-<span class="sd">        :raises: Exception if the host is down.</span>
+<span class="sd">        :raises: :class:`HostDown` if there is no host initiated.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Spawning on a dead host?&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HostDown</span><span class="p">()</span>
         <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">host_url</span><span class="o">.</span><span class="n">netloc</span><span class="p">,</span><span class="nb">id</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">actors</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">AlreadyExists</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">obj</span> <span class="o">=</span> <span class="n">klass</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
             <span class="n">obj</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="nb">id</span>
-            <span class="n">new_actor</span> <span class="o">=</span> <span class="n">Actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">,</span><span class="n">obj</span><span class="p">)</span>
-            <span class="n">obj</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">Proxy</span><span class="p">(</span><span class="n">new_actor</span><span class="p">)</span>
-            <span class="c1">#obj._host = self</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">:</span>
                 <span class="n">obj</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     obj.host = Exception(&quot;Host is not an active actor. Use &#39;init_host&#39; to make it alive.&quot;)</span>
+
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="s1">&#39;_parallel&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">klass</span><span class="o">.</span><span class="n">_parallel</span><span class="p">:</span>
+                <span class="n">new_actor</span> <span class="o">=</span> <span class="n">ActorParallel</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">,</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">lock</span> <span class="o">=</span> <span class="n">new_actor</span><span class="o">.</span><span class="n">get_lock</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">locks</span><span class="p">[</span><span class="n">url</span><span class="p">]</span> <span class="o">=</span> <span class="n">lock</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">obj</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Host is not an active actor. Use &#39;init_host&#39; to make it alive.&quot;</span><span class="p">)</span>
+                <span class="n">new_actor</span> <span class="o">=</span> <span class="n">Actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">,</span><span class="n">obj</span><span class="p">)</span>
+
+            <span class="n">obj</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">Proxy</span><span class="p">(</span><span class="n">new_actor</span><span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">launch_actor</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">new_actor</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">Proxy</span><span class="p">(</span><span class="n">new_actor</span><span class="p">)</span>
 
@@ -1073,10 +1171,10 @@
 
 <span class="sd">        :param str. id: identifier of the actor you want.</span>
 <span class="sd">        :return: :class:`~.Proxy` of the actor requiered.</span>
-<span class="sd">        :raises: Exception if the host is down.</span>
+<span class="sd">        :raises: :class:`HostDown`  if the host is down.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Host is down.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HostDown</span><span class="p">()</span>
         <span class="n">url</span> <span class="o">=</span>  <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transport</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">host_url</span><span class="o">.</span><span class="n">netloc</span><span class="p">,</span><span class="nb">id</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">actors</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">Proxy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actors</span><span class="p">[</span><span class="n">url</span><span class="p">])</span>
@@ -1089,7 +1187,7 @@
 <span class="sd">        Should be called at the end of its usage, to finish correctly all the</span>
 <span class="sd">        connections and threads.</span>
 <span class="sd">        When the actors stop running, they can&#39;t be started again and the host</span>
-<span class="sd">        can&#39;t process new spaws. You might need to create a new host</span>
+<span class="sd">        can&#39;t process new spawns. You might need to create a new host</span>
 <span class="sd">        (:func:`create_host`).</span>
 
 <span class="sd">        This method can&#39;t be called remotely.</span>
@@ -1100,10 +1198,13 @@
                 <span class="n">Proxy</span><span class="p">(</span><span class="n">actor</span><span class="p">)</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
                 <span class="n">actor</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
-            <span class="k">for</span> <span class="n">interval_event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">interval_event</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
                 <span class="n">interval_event</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
 
+            <span class="bp">self</span><span class="o">.</span><span class="n">locks</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">actors</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">pthreads</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">alive</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">util</span><span class="o">.</span><span class="n">host</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1121,9 +1222,10 @@
 <span class="sd">        :return: :class:`~.Proxy` of the actor requested.</span>
 <span class="sd">        :raise: :class:`NotFound`, if the URL specified do not correspond to any</span>
 <span class="sd">            actor in the host.</span>
+<span class="sd">        :raises: :class:`HostDown`  if the host is down.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Host is down.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">HostDown</span><span class="p">()</span>
         <span class="n">aurl</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_local</span><span class="p">(</span><span class="n">aurl</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">actors</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">url</span><span class="p">):</span>
@@ -1144,22 +1246,22 @@
 
 
     <span class="k">def</span> <span class="nf">is_local</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">aurl</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Private method.</span>
-<span class="sd">        Tells if the address given is from this host.</span>
-
-<span class="sd">        :param ParseResult aurl: address to analyze.</span>
-<span class="sd">        :return: (*Bool.*) If is local (**True**) or not (**False**).</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># &#39;&#39;&#39;Private method.</span>
+        <span class="c1"># Tells if the address given is from this host.</span>
+        <span class="c1">#</span>
+        <span class="c1"># :param ParseResult aurl: address to analyze.</span>
+        <span class="c1"># :return: (*Bool.*) If is local (**True**) or not (**False**).</span>
+        <span class="c1"># &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">host_url</span><span class="o">.</span><span class="n">netloc</span> <span class="o">==</span> <span class="n">aurl</span><span class="o">.</span><span class="n">netloc</span>
 
 
     <span class="k">def</span> <span class="nf">launch_actor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span><span class="n">actor</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Private method.</span>
-<span class="sd">        This function makes an actor alive to start processing queries.</span>
-
-<span class="sd">        :param str. url: identifier of the actor.</span>
-<span class="sd">        :param Actor actor: instance of the actor.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># &#39;&#39;&#39;Private method.</span>
+        <span class="c1"># This function makes an actor alive to start processing queries.</span>
+        <span class="c1">#</span>
+        <span class="c1"># :param str. url: identifier of the actor.</span>
+        <span class="c1"># :param Actor actor: instance of the actor.</span>
+        <span class="c1"># &#39;&#39;&#39;</span>
         <span class="n">actor</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">actors</span><span class="p">[</span><span class="n">url</span><span class="p">]</span> <span class="o">=</span> <span class="n">actor</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">threads</span><span class="p">[</span><span class="n">actor</span><span class="o">.</span><span class="n">thread</span><span class="p">]</span> <span class="o">=</span> <span class="n">url</span>
@@ -1171,7 +1273,7 @@
 <span class="sd">        Called always from the init function of the host, so no need for calling</span>
 <span class="sd">        this directly.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">if</span>  <span class="ow">not</span><span class="p">(</span><span class="n">running</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive</span><span class="p">:</span>
+        <span class="k">if</span>  <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">running</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
             <span class="n">host</span> <span class="o">=</span> <span class="n">Actor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">,</span><span class="n">Host</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span> <span class="o">=</span> <span class="n">Proxy</span><span class="p">(</span><span class="n">host</span><span class="p">)</span>
@@ -1190,7 +1292,7 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="nb">print</span> <span class="s1">&#39;You pressed Ctrl+C!&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">online</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serving</span> <span class="o">=</span> <span class="kc">False</span>
 
 
     <span class="k">def</span> <span class="nf">serve_forever</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1203,10 +1305,10 @@
 <span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">alive</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;This host is already shutted down.&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">online</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serving</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">signal</span><span class="o">.</span><span class="n">signal</span><span class="p">(</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">signal_handler</span><span class="p">)</span>
         <span class="nb">print</span> <span class="s1">&#39;Press Ctrl+C to kill the execution&#39;</span>
-        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">online</span><span class="p">:</span>
+        <span class="k">while</span> <span class="bp">self</span><span class="o">.</span><span class="n">serving</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
@@ -1214,13 +1316,13 @@
         <span class="nb">print</span> <span class="s1">&#39;BYE!&#39;</span>
 
     <span class="k">def</span> <span class="nf">attach_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_id</span><span class="p">,</span> <span class="n">interval_event</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Registers an interval to the host.</span>
+        <span class="sd">&#39;&#39;&#39;Registers an interval event to the host.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">[</span><span class="n">interval_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval_event</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="n">interval_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">interval_event</span>
     <span class="k">def</span> <span class="nf">detach_interval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interval_id</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Deletes an interval from the host registry.</span>
+        <span class="sd">&#39;&#39;&#39;Deletes an interval event from the host registry.</span>
 <span class="sd">        &#39;&#39;&#39;</span>
-        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">interval</span><span class="p">[</span><span class="n">interval_id</span><span class="p">]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">intervals</span><span class="p">[</span><span class="n">interval_id</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">_dumps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;</span>
@@ -1252,10 +1354,22 @@
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="n">new_dict</span><span class="o">=</span><span class="n">param</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">new_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dumps</span><span class="p">(</span><span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loads</span><span class="p">(</span><span class="n">new_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
             <span class="k">return</span> <span class="n">new_dict</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">param</span>
+
+    <span class="k">def</span> <span class="nf">new_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">from_url</span><span class="p">,</span> <span class="n">pthr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Register a new thread executing a parallel method.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pthreads</span><span class="p">[</span><span class="n">pthr</span><span class="p">]</span><span class="o">=</span><span class="n">from_url</span>
+
+    <span class="k">def</span> <span class="nf">del_parallel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pthr</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Deletes a thread executing a parallel method.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">pthreads</span><span class="p">[</span><span class="n">pthr</span><span class="p">]</span>
 </pre></div>
 </td></tr></table></div>
 </div>
@@ -1306,13 +1420,18 @@
 43
 44
 45
-46</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">currentThread</span>
+46
+47
+48
+49</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">currentThread</span>
 <span class="kn">import</span> <span class="nn">time</span> <span class="k">as</span> <span class="nn">timep</span>
 
 <span class="k">def</span> <span class="nf">later</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Sets a timer that will call the *f* function past *timeout* seconds.</span>
-<span class="sd">    Used to stop intervals. See example in :ref:`sample_inter`</span>
+<span class="sd">    See example in :ref:`sample_inter`</span>
+
+<span class="sd">    :return: :class:`Timer`</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">t</span> <span class="o">=</span> <span class="n">Timer</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
     <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -1321,7 +1440,7 @@
 
 <span class="k">def</span> <span class="nf">interval_host</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Creats an Event that attached to the *host* that will execute the *f* function</span>
+<span class="sd">    Creates an Event attached to the *host* that will execute the *f* function</span>
 <span class="sd">    every *time* seconds.</span>
 
 <span class="sd">    See example in :ref:`sample_inter`</span>
@@ -1331,6 +1450,7 @@
 <span class="sd">    :param int time: seconds for the intervals.</span>
 <span class="sd">    :param func f: function to be called every *time* seconds.</span>
 <span class="sd">    :param list args: arguments for *f*.</span>
+<span class="sd">    :return: :class:`Event` instance of the interval.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">thread</span> <span class="o">=</span> <span class="n">currentThread</span><span class="p">()</span>
@@ -1355,6 +1475,294 @@
 </pre></div>
 </td></tr></table></div>
 </div>
+<div class="section" id="parallel">
+<span id="parallels-source"></span><h2>Parallel<a class="headerlink" href="#parallel" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>  1
+  2
+  3
+  4
+  5
+  6
+  7
+  8
+  9
+ 10
+ 11
+ 12
+ 13
+ 14
+ 15
+ 16
+ 17
+ 18
+ 19
+ 20
+ 21
+ 22
+ 23
+ 24
+ 25
+ 26
+ 27
+ 28
+ 29
+ 30
+ 31
+ 32
+ 33
+ 34
+ 35
+ 36
+ 37
+ 38
+ 39
+ 40
+ 41
+ 42
+ 43
+ 44
+ 45
+ 46
+ 47
+ 48
+ 49
+ 50
+ 51
+ 52
+ 53
+ 54
+ 55
+ 56
+ 57
+ 58
+ 59
+ 60
+ 61
+ 62
+ 63
+ 64
+ 65
+ 66
+ 67
+ 68
+ 69
+ 70
+ 71
+ 72
+ 73
+ 74
+ 75
+ 76
+ 77
+ 78
+ 79
+ 80
+ 81
+ 82
+ 83
+ 84
+ 85
+ 86
+ 87
+ 88
+ 89
+ 90
+ 91
+ 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyactor.actor</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pyactor.intervals</span> <span class="k">import</span> <span class="n">interval_host</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Lock</span>
+
+<span class="n">CLEAN_INT</span> <span class="o">=</span> <span class="mi">4</span>
+
+<span class="k">class</span> <span class="nc">ActorParallel</span><span class="p">(</span><span class="n">Actor</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Actor with parallel methods. Parallel methods are invoked in new threads, so</span>
+<span class="sd">    their invocation do not block the actor allowing it to process many queries</span>
+<span class="sd">    at a time.</span>
+<span class="sd">    To aboid concurrence problems, this actors use Locks to guarantee its correct</span>
+<span class="sd">    state.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ActorParallel</span><span class="p">,</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">url</span><span class="p">,</span><span class="n">klass</span><span class="p">,</span><span class="n">obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pthreads</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pending</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ask_parallel</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ask</span><span class="p">)</span><span class="o">|</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ask_ref</span><span class="p">))</span><span class="o">&amp;</span><span class="nb">set</span><span class="p">(</span><span class="n">klass</span><span class="o">.</span><span class="n">_parallel</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tell_parallel</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tell</span><span class="p">)</span><span class="o">|</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tell_ref</span><span class="p">))</span><span class="o">&amp;</span><span class="nb">set</span><span class="p">(</span><span class="n">klass</span><span class="o">.</span><span class="n">_parallel</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ask_parallel</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">ParallelAskWraper</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">method</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">method</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tell_parallel</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">ParallelTellWraper</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">method</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cleaner</span> <span class="o">=</span> <span class="n">interval_host</span><span class="p">(</span><span class="n">get_host</span><span class="p">(),</span> <span class="n">CLEAN_INT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">do_clean</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">receive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Overwriting :meth:`Actor.receive`, adds the checks and functionalities</span>
+<span class="sd">        requiered by parallel methods.</span>
+
+<span class="sd">        :param msg: The message is a namedtuple of the defined in util.py</span>
+<span class="sd">            (:class:`~.AskRequest`, :class:`~.TellRequest`, :class:`~.FutureRequest`).</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">method</span><span class="o">==</span><span class="s1">&#39;stop&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cleaner</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pthreads</span><span class="p">:</span>
+                <span class="n">t</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">invoke</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="n">msg</span><span class="o">.</span><span class="n">method</span><span class="p">)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="n">msg</span><span class="o">.</span><span class="n">params</span>
+
+                <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">method</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ask_parallel</span><span class="p">:</span>
+                    <span class="n">rpc_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())</span>
+                    <span class="c1"># add rpc message to pendent AskResponse s</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">pending</span><span class="p">[</span><span class="n">rpc_id</span><span class="p">]</span> <span class="o">=</span> <span class="n">msg</span>
+                    <span class="c1"># insert an rpc id to args</span>
+                    <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                    <span class="n">params</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rpc_id</span><span class="p">)</span>
+                    <span class="n">invoke</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+                    <span class="k">return</span>
+
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">invoke</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">e</span>
+                <span class="nb">print</span> <span class="n">result</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">result</span><span class="p">,</span><span class="n">msg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">receive_from_ask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">rpc_id</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending</span><span class="p">[</span><span class="n">rpc_id</span><span class="p">]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending</span><span class="p">[</span><span class="n">rpc_id</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">get_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        :return: :class:`Lock` of the actor.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span>
+
+    <span class="k">def</span> <span class="nf">do_clean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;This function is called at intervals to delete the threads created for</span>
+<span class="sd">        parallel methods that have already stopped.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pthreads</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">t</span><span class="o">.</span><span class="n">isAlive</span><span class="p">():</span>
+                <span class="n">get_host</span><span class="p">()</span><span class="o">.</span><span class="n">del_parallel</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">pthreads</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ParallelAskWraper</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Wrapper for ask methods that have to be called in a parallel form.&#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">actor</span><span class="p">,</span> <span class="n">lock</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__actor</span> <span class="o">=</span> <span class="n">actor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span> <span class="o">=</span> <span class="n">lock</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="n">rpc_id</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">rpc_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">rpc_id</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__method</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">result</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">t1</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">invoke</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__method</span><span class="p">,</span><span class="n">rpc_id</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span><span class="n">kwargs</span><span class="p">))</span>
+                <span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">__actor</span><span class="o">.</span><span class="n">pthreads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+                <span class="n">get_host</span><span class="p">()</span><span class="o">.</span><span class="n">new_parallel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__actor</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">t1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">rpc_id</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[],</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span><span class="n">e</span><span class="p">:</span>
+            <span class="n">result</span><span class="o">=</span> <span class="n">e</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__actor</span><span class="o">.</span><span class="n">receive_from_ask</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">rpc_id</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ParallelTellWraper</span><span class="p">():</span>
+    <span class="sd">&#39;&#39;&#39;Wrapper for tell methods that have to be called in a parallel form.&#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">actor</span><span class="p">,</span> <span class="n">lock</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__actor</span> <span class="o">=</span> <span class="n">actor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span> <span class="o">=</span> <span class="n">lock</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">t1</span> <span class="o">=</span> <span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">invoke</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__method</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">))</span>
+        <span class="n">t1</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__actor</span><span class="o">.</span><span class="n">pthreads</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">t1</span><span class="p">)</span>
+        <span class="n">get_host</span><span class="p">()</span><span class="o">.</span><span class="n">new_parallel</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__actor</span><span class="o">.</span><span class="n">url</span><span class="p">,</span> <span class="n">t1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">invoke</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[],</span> <span class="n">kwargs</span><span class="o">=</span><span class="p">[]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="o">.</span><span class="n">acquire</span><span class="p">()</span>
+        <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__lock</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+</div>
 </div>
 
 
@@ -1370,6 +1778,7 @@
 <li><a class="reference internal" href="#proxy">Proxy</a></li>
 <li><a class="reference internal" href="#context">Context</a></li>
 <li><a class="reference internal" href="#intervals">Intervals</a></li>
+<li><a class="reference internal" href="#parallel">Parallel</a></li>
 </ul>
 </li>
 </ul>

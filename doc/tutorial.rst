@@ -18,7 +18,7 @@ To install the library use::
 
     python setup.py install
 
-You can check that works with the examples explained in this page.
+You can check that works with the examples explained in this page. Tested with Python 2.7.
 
 
 .. _global:

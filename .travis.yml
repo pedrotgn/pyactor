@@ -4,9 +4,11 @@ python:
 install:
     - python setup.py install
     - pip install coverage
-script: coverage run testing/tests.py
+    - pip install pep8
+script:
+    - find . -name \*.py -exec pep8 --ignore=E402 {} + 
+    - coverage run testing/tests.py
 after_success:
     - pip install coveralls
     - coveralls
     - bash <(curl -s https://codecov.io/bash)
-    

@@ -3,35 +3,42 @@ Parallel methods sample.
 '''
 from pyactor.context import create_host
 from pyactor.util import Timeout
+
 from time import sleep
 
 
 class File(object):
     _ask = ['download']
 
-    def download(self,filename):
-        print 'downloading '+ filename
+    def download(self, filename):
+        print 'downloading ' + filename
         sleep(5)
         return True
 
+
 class Web(object):
-    _ask = ['list_files','get_file']
+    _ask = ['list_files', 'get_file']
     _tell = ['remote_server']
-    _parallel = ['list_files','get_file', 'remote_server']  # Comment this line to check the raise of timeouts if paral are not used.
+    _parallel = ['list_files', 'get_file', 'remote_server']
+# Comment the line above to check the raise of timeouts if paral are not used.
     _ref = ["remote_server"]
 
     def __init__(self):
-        self.files = ['a1.txt','a2.txt','a3.txt','a4.zip']
+        self.files = ['a1.txt', 'a2.txt', 'a3.txt', 'a4.zip']
+
     def remote_server(self, file_server):
         self.server = file_server
+
     def list_files(self):
         return self.files
-    def get_file(self,filename):
+
+    def get_file(self, filename):
         return self.server.download(filename).get(10)
+
 
 class Workload(object):
     _ask = []
-    _tell = ['launch','download', 'remote_server']
+    _tell = ['launch', 'download', 'remote_server']
     _parallel = []
     _ref = ["remote_server"]
 
@@ -46,10 +53,8 @@ class Workload(object):
         self.server = web_server
 
     def download(self):
-
         self.server.get_file('a1.txt').get(10)
         print 'download finished'
-
 
 
 host = create_host()
@@ -66,4 +71,4 @@ load2.download()
 
 sleep(10)
 host.shutdown()
-#host.serve_forever()
+# host.serve_forever()

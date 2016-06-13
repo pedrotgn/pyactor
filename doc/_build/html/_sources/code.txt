@@ -30,6 +30,22 @@ Context
 .. automodule:: pyactor.context
     :members:
 
+Intervals
+==========
+
+:ref:`See source <intervals_source>`
+
+.. automodule:: pyactor.intervals
+    :members:
+
+Parallel
+========
+
+:ref:`See source <parallels_source>`
+
+.. automodule:: pyactor.parallels
+    :members:
+
 Util
 ====
 

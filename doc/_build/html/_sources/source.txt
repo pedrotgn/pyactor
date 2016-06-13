@@ -34,3 +34,11 @@ Intervals
 
 .. literalinclude:: ..\pyactor\intervals.py
     :linenos:
+
+.. _parallels_source:
+
+Parallel
+=========
+
+.. literalinclude:: ..\pyactor\parallels.py
+    :linenos:

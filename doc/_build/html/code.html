@@ -182,6 +182,12 @@ in util.py (<a class="reference internal" href="#module-pyactor.util" title="pya
 <h2>Proxy<a class="headerlink" href="#proxy" title="Permalink to this headline">¶</a></h2>
 <p><a class="reference internal" href="source.html#proxy-source"><span class="std std-ref">See source</span></a></p>
 <span class="target" id="module-pyactor.proxy"></span><dl class="class">
+<dt id="pyactor.proxy.AskRefWrapper">
+<em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">AskRefWrapper</code><span class="sig-paren">(</span><em>channel</em>, <em>method</em>, <em>actor_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.AskRefWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for Ask queries that have a proxy in parameters or returns.</p>
+</dd></dl>
+
+<dl class="class">
 <dt id="pyactor.proxy.AskWrapper">
 <em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">AskWrapper</code><span class="sig-paren">(</span><em>channel</em>, <em>method</em>, <em>actor_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.AskWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for Ask type queries to the proxy. Creates a <a class="reference internal" href="#pyactor.proxy.Future" title="pyactor.proxy.Future"><code class="xref py py-class docutils literal"><span class="pre">Future</span></code></a> to
@@ -283,6 +289,12 @@ and invoke its methods.</p>
 </dd></dl>
 
 <dl class="class">
+<dt id="pyactor.proxy.TellRefWrapper">
+<em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">TellRefWrapper</code><span class="sig-paren">(</span><em>channel</em>, <em>method</em>, <em>actor_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.TellRefWrapper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for Tell queries that have a proxy in parameters.</p>
+</dd></dl>
+
+<dl class="class">
 <dt id="pyactor.proxy.TellWrapper">
 <em class="property">class </em><code class="descclassname">pyactor.proxy.</code><code class="descname">TellWrapper</code><span class="sig-paren">(</span><em>channel</em>, <em>method</em>, <em>actor_url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.TellWrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper for Tell type queries to the proxy. Creates the request and sends it
@@ -302,12 +314,6 @@ through the channel.</p>
 </table>
 </dd></dl>
 
-<dl class="function">
-<dt id="pyactor.proxy.ref">
-<code class="descclassname">pyactor.proxy.</code><code class="descname">ref</code><span class="sig-paren">(</span><em>func</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.proxy.ref" title="Permalink to this definition">¶</a></dt>
-<dd><p>Decorator for the methods that include Proxys in their parameters or returns.</p>
-</dd></dl>
-
 </div>
 <div class="section" id="context">
 <h2>Context<a class="headerlink" href="#context" title="Permalink to this headline">¶</a></h2>
@@ -315,9 +321,10 @@ through the channel.</p>
 <span class="target" id="module-pyactor.context"></span><dl class="class">
 <dt id="pyactor.context.Host">
 <em class="property">class </em><code class="descclassname">pyactor.context.</code><code class="descname">Host</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host" title="Permalink to this definition">¶</a></dt>
-<dd><p>Host is the container of the actors. It manages the spawn and elimination of
+<dd><p>Host must be created using the function <a class="reference internal" href="#pyactor.context.create_host" title="pyactor.context.create_host"><code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code></a>.</p>
+<p>Host is the container of the actors. It manages the spawn and elimination of
 actors and their communication through channels. Also configures the TCP socket
-where the actors will be able to recieve queries remotely.
+where the actors will be able to receive queries remotely.
 Additionaly, controls the correct management of the threads and intervals of
 its actors.</p>
 <p>The host can be managed as a simple object, but it also is an actor itself so
@@ -334,13 +341,19 @@ host to spawn remotely.</p>
 <dl class="method">
 <dt id="pyactor.context.Host.attach_interval">
 <code class="descname">attach_interval</code><span class="sig-paren">(</span><em>interval_id</em>, <em>interval_event</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.attach_interval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Registers an interval to the host.</p>
+<dd><p>Registers an interval event to the host.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.del_parallel">
+<code class="descname">del_parallel</code><span class="sig-paren">(</span><em>pthr</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.del_parallel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deletes a thread executing a parallel method.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyactor.context.Host.detach_interval">
 <code class="descname">detach_interval</code><span class="sig-paren">(</span><em>interval_id</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.detach_interval" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes an interval from the host registry.</p>
+<dd><p>Deletes an interval event from the host registry.</p>
 </dd></dl>
 
 <dl class="method">
@@ -349,42 +362,6 @@ host to spawn remotely.</p>
 <dd><p>This method creates an actor for the Host so it can spawn actors remotely.
 Called always from the init function of the host, so no need for calling
 this directly.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyactor.context.Host.is_local">
-<code class="descname">is_local</code><span class="sig-paren">(</span><em>aurl</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.is_local" title="Permalink to this definition">¶</a></dt>
-<dd><p>Private method.
-Tells if the address given is from this host.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>aurl</strong> (<em>ParseResult</em>) &#8211; address to analyze.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">(<em>Bool.</em>) If is local (<strong>True</strong>) or not (<strong>False</strong>).</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="pyactor.context.Host.launch_actor">
-<code class="descname">launch_actor</code><span class="sig-paren">(</span><em>url</em>, <em>actor</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.launch_actor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Private method.
-This function makes an actor alive to start processing queries.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>url</strong> (<em>str.</em>) &#8211; identifier of the actor.</li>
-<li><strong>actor</strong> (<a class="reference internal" href="#pyactor.actor.Actor" title="pyactor.actor.Actor"><em>Actor</em></a>) &#8211; instance of the actor.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
 </dd></dl>
 
 <dl class="method">
@@ -418,7 +395,7 @@ the given ID.</p>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a> of the actor requiered.</td>
 </tr>
-<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body">Exception if the host is down.</td>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">HostDown</span></code>  if the host is down.</td>
 </tr>
 </tbody>
 </table>
@@ -441,8 +418,16 @@ It can be a local reference or a TCP direction.</p>
 <tr class="field-odd field"><th class="field-name">Raise:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">NotFound</span></code>, if the URL specified do not correspond to any
 actor in the host.</td>
 </tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">HostDown</span></code>  if the host is down.</td>
+</tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.context.Host.new_parallel">
+<code class="descname">new_parallel</code><span class="sig-paren">(</span><em>from_url</em>, <em>pthr</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.new_parallel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a new thread executing a parallel method.</p>
 </dd></dl>
 
 <dl class="method">
@@ -461,7 +446,7 @@ To kill the execution, press Ctrl+C.</p>
 Should be called at the end of its usage, to finish correctly all the
 connections and threads.
 When the actors stop running, they can&#8217;t be started again and the host
-can&#8217;t process new spaws. You might need to create a new host
+can&#8217;t process new spawns. You might need to create a new host
 (<a class="reference internal" href="#pyactor.context.create_host" title="pyactor.context.create_host"><code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code></a>).</p>
 <p>This method can&#8217;t be called remotely.</p>
 </dd></dl>
@@ -509,7 +494,7 @@ it among the host.</p>
 <tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><code class="xref py py-class docutils literal"><span class="pre">AlreadyExists</span></code>, if the ID specified is already in use.</p>
 </td>
 </tr>
-<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last">Exception if the host is down.</p>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">HostDown</span></code> if there is no host initiated.</p>
 </td>
 </tr>
 </tbody>
@@ -523,7 +508,7 @@ it among the host.</p>
 <code class="descclassname">pyactor.context.</code><code class="descname">create_host</code><span class="sig-paren">(</span><em>url='local://local:6666/host'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.create_host" title="Permalink to this definition">¶</a></dt>
 <dd><p>This is the main function to create a new Host to which you can spawn actors.
 It will be set by default at local address if no parameter <em>url</em> is given.
-This function shuould be called onece for execution or after callig
+This function shuould be called once for execution or after callig
 <a class="reference internal" href="#pyactor.context.Host.shutdown" title="pyactor.context.Host.shutdown"><code class="xref py py-meth docutils literal"><span class="pre">shutdown()</span></code></a> to the previous host. Only one host can be alive at a time,
 trying to create more than one will raise an exception.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -538,6 +523,113 @@ trying to create more than one will raise an exception.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+</div>
+<div class="section" id="intervals">
+<h2>Intervals<a class="headerlink" href="#intervals" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="source.html#intervals-source"><span class="std std-ref">See source</span></a></p>
+<span class="target" id="module-pyactor.intervals"></span><dl class="function">
+<dt id="pyactor.intervals.interval_host">
+<code class="descclassname">pyactor.intervals.</code><code class="descname">interval_host</code><span class="sig-paren">(</span><em>host</em>, <em>time</em>, <em>f</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.intervals.interval_host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an Event attached to the <em>host</em> that will execute the <em>f</em> function
+every <em>time</em> seconds.</p>
+<p>See example in <a class="reference internal" href="tutorial.html#sample-inter"><span class="std std-ref">Intervals</span></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>host</strong> (<a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><em>Proxy</em></a>) &#8211; proxy of the host. Can be obtained from inside a class
+with <code class="docutils literal"><span class="pre">self.host</span></code>.</li>
+<li><strong>time</strong> (<em>int</em>) &#8211; seconds for the intervals.</li>
+<li><strong>f</strong> (<em>func</em>) &#8211; function to be called every <em>time</em> seconds.</li>
+<li><strong>args</strong> (<em>list</em>) &#8211; arguments for <em>f</em>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">Event</span></code> instance of the interval.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.intervals.later">
+<code class="descclassname">pyactor.intervals.</code><code class="descname">later</code><span class="sig-paren">(</span><em>timeout</em>, <em>f</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.intervals.later" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a timer that will call the <em>f</em> function past <em>timeout</em> seconds.
+See example in <a class="reference internal" href="tutorial.html#sample-inter"><span class="std std-ref">Intervals</span></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">Timer</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="parallel">
+<h2>Parallel<a class="headerlink" href="#parallel" title="Permalink to this headline">¶</a></h2>
+<p><a class="reference internal" href="source.html#parallels-source"><span class="std std-ref">See source</span></a></p>
+<span class="target" id="module-pyactor.parallels"></span><dl class="class">
+<dt id="pyactor.parallels.ActorParallel">
+<em class="property">class </em><code class="descclassname">pyactor.parallels.</code><code class="descname">ActorParallel</code><span class="sig-paren">(</span><em>url</em>, <em>klass</em>, <em>obj</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.parallels.ActorParallel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Actor with parallel methods. Parallel methods are invoked in new threads, so
+their invocation do not block the actor allowing it to process many queries
+at a time.
+To aboid concurrence problems, this actors use Locks to guarantee its correct
+state.</p>
+<dl class="method">
+<dt id="pyactor.parallels.ActorParallel.do_clean">
+<code class="descname">do_clean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.parallels.ActorParallel.do_clean" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is called at intervals to delete the threads created for
+parallel methods that have already stopped.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.parallels.ActorParallel.get_lock">
+<code class="descname">get_lock</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.parallels.ActorParallel.get_lock" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="xref py py-class docutils literal"><span class="pre">Lock</span></code> of the actor.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyactor.parallels.ActorParallel.receive">
+<code class="descname">receive</code><span class="sig-paren">(</span><em>msg</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.parallels.ActorParallel.receive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overwriting <code class="xref py py-meth docutils literal"><span class="pre">Actor.receive()</span></code>, adds the checks and functionalities
+requiered by parallel methods.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>msg</strong> &#8211; The message is a namedtuple of the defined in util.py
+(<a class="reference internal" href="#pyactor.util.AskRequest" title="pyactor.util.AskRequest"><code class="xref py py-class docutils literal"><span class="pre">AskRequest</span></code></a>, <a class="reference internal" href="#pyactor.util.TellRequest" title="pyactor.util.TellRequest"><code class="xref py py-class docutils literal"><span class="pre">TellRequest</span></code></a>, <a class="reference internal" href="#pyactor.util.FutureRequest" title="pyactor.util.FutureRequest"><code class="xref py py-class docutils literal"><span class="pre">FutureRequest</span></code></a>).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.parallels.ParallelAskWraper">
+<em class="property">class </em><code class="descclassname">pyactor.parallels.</code><code class="descname">ParallelAskWraper</code><span class="sig-paren">(</span><em>method</em>, <em>actor</em>, <em>lock</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.parallels.ParallelAskWraper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for ask methods that have to be called in a parallel form.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyactor.parallels.ParallelTellWraper">
+<em class="property">class </em><code class="descclassname">pyactor.parallels.</code><code class="descname">ParallelTellWraper</code><span class="sig-paren">(</span><em>method</em>, <em>actor</em>, <em>lock</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.parallels.ParallelTellWraper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrapper for tell methods that have to be called in a parallel form.</p>
 </dd></dl>
 
 </div>
@@ -695,6 +787,8 @@ trying to create more than one will raise an exception.</p>
 <li><a class="reference internal" href="#actor">Actor</a></li>
 <li><a class="reference internal" href="#proxy">Proxy</a></li>
 <li><a class="reference internal" href="#context">Context</a></li>
+<li><a class="reference internal" href="#intervals">Intervals</a></li>
+<li><a class="reference internal" href="#parallel">Parallel</a></li>
 <li><a class="reference internal" href="#module-pyactor.util">Util</a></li>
 </ul>
 </li>
