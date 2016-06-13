@@ -22,19 +22,13 @@ class ActorParallel(Actor):
 
         self.__lock = Lock()
         for method in self.ask_parallel:
-            setattr(self._obj, method, ParallelAskWraper(
-                                            getattr(self._obj, method),
-                                            self,
-                                            self.__lock
-                                        )
-                    )
+            setattr(self._obj, method,
+                    ParallelAskWraper(getattr(self._obj, method), self,
+                                      self.__lock))
         for method in self.tell_parallel:
-            setattr(self._obj, method, ParallelTellWraper(
-                                            getattr(self._obj, method),
-                                            self,
-                                            self.__lock
-                                        )
-                    )
+            setattr(self._obj, method,
+                    ParallelTellWraper(getattr(self._obj, method), self,
+                                       self.__lock))
 
     def receive(self, msg):
         '''

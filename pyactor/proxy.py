@@ -34,8 +34,8 @@ class Proxy:
 
     def __repr__(self):
         return 'Proxy(actor=%s, tell=%s ref=%s, ask=%s ref=%s)' % \
-                    (self.actor, self.actor.tell, self.actor.tell_ref,
-                        self.actor.ask, self.actor.ask_ref)
+               (self.actor, self.actor.tell, self.actor.tell_ref,
+                self.actor.ask, self.actor.ask_ref)
 
 
 class Future(object):

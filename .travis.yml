@@ -6,7 +6,7 @@ install:
     - pip install coverage
     - pip install pep8
 script:
-    - find . -name \*.py -exec pep8 --ignore=E402 {} + 
+    - find .\pyactor -name \*.py -exec pep8 --ignore=E402 {} + 
     - coverage run testing/tests.py
 after_success:
     - pip install coveralls
