@@ -34,7 +34,7 @@ class Echo:
 class Bot:
     _tell = ['set_echo', 'ping', 'pong']
     _ask = ['get_name', 'get_proxy', 'get_host', 'get_echo', 'get_echo_ref',
-            'check_ref']
+            'check_ref', 'get_real_host']
     _ref = ['get_name', 'set_echo', 'get_proxy', 'get_host', 'get_echo_ref',
             'check_ref']
 
@@ -68,6 +68,9 @@ class Bot:
         global out
         out = msg
         # print 'callback',msg
+
+    def get_real_host(self):
+        return get_host()
 
 
 class Counter:
@@ -146,10 +149,9 @@ class Workload(object):
         for i in range(10):
             try:
                 print self.server.list_files().get(1)
-            except Timeout as e:
-                print 'timeout'
+            except TimeoutError as e:
                 cnt = 1000
-                raise Timeout
+                raise TimeoutError
 
     def remote_server(self, web_server):
         self.server = web_server
@@ -185,13 +187,25 @@ class TestBasic(unittest.TestCase):
             h2 = create_host()
         self.assertEqual(self.hr, get_host())
 
+        b1 = self.hr.spawn('bot1', Bot)
+        self.assertEqual(self.hr, b1.get_real_host().get())
+
+        h2 = create_host("local://local:7777/host")
+        b2 = h2.spawn('bot1', Bot)
+        self.assertEqual(h2, b2.get_real_host().get())
+        b2.set_echo(self.e1)
+        with self.assertRaises(Exception):
+            b1.set_echo(b2)  # This line raises TCPthing
+
+        h2.shutdown()
+
     def test_2spawning(self):
         global out
         out = ""
         self.assertEqual(self.e1.__class__.__name__, 'Proxy')
         self.assertTrue(self.e1.actor.is_alive())
 
-        with self.assertRaises(AlreadyExists):
+        with self.assertRaises(AlreadyExistsError):
             e2 = self.h.spawn('echo1', Echo).get()
 
         b1 = self.h.spawn('bot1', Bot).get()
@@ -223,7 +237,7 @@ class TestBasic(unittest.TestCase):
         sleep(1)
         self.assertEqual(out, 'something')
 
-        with self.assertRaises(Timeout):
+        with self.assertRaises(TimeoutError):
             self.e1.say_something_slow().get()
 
         with self.assertRaises(Exception):
@@ -239,7 +253,7 @@ class TestBasic(unittest.TestCase):
         sleep(2)
         self.assertEqual(out, 'hello')
 
-        with self.assertRaises(NotFound):
+        with self.assertRaises(NotFoundError):
             e = self.h.lookup('echo2').get()
 
         ee = self.h.lookup_url('local://local:6666/echo1').get()
@@ -249,23 +263,23 @@ class TestBasic(unittest.TestCase):
         ee.echo('hello')
         sleep(1)
         self.assertEqual(out, 'hello')
-        with self.assertRaises(NotFound):
+        with self.assertRaises(NotFoundError):
             e = self.h.lookup_url('local://local:6666/echo2').get()
 
     def test_5shutdown(self):
         self.hr.shutdown()
         # sleep(0.1)
         self.assertEqual(get_host(), None)
-        with self.assertRaises(Exception):
+        with self.assertRaises(HostDownError):
             self.hr.spawn('bot', Bot)
-        with self.assertRaises(Exception):
+        with self.assertRaises(HostDownError):
             self.hr.lookup('echo1').get()
-        with self.assertRaises(Exception):
+        with self.assertRaises(HostDownError):
             self.hr.lookup_url('local://local:6666/echo1')
-        with self.assertRaises(Timeout):
+        with self.assertRaises(TimeoutError):
             self.h.spawn('bot', Bot).get()
         # Now the actor is not running, invoking a method should raise Timeout.
-        with self.assertRaises(Timeout):
+        with self.assertRaises(TimeoutError):
             self.e1.say_something().get()
         # The actor should not be alive.
         self.assertFalse(self.e1.actor.is_alive())
@@ -291,6 +305,8 @@ class TestBasic(unittest.TestCase):
         load.launch()
         load2.download()
         sleep(10)
+
+        self.assertNotEqual(cnt, 1000)
 
         web2 = self.hr.spawn('web2', WebNP)
         web2.remote_server(f1)

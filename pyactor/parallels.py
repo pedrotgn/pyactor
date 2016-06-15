@@ -14,13 +14,13 @@ class ActorParallel(Actor):
     '''
     def __init__(self, url, klass, obj):
         super(ActorParallel, self).__init__(url, klass, obj)
+        self.__lock = Lock()
         self.pending = {}
         self.ask_parallel = list((set(self.ask) | set(self.ask_ref)) &
                                  set(klass._parallel))
         self.tell_parallel = list((set(self.tell) | set(self.tell_ref)) &
                                   set(klass._parallel))
 
-        self.__lock = Lock()
         for method in self.ask_parallel:
             setattr(self._obj, method,
                     ParallelAskWraper(getattr(self._obj, method), self,

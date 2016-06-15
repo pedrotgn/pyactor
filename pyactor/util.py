@@ -50,8 +50,8 @@ def get_current():
 
 def get_lock():
     current = current_thread()
+    url = None
     for host in hosts.values():
-        url = None
         if current in host.threads.keys():
             url = host.threads[current]
         elif current in host.pthreads.keys():
@@ -63,20 +63,33 @@ def get_lock():
             return lock
 
 
-class Timeout(Exception):
-    pass
+class TimeoutError(Exception):
+    def __init__(self, meth='Not specified'):
+        self.method = meth
+
+    def __str__(self):
+        return ("Timeout triggered: %r" % self.method)
 
 
-class AlreadyExists(Exception):
-    pass
+class AlreadyExistsError(Exception):
+    def __init__(self, value='Not specified'):
+        self.value = value
+
+    def __str__(self):
+        return ("Repeated ID: %r" % self.value)
 
 
-class NotFound(Exception):
-    pass
+class NotFoundError(Exception):
+    def __init__(self, value='Not specified'):
+        self.value = value
+
+    def __str__(self):
+        return ("Not found ID: %r" % self.value)
 
 
-class HostDown(Exception):
-    pass
+class HostDownError(Exception):
+    def __str__(self):
+        return ("The host is down.")
 
 
 TellRequest = collections.namedtuple('TellRequest',

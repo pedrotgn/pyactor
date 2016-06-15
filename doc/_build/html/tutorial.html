@@ -60,7 +60,7 @@ classic actor model and tries to be a simple way to get two remote objects to qu
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
-<p>You can check that works with the examples explained in this page.</p>
+<p>You can check that works with the examples explained in this page. Tested with Python 2.7.</p>
 </div>
 <div class="section" id="global-indications">
 <span id="global"></span><h2>Global indications<a class="headerlink" href="#global-indications" title="Permalink to this headline">¶</a></h2>
@@ -116,25 +116,31 @@ Then, queries an async method of this actor. This is the full code of this sampl
 20
 21
 22
-23</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+23
+24
+25
+26</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Basic host creation sample.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 
+
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="nb">print</span> <span class="n">msg</span>
 
 
 <span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
-<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
 <span class="n">e1</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;hello there !!&#39;</span><span class="p">)</span>
 
 <span class="n">hr</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">proxy</span>
-<span class="n">e2</span> <span class="o">=</span> <span class="n">hr</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo2&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+<span class="n">e2</span> <span class="o">=</span> <span class="n">hr</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo2&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
 <span class="n">e2</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;remote hello!!&#39;</span><span class="p">)</span>
 
 <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
@@ -220,26 +226,32 @@ and adds an actor to it. This is the full code of this sample, which you can fin
 24
 25
 26
-27</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+27
+28
+29
+30</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Sync/async queries sample.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 
+
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span><span class="s1">&#39;bye&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="s1">&#39;bye&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;say_something&#39;</span><span class="p">]</span>
-    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="nb">print</span> <span class="n">msg</span>
+
     <span class="k">def</span> <span class="nf">bye</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s1">&#39;bye&#39;</span>
+
     <span class="k">def</span> <span class="nf">say_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;something&#39;</span>
 
-
-
 <span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
-<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
 <span class="n">e1</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;hello there !!&#39;</span><span class="p">)</span>
 <span class="n">e1</span><span class="o">.</span><span class="n">bye</span><span class="p">()</span>
 
@@ -300,37 +312,55 @@ sample, which you can find and test in <code class="docutils literal"><span clas
 33
 34
 35
-36</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Callback sample.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 
+
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span><span class="s1">&#39;bye&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="s1">&#39;bye&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;say_something&#39;</span><span class="p">]</span>
-    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="nb">print</span> <span class="n">msg</span>
+
     <span class="k">def</span> <span class="nf">bye</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s1">&#39;bye&#39;</span>
+
     <span class="k">def</span> <span class="nf">say_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;something&#39;</span>
 
+
 <span class="k">class</span> <span class="nc">Bot</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;set_echo&#39;</span><span class="p">,</span><span class="s1">&#39;ping&#39;</span><span class="p">,</span><span class="s1">&#39;pong&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;set_echo&#39;</span><span class="p">,</span> <span class="s1">&#39;ping&#39;</span><span class="p">,</span> <span class="s1">&#39;pong&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">def</span> <span class="nf">set_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">echo</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">set_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">echo</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">echo</span> <span class="o">=</span> <span class="n">echo</span>
+
     <span class="k">def</span> <span class="nf">ping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">future</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span>
         <span class="n">future</span><span class="o">.</span><span class="n">add_callback</span><span class="p">(</span><span class="s1">&#39;pong&#39;</span><span class="p">)</span>
         <span class="nb">print</span> <span class="s1">&#39;pinging..&#39;</span>
-    <span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="s1">&#39;callback&#39;</span><span class="p">,</span><span class="n">msg</span>
+
+    <span class="k">def</span> <span class="nf">pong</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s1">&#39;callback&#39;</span><span class="p">,</span> <span class="n">msg</span>
 
 <span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
-<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span>
-<span class="n">bot</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;bot&#39;</span><span class="p">,</span><span class="n">Bot</span><span class="p">)</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
+<span class="n">bot</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;bot&#39;</span><span class="p">,</span> <span class="n">Bot</span><span class="p">)</span>
 <span class="n">bot</span><span class="o">.</span><span class="n">set_echo</span><span class="p">(</span><span class="n">e1</span><span class="p">)</span>
 <span class="n">bot</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
 
@@ -388,35 +418,39 @@ one parameter, which will be the result of the method invoked.</p>
 29
 30
 31
-32</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+32
+33
+34</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Timeout smaple.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
+<span class="kn">from</span> <span class="nn">pyactor.util</span> <span class="k">import</span> <span class="ne">TimeoutError</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
-<span class="kn">from</span> <span class="nn">pyactor.util</span> <span class="k">import</span> <span class="n">Timeout</span>
+
 
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span><span class="s1">&#39;bye&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="s1">&#39;bye&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;say_something&#39;</span><span class="p">]</span>
-    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="nb">print</span> <span class="n">msg</span>
+
     <span class="k">def</span> <span class="nf">bye</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s1">&#39;bye&#39;</span>
+
     <span class="k">def</span> <span class="nf">say_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
         <span class="k">return</span> <span class="s1">&#39;something&#39;</span>
 
-
-
-
 <span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
-<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
 <span class="n">e1</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;hello there !!&#39;</span><span class="p">)</span>
 <span class="n">e1</span><span class="o">.</span><span class="n">bye</span><span class="p">()</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">x</span> <span class="o">=</span> <span class="n">e1</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="k">except</span> <span class="n">Timeout</span><span class="p">:</span>
+<span class="k">except</span> <span class="ne">TimeoutError</span><span class="p">:</span>
     <span class="nb">print</span> <span class="s1">&#39;timeout catched&#39;</span>
 <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 <span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
@@ -468,25 +502,33 @@ you can find and test in <code class="docutils literal"><span class="pre">pyacto
 25
 26
 27
-28</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+28
+29
+30
+31
+32</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Lookup sample.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 
+
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span><span class="s1">&#39;bye&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="s1">&#39;bye&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;say_something&#39;</span><span class="p">]</span>
-    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
         <span class="nb">print</span> <span class="n">msg</span>
+
     <span class="k">def</span> <span class="nf">bye</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="nb">print</span> <span class="s1">&#39;bye&#39;</span>
+
     <span class="k">def</span> <span class="nf">say_something</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;something&#39;</span>
 
-
 <span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
-<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
 
 <span class="n">e</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">)</span>
 <span class="nb">print</span> <span class="n">e</span><span class="o">.</span><span class="n">say_something</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
@@ -551,36 +593,48 @@ also to get a local reference giving the standard local url at which the host is
 32
 33
 34
-35</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+35
+36
+37
+38
+39
+40
+41</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Self references sample. Actor id/proxy. + serve_forever</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 
 
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">,</span><span class="n">sender</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span><span class="s1">&#39;from:&#39;</span><span class="p">,</span><span class="n">sender</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">sender</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;from:&#39;</span><span class="p">,</span> <span class="n">sender</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
 
 <span class="k">class</span> <span class="nc">Bot</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;set_echo&#39;</span><span class="p">,</span><span class="s1">&#39;say_hi&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;set_echo&#39;</span><span class="p">,</span> <span class="s1">&#39;say_hi&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;get_name&#39;</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">greetings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span><span class="s1">&#39;hi&#39;</span><span class="p">,</span><span class="s1">&#39;hey&#39;</span><span class="p">,</span><span class="s1">&#39;what`s up?&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">greetings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;hi&#39;</span><span class="p">,</span> <span class="s1">&#39;hey&#39;</span><span class="p">,</span> <span class="s1">&#39;what`s up?&#39;</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">set_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">echo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+
     <span class="k">def</span> <span class="nf">say_hi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">salute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">greetings</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">salute</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">)</span>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">salute</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">)</span>
 
 <span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
-<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span>
-<span class="n">bot</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;bot1&#39;</span><span class="p">,</span><span class="n">Bot</span><span class="p">)</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
+<span class="n">bot</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;bot1&#39;</span><span class="p">,</span> <span class="n">Bot</span><span class="p">)</span>
 <span class="n">bot</span><span class="o">.</span><span class="n">set_echo</span><span class="p">()</span>
 <span class="n">bot</span><span class="o">.</span><span class="n">say_hi</span><span class="p">()</span>
 
@@ -655,36 +709,48 @@ to lookup and call methods from actors in this host.</p>
 32
 33
 34
-35</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+35
+36
+37
+38
+39
+40
+41</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Self references sample. Actor id/proxy. + serve_forever</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
 
 
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">msg</span><span class="p">,</span><span class="n">sender</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span><span class="s1">&#39;from:&#39;</span><span class="p">,</span><span class="n">sender</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">sender</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;from:&#39;</span><span class="p">,</span> <span class="n">sender</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
 
 <span class="k">class</span> <span class="nc">Bot</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;set_echo&#39;</span><span class="p">,</span><span class="s1">&#39;say_hi&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;set_echo&#39;</span><span class="p">,</span> <span class="s1">&#39;say_hi&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;get_name&#39;</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">greetings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span><span class="s1">&#39;hi&#39;</span><span class="p">,</span><span class="s1">&#39;hey&#39;</span><span class="p">,</span><span class="s1">&#39;what`s up?&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">greetings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;hi&#39;</span><span class="p">,</span> <span class="s1">&#39;hey&#39;</span><span class="p">,</span> <span class="s1">&#39;what`s up?&#39;</span><span class="p">]</span>
+
     <span class="k">def</span> <span class="nf">set_echo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">echo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
     <span class="k">def</span> <span class="nf">get_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span>
+
     <span class="k">def</span> <span class="nf">say_hi</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">salute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">greetings</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">salute</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">)</span>
-
+            <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">salute</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">)</span>
 
 <span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
-<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span>
-<span class="n">bot</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;bot1&#39;</span><span class="p">,</span><span class="n">Bot</span><span class="p">)</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
+<span class="n">bot</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;bot1&#39;</span><span class="p">,</span> <span class="n">Bot</span><span class="p">)</span>
 <span class="n">bot</span><span class="o">.</span><span class="n">set_echo</span><span class="p">()</span>
 <span class="n">bot</span><span class="o">.</span><span class="n">say_hi</span><span class="p">()</span>
 
@@ -723,8 +789,10 @@ have to indicate that a method recieves or returns a proxy with <code class="doc
 19
 20
 21
-22</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
+22
+23</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">create_host</span>
 <span class="kn">from</span> <span class="nn">pyactor.intervals</span> <span class="k">import</span> <span class="n">interval_host</span><span class="p">,</span> <span class="n">later</span>
+
 
 <span class="k">class</span> <span class="nc">Registry</span><span class="p">():</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[]</span>
@@ -742,16 +810,16 @@ have to indicate that a method recieves or returns a proxy with <code class="doc
 
 
 <span class="n">host</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
-<span class="n">registry</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span><span class="n">Registry</span><span class="p">)</span>
+<span class="n">registry</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="n">Registry</span><span class="p">)</span>
 <span class="n">registry</span><span class="o">.</span><span class="n">init_start</span><span class="p">()</span>
 <span class="n">host</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>To generate intervals, we need to import <code class="xref py py-func docutils literal"><span class="pre">interval_host()</span></code> and <code class="xref py py-func docutils literal"><span class="pre">later()</span></code> from intervals module.
+<p>To generate intervals, we need to import <a class="reference internal" href="code.html#pyactor.intervals.interval_host" title="pyactor.intervals.interval_host"><code class="xref py py-func docutils literal"><span class="pre">interval_host()</span></code></a> and <a class="reference internal" href="code.html#pyactor.intervals.later" title="pyactor.intervals.later"><code class="xref py py-func docutils literal"><span class="pre">later()</span></code></a> from intervals module.
 The class will call the first one giving the interval time and the function to execute, along with the host proxy
 that can be obtained with <code class="docutils literal"><span class="pre">self.proxy</span></code>. This function returns an interval instance that we have to keep in order
 to stop it after by calling <em>.set()</em>.
-In this example we use <code class="xref py py-func docutils literal"><span class="pre">later()</span></code> to set a timer that will stop the interval after a certain time.</p>
+In this example we use <a class="reference internal" href="code.html#pyactor.intervals.later" title="pyactor.intervals.later"><code class="xref py py-func docutils literal"><span class="pre">later()</span></code></a> to set a timer that will stop the interval after a certain time.</p>
 </div>
 <div class="section" id="parallel">
 <h2>Parallel<a class="headerlink" href="#parallel" title="Permalink to this headline">¶</a></h2>

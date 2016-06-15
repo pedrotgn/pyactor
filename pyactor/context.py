@@ -108,15 +108,15 @@ class Host(object):
         :param list args: arguments for the init function of the
             spawning actor class.
         :return: :class:`~.Proxy` of the actor spawned.
-        :raises: :class:`AlreadyExists`, if the ID specified is already
-            in use.
-        :raises: :class:`HostDown` if there is no host initiated.
+        :raises: :class:`AlreadyExistsError`, if the ID specified is
+            already in use.
+        :raises: :class:`HostDownError` if there is no host initiated.
         '''
         if not self.alive:
-            raise HostDown()
+            raise HostDownError()
         url = '%s://%s/%s' % (self.transport, self.host_url.netloc, id)
         if url in self.actors.keys():
-            raise AlreadyExists()
+            raise AlreadyExistsError(url)
         else:
             obj = klass(*args)
             obj.id = id
@@ -147,15 +147,16 @@ class Host(object):
 
         :param str. id: identifier of the actor you want.
         :return: :class:`~.Proxy` of the actor requiered.
-        :raises: :class:`HostDown`  if the host is down.
+        :raises: :class:`NotFoundError`  if the actor does not exist.
+        :raises: :class:`HostDownError`  if the host is down.
         '''
         if not self.alive:
-            raise HostDown()
+            raise HostDownError()
         url = '%s://%s/%s' % (self.transport, self.host_url.netloc, id)
         if url in self.actors.keys():
             return Proxy(self.actors[url])
         else:
-            raise NotFound()
+            raise NotFoundError(url)
 
     def shutdown(self):
         '''
@@ -168,6 +169,7 @@ class Host(object):
 
         This method can't be called remotely.
         '''
+        # print self.pthreads
         if self.alive:
             for interval_event in self.intervals.values():
                 interval_event.set()
@@ -204,16 +206,16 @@ class Host(object):
 
         :param srt. url: address that identifies an actor.
         :return: :class:`~.Proxy` of the actor requested.
-        :raise: :class:`NotFound`, if the URL specified do not
+        :raise: :class:`NotFoundError`, if the URL specified do not
             correspond to any actor in the host.
-        :raises: :class:`HostDown`  if the host is down.
+        :raises: :class:`HostDownError`  if the host is down.
         '''
         if not self.alive:
-            raise HostDown()
+            raise HostDownError()
         aurl = urlparse(url)
         if self.is_local(aurl):
             if url not in self.actors.keys():
-                raise NotFound()
+                raise NotFoundError(url)
             else:
                 return Proxy(self.actors[url])
         else:
@@ -339,15 +341,19 @@ class Host(object):
         '''
         Register a new thread executing a parallel method.
         '''
+        for t in self.pthreads.keys():
+            if self.pthreads[t] == from_url:
+                if not t.isAlive():
+                    del self.pthreads[t]
         t = threading.Thread(target=invoke, args=param)
         t.start()
         self.pthreads[t] = from_url
 
-    def do_clean(self):
-        '''
-        This function is called at intervals to delete the threads
-        created for parallel methods that have already stopped.
-        '''
-        for t in self.pthreads.values():
-            if not t.isAlive():
-                del self.pthreads[pthr]
+    # def do_clean(self):
+    #     '''
+    #     This function is called at intervals to delete the threads
+    #     created for parallel methods that have already stopped.
+    #     '''
+    #     for t in self.pthreads.values():
+    #         if not t.isAlive():
+    #             del self.pthreads[t]

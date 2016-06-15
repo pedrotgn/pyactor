@@ -1,5 +1,4 @@
 from Queue import Empty
-from functools import wraps
 
 from actor import Channel
 from parallels import *
@@ -51,9 +50,9 @@ class Future(object):
         self.__target = actor_url
         self.__lock = get_lock()
 
-    def __getattr__(self, name):
-        raise Exception("'Future' object has no attribute %r. Remember to \
-                            call get() after an ask query." % name)
+    # def __getattr__(self, name):
+    #     raise Exception("'Future' object has no attribute %r. Remember to \
+    #                     call get() after an ask query." % name)
 
     def get(self, timeout=1):
         '''
@@ -78,7 +77,7 @@ class Future(object):
         :param int timeout: timeout to wait for the result. If not
             specified, it's set to 1 sec.
         :returns: the result of the invoked method. Could be any type.
-        :raises: :class:`Timeout`, or an error receiving from the
+        :raises: :class:`TimeoutError`, or an error receiving from the
             channel.
         '''
         #  SENDING MESSAGE ASK
@@ -97,10 +96,12 @@ class Future(object):
                 raise result
             else:
                 return result
-        except AlreadyExists, ae:
+        except AlreadyExistsError, ae:
             raise ae
         except Empty, e:
-            raise Timeout()
+            if self.__lock:
+                self.__lock.acquire()
+            raise TimeoutError(self.__method)
 
     def add_callback(self, callback):
         '''

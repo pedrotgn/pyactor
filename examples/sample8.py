@@ -2,7 +2,7 @@
 Parallel methods sample.
 '''
 from pyactor.context import create_host
-from pyactor.util import Timeout
+from pyactor.util import TimeoutError
 
 from time import sleep
 
@@ -33,7 +33,7 @@ class Web(object):
         return self.files
 
     def get_file(self, filename):
-        return self.server.download(filename).get(10)
+        return self.server.download(filename).get(6)
 
 
 class Workload(object):
@@ -46,8 +46,8 @@ class Workload(object):
         for i in range(10):
             try:
                 print self.server.list_files().get(2)
-            except Timeout as e:
-                print "timeout"
+            except TimeoutError as e:
+                print e
 
     def remote_server(self, web_server):
         self.server = web_server
@@ -66,9 +66,9 @@ load = host.spawn('wl1', Workload)
 load.remote_server(web)
 load2 = host.spawn('wl2', Workload)
 load2.remote_server(web)
+
 load.launch()
 load2.download()
 
-sleep(10)
+sleep(7)
 host.shutdown()
-# host.serve_forever()

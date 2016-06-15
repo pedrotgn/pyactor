@@ -2,7 +2,7 @@
 Timeout smaple.
 '''
 from pyactor.context import create_host
-from pyactor.util import Timeout
+from pyactor.util import TimeoutError
 
 from time import sleep
 
@@ -28,7 +28,7 @@ e1.bye()
 
 try:
     x = e1.say_something().get(1)
-except Timeout:
+except TimeoutError:
     print 'timeout catched'
 sleep(1)
 h.shutdown()
