@@ -1,10 +1,8 @@
 '''
 Timeout smaple.
 '''
-from pyactor.context import create_host
+from pyactor.context import set_context, create_host, sleep
 from pyactor.util import TimeoutError
-
-from time import sleep
 
 
 class Echo:
@@ -21,6 +19,7 @@ class Echo:
         sleep(2)
         return 'something'
 
+set_context()
 h = create_host()
 e1 = h.spawn('echo1', Echo)
 e1.echo('hello there !!')

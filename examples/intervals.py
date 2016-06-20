@@ -1,5 +1,5 @@
-from pyactor.context import create_host
-from pyactor.intervals import interval_host, later
+from pyactor.context import (set_context, create_host, sleep,
+                             interval_host, later)
 
 
 class Registry():
@@ -17,7 +17,10 @@ class Registry():
         print 'Hello'
 
 
+set_context()
 host = create_host()
 registry = host.spawn('1', Registry)
 registry.init_start()
-host.serve_forever()
+# host.serve_forever()
+sleep(11)
+host.shutdown()

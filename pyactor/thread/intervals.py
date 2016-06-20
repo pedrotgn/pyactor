@@ -2,6 +2,10 @@ from threading import Thread, Timer, Event, currentThread
 import time as timep
 
 
+def sleep(time):
+    timep.sleep(time)
+
+
 def later(timeout, f, *args, **kwargs):
     '''
     Sets a timer that will call the *f* function past *timeout* seconds.

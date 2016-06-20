@@ -1,9 +1,9 @@
 '''
 Sync/async queries sample.
 '''
-from pyactor.context import create_host
+from pyactor.context import set_context, create_host, sleep
 
-from time import sleep
+# from time import sleep
 
 
 class Echo:
@@ -19,6 +19,7 @@ class Echo:
     def say_something(self):
         return 'something'
 
+set_context()
 h = create_host()
 e1 = h.spawn('echo1', Echo)
 e1.echo('hello there !!')

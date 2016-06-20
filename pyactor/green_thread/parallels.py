@@ -1,7 +1,7 @@
 import uuid
-from threading import Lock
+# from threading import Lock
 
-from pyactor.actor import *
+from actor import *
 
 
 class ActorParallel(Actor):
@@ -14,7 +14,7 @@ class ActorParallel(Actor):
     '''
     def __init__(self, url, klass, obj):
         super(ActorParallel, self).__init__(url, klass, obj)
-        self.__lock = Lock()
+        # self.__lock = Lock()
         self.pending = {}
         self.ask_parallel = list((set(self.ask) | set(self.ask_ref)) &
                                  set(klass._parallel))
@@ -23,12 +23,10 @@ class ActorParallel(Actor):
 
         for method in self.ask_parallel:
             setattr(self._obj, method,
-                    ParallelAskWraper(getattr(self._obj, method), self,
-                                      self.__lock))
+                    ParallelAskWraper(getattr(self._obj, method), self))
         for method in self.tell_parallel:
             setattr(self._obj, method,
-                    ParallelTellWraper(getattr(self._obj, method), self,
-                                       self.__lock))
+                    ParallelTellWraper(getattr(self._obj, method), self))
 
     def receive(self, msg):
         '''
@@ -59,9 +57,9 @@ class ActorParallel(Actor):
                     return
 
                 else:
-                    self.__lock.acquire()
+                    # self.__lock.acquire()
                     result = invoke(*params)
-                    self.__lock.release()
+                    # self.__lock.release()
             except Exception, e:
                 result = e
                 print result
@@ -75,17 +73,18 @@ class ActorParallel(Actor):
 
     def get_lock(self):
         '''
-        :return: :class:`Lock` of the actor.
+        :return: :class:`Lock` of the actor. Green Thread does not have
+            lock.
         '''
-        return self.__lock
+        return None
 
 
 class ParallelAskWraper():
     '''Wrapper for ask methods that have to be called in a parallel form.'''
-    def __init__(self, method, actor, lock):
+    def __init__(self, method, actor):
         self.__method = method
         self.__actor = actor
-        self.__lock = lock
+        # self.__lock = lock
 
     def __call__(self, *args, **kwargs):
         try:
@@ -101,15 +100,16 @@ class ParallelAskWraper():
                 return result
             else:
                 param = (self.__method, rpc_id, args, kwargs)
-                get_host().new_parallel(self.__actor.url, self.invoke, param)
+                t = gevent.spawn(self.invoke, *param)
+                get_host().new_parallel(self.__actor.url, t)
 
     def invoke(self, func, rpc_id, args=[], kwargs=[]):
-        self.__lock.acquire()
+        # self.__lock.acquire()
         try:
             result = func(*args, **kwargs)
         except Exception, e:
             result = e
-        self.__lock.release()
+        # self.__lock.release()
         self.__actor.receive_from_ask(result, rpc_id)
 
 
@@ -117,16 +117,17 @@ class ParallelTellWraper():
     '''
     Wrapper for tell methods that have to be called in a parallel form.
     '''
-    def __init__(self, method, actor, lock):
+    def __init__(self, method, actor):
         self.__method = method
         self.__actor = actor
-        self.__lock = lock
+        # self.__lock = lock
 
     def __call__(self, *args, **kwargs):
         param = (self.__method, args, kwargs)
-        get_host().new_parallel(self.__actor.url, self.invoke, param)
+        t = gevent.spawn(self.invoke, *param)
+        get_host().new_parallel(self.__actor.url, t)
 
     def invoke(self, func, args=[], kwargs=[]):
-        self.__lock.acquire()
+        # self.__lock.acquire()
         func(*args, **kwargs)
-        self.__lock.release()
+        # self.__lock.release()

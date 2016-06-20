@@ -1,9 +1,8 @@
 '''
 Basic host creation sample.
 '''
-from pyactor.context import create_host
-
-from time import sleep
+from pyactor.context import set_context, create_host, sleep
+# from pyactor.intervals import sleep
 
 
 class Echo:
@@ -13,7 +12,7 @@ class Echo:
     def echo(self, msg):
         print msg
 
-
+set_context()
 h = create_host()
 e1 = h.spawn('echo1', Echo)
 e1.echo('hello there !!')

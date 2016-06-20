@@ -1,19 +1,38 @@
-import signal
+from signal import SIGINT
 import sys
-import threading
 
 from urlparse import urlparse
 from copy import copy
-from time import sleep
-
-from actor import Actor, ActorRef
-from parallels import ActorParallel
-from pyactor.intervals import interval_host
-from proxy import Proxy
+from proxy import Proxy, set_actor
 from util import *
 import util
 
 CLEAN_INT = 4
+core_type = None
+available_types = ['thread', 'green_thread']
+
+
+def set_context(module_name='thread'):
+    global core_type
+    if core_type is None and module_name in available_types:
+        core_type = module_name
+        global actor
+        actor = __import__(module_name+'.actor', globals(), locals(),
+                           ['Actor', 'ActorRef'], -1)
+        global intervals
+        intervals = __import__(module_name+'.intervals', globals(), locals(),
+                               ['interval_host', 'sleep', 'later'], -1)
+        global parallels
+        parallels = __import__(module_name+'.parallels', globals(), locals(),
+                               ['ActorParallel'], -1)
+        set_actor(module_name)
+        global signal
+        if module_name == 'green_thread':
+            signal = __import__('gevent', ['signal'])
+        else:
+            signal = __import__('signal', ['signal'])
+    else:
+        raise Exception('Bad core type.')
 
 
 def create_host(url="local://local:6666/host"):
@@ -127,11 +146,11 @@ class Host(object):
             #                           Use 'init_host' to make it alive.")
 
             if hasattr(klass, '_parallel') and klass._parallel:
-                new_actor = ActorParallel(url, klass, obj)
+                new_actor = parallels.ActorParallel(url, klass, obj)
                 lock = new_actor.get_lock()
                 self.locks[url] = lock
             else:
-                new_actor = Actor(url, klass, obj)
+                new_actor = actor.Actor(url, klass, obj)
 
             obj.proxy = Proxy(new_actor)
 
@@ -182,8 +201,6 @@ class Host(object):
 
             for thread in self.threads.keys():
                 thread.join()
-
-            # self.cleaner.set()
 
             self.locks.clear()
             self.actors.clear()
@@ -258,12 +275,12 @@ class Host(object):
         '''
         if not self.running and self.alive:
             self.id = self.url
-            host = Actor(self.url, Host, self)
+            host = actor.Actor(self.url, Host, self)
             self.proxy = Proxy(host)
             self.launch_actor(self.url, host)
             self.running = True
 
-    def signal_handler(self, signal, frame):
+    def signal_handler(self, signal=None, frame=None):
         '''
         This gets the signal of Ctrl+C and stops the host. It also ends
         the execution. Needs the invocation of :meth:`serve_forever`.
@@ -286,7 +303,7 @@ class Host(object):
         if not self.alive:
             raise Exception("This host is already shutted down.")
         self.serving = True
-        signal.signal(signal.SIGINT, self.signal_handler)
+        signal.signal(SIGINT, self.signal_handler)
         print 'Press Ctrl+C to kill the execution'
         while self.serving:
             try:
@@ -337,16 +354,14 @@ class Host(object):
         else:
             return param
 
-    def new_parallel(self, from_url, invoke, param):
+    def new_parallel(self, from_url, t):
         '''
         Register a new thread executing a parallel method.
         '''
-        for t in self.pthreads.keys():
-            if self.pthreads[t] == from_url:
-                if not t.isAlive():
-                    del self.pthreads[t]
-        t = threading.Thread(target=invoke, args=param)
-        t.start()
+        # for t in self.pthreads.keys():
+        #     if self.pthreads[t] == from_url:
+        #         if not t.ready():
+        #             del self.pthreads[t]
         self.pthreads[t] = from_url
 
     # def do_clean(self):
@@ -357,3 +372,15 @@ class Host(object):
     #     for t in self.pthreads.values():
     #         if not t.isAlive():
     #             del self.pthreads[t]
+
+
+def sleep(seconds):
+    intervals.sleep(seconds)
+
+
+def interval_host(host, time, f, *args, **kwargs):
+    return intervals.interval_host(host, time, f, *args, **kwargs)
+
+
+def later(timeout, f, *args, **kwargs):
+    return intervals.later(timeout, f, *args, **kwargs)

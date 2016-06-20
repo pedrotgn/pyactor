@@ -1,9 +1,7 @@
 '''
 Self references sample. Actor id/proxy. + serve_forever
 '''
-from pyactor.context import create_host
-
-from time import sleep
+from pyactor.context import set_context, create_host, sleep
 
 
 class Echo:
@@ -31,6 +29,7 @@ class Bot:
         for salute in self.greetings:
             self.echo.echo(salute, self.proxy)
 
+set_context()
 h = create_host()
 e1 = h.spawn('echo1', Echo)
 bot = h.spawn('bot1', Bot)

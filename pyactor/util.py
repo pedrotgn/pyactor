@@ -11,7 +11,7 @@ Defined constants:
     FROM, TO, TYPE, METHOD, PARAMS, FUTURE, ASK, TELL, SRC
 
 """
-from threading import current_thread
+from gevent import getcurrent
 import collections
 
 
@@ -30,7 +30,7 @@ hosts = {}
 
 
 def get_host():
-    current = current_thread()
+    current = getcurrent()
     for host in hosts.values():
         if current in host.threads.keys():
             return host
@@ -40,7 +40,7 @@ def get_host():
 
 
 def get_current():
-    current = current_thread()
+    current = getcurrent()
     for host in hosts.values():
         if current in host.threads.keys():
             return host.actors[host.threads[current]]
@@ -49,7 +49,7 @@ def get_current():
 
 
 def get_lock():
-    current = current_thread()
+    current = getcurrent()
     url = None
     for host in hosts.values():
         if current in host.threads.keys():

@@ -1,9 +1,7 @@
 '''
 Lookup sample.
 '''
-from pyactor.context import create_host
-
-from time import sleep
+from pyactor.context import set_context, create_host, sleep
 
 
 class Echo:
@@ -19,6 +17,7 @@ class Echo:
     def say_something(self):
         return 'something'
 
+set_context()
 h = create_host()
 e1 = h.spawn('echo1', Echo)
 

@@ -1,10 +1,8 @@
 '''
 Parallel methods sample.
 '''
-from pyactor.context import create_host
+from pyactor.context import set_context, create_host, sleep
 from pyactor.util import TimeoutError
-
-from time import sleep
 
 
 class File(object):
@@ -56,6 +54,7 @@ class Workload(object):
         self.server.get_file('a1.txt').get(10)
         print 'download finished'
 
+set_context()
 
 host = create_host()
 
@@ -71,4 +70,6 @@ load.launch()
 load2.download()
 
 sleep(7)
+print host.pthreads
+# print host.threads
 host.shutdown()

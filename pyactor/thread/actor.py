@@ -2,7 +2,7 @@ from Queue import Queue, Empty
 from threading import Thread
 from copy import copy
 
-from util import *
+from pyactor.util import *
 
 
 class Channel(Queue):

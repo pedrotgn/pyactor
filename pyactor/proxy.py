@@ -1,8 +1,13 @@
 from Queue import Empty
 
-from actor import Channel
-from parallels import *
+# from actor import Channel
 from util import *
+
+
+def set_actor(module_name):
+    global actorm
+    actorm = __import__(module_name+'.actor', globals(), locals(),
+                        ['Channel'], -1)
 
 
 class Proxy:
@@ -43,7 +48,7 @@ class Future(object):
     Mostly for ask requests.
     '''
     def __init__(self, actor_channel, method, params, actor_url):
-        self.__channel = Channel()
+        self.__channel = actorm.Channel()
         self.__method = method
         self.__params = params
         self.__actor_channel = actor_channel

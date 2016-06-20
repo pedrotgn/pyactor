@@ -3,7 +3,7 @@ unittest module
 '''
 import unittest
 import sys
-from time import sleep
+# from time import sleep
 import os
 import signal
 
