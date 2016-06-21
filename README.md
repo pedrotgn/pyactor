@@ -3,6 +3,7 @@
 
 [![Build Status](https://travis-ci.org/pedrotgn/pyactor.svg?branch=master)](https://travis-ci.org/pedrotgn/pyactor)
 [![Coverage Status](https://coveralls.io/repos/github/pedrotgn/pyactor/badge.svg?branch=master)](https://coveralls.io/github/pedrotgn/pyactor?branch=master)
+[![Documentation Status](https://readthedocs.org/projects/pyactor/badge/?version=latest)](http://pyactor.readthedocs.io/en/latest/?badge=latest)
 
 PyActor is a python actor library constructed with the idea of getting two remote objects
 to quickly communicate in a very simple and minimalistic way.
@@ -20,7 +21,6 @@ python sample1.py
 
 ...
 
-Also see the documentation in doc/_build/html/index.html
 
 
 

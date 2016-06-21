@@ -54,7 +54,7 @@ class Workload(object):
         self.server.get_file('a1.txt').get(10)
         print 'download finished'
 
-set_context()
+set_context('green_thread')
 
 host = create_host()
 

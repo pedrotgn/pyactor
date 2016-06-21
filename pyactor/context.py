@@ -16,6 +16,7 @@ def set_context(module_name='thread'):
     global core_type
     if core_type is None and module_name in available_types:
         core_type = module_name
+        util.core_type = core_type
         global actor
         actor = __import__(module_name+'.actor', globals(), locals(),
                            ['Actor', 'ActorRef'], -1)

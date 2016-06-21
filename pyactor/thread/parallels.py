@@ -1,5 +1,5 @@
 import uuid
-from threading import Lock
+from threading import Lock, Thread
 
 from actor import *
 
@@ -101,7 +101,7 @@ class ParallelAskWraper():
                 return result
             else:
                 param = (self.__method, rpc_id, args, kwargs)
-                t = threading.Thread(target=invoke, args=param)
+                t = Thread(target=self.invoke, args=param)
                 t.start()
                 get_host().new_parallel(self.__actor.url, t)
 
@@ -126,7 +126,7 @@ class ParallelTellWraper():
 
     def __call__(self, *args, **kwargs):
         param = (self.__method, args, kwargs)
-        t = threading.Thread(target=invoke, args=param)
+        t = Thread(target=self.invoke, args=param)
         t.start()
         get_host().new_parallel(self.__actor.url, t)
 

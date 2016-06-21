@@ -60,7 +60,7 @@ This example shows and tests the most basic elements of this library. It creates
 Then, queries an async method of this actor. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample1.py``:
 
-.. literalinclude:: ..\examples\sample1.py
+.. literalinclude:: ../examples/sample1.py
     :linenos:
 
 This example is similar to the one shown above in :ref:`global`, but here we'll explain it more carefully.
@@ -124,7 +124,7 @@ This example extends the content of the previous one by including sync queries. 
 and adds an actor to it. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample2.py``:
 
-.. literalinclude:: ..\examples\sample2.py
+.. literalinclude:: ../examples/sample2.py
     :linenos:
 
 Now :class:`Echo` has two new methods, :meth:`bye` and :meth:`say_something`. The first one is async like
@@ -149,7 +149,7 @@ Sample 3 - Callback
 This example tries the functionality of the callback element of the synchronous queries. This is the full code of this
 sample, which you can find and test in ``pyactor\examples\sample3.py``:
 
-.. literalinclude:: ..\examples\sample3.py
+.. literalinclude:: ../examples/sample3.py
     :linenos:
 
 This time we keep having the same initialitzation as before, but now threre is a new class. :class:`Bot` has three async
@@ -175,7 +175,7 @@ Sample 4 - Timeout
 This example tests the raising of timeouts. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample4.py``:
 
-.. literalinclude:: ..\examples\sample4.py
+.. literalinclude:: ../examples/sample4.py
     :linenos:
 
 Now we have the same :class:`Echo` class but in the sync method we added a sleep of 2 seconds. Also, we sorrounded
@@ -200,7 +200,7 @@ Sample 5 - Lookup
 This example shows the usage of the lookup methods applied to a host. This is the full code of this sample, which
 you can find and test in ``pyactor\examples\sample5.py``:
 
-.. literalinclude:: ..\examples\sample5.py
+.. literalinclude:: ../examples/sample5.py
     :linenos:
 
 We have two ways to get the reference of one already existing actor of a host. If it is local, of the same host,
@@ -225,7 +225,7 @@ Sample 6 - self.id, proxy and host
 This example tests the self references to actors id and proxy. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample6.py``:
 
-.. literalinclude:: ..\examples\sample6.py
+.. literalinclude:: ../examples/sample6.py
     :linenos:
 
 This sample demonstrates how to get references to an actor from the actor itself. With ``self.id`` we obtain the string
@@ -265,7 +265,7 @@ Sample 7 - references
 This example tests sending of proxy references by parameter using the ref decorator. This is the full code of this sample,
  which you can find and test in ``pyactor\examples\sample7.py``:
 
-.. literalinclude:: ..\examples\sample6.py
+.. literalinclude:: ../examples/sample6.py
     :linenos:
 
 The previous examples pass proxy references by parameter in its methods, but them are sharing the same instance of a proxy.
@@ -281,7 +281,7 @@ Intervals
 This example tests the usage of intervals that allow an actor to periadically do an action. This is the full code of this sample,
  which you can find and test in ``pyactor\examples\intervals.py``:
 
-.. literalinclude:: ..\examples\intervals.py
+.. literalinclude:: ../examples/intervals.py
     :linenos:
 
 To generate intervals, we need to import :func:`~.interval_host` and :func:`~.later` from intervals module.

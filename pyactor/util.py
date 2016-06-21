@@ -12,6 +12,7 @@ Defined constants:
 
 """
 from gevent import getcurrent
+from threading import current_thread
 import collections
 
 
@@ -26,11 +27,15 @@ TELL = 7
 SRC = 8
 
 main_host = None
+core_type = None
 hosts = {}
 
 
 def get_host():
-    current = getcurrent()
+    if core_type == 'thread':
+        current = current_thread()
+    else:
+        current = getcurrent()
     for host in hosts.values():
         if current in host.threads.keys():
             return host
@@ -40,7 +45,10 @@ def get_host():
 
 
 def get_current():
-    current = getcurrent()
+    if core_type == 'thread':
+        current = current_thread()
+    else:
+        current = getcurrent()
     for host in hosts.values():
         if current in host.threads.keys():
             return host.actors[host.threads[current]]
@@ -49,7 +57,10 @@ def get_current():
 
 
 def get_lock():
-    current = getcurrent()
+    if core_type == 'thread':
+        current = current_thread()
+    else:
+        current = getcurrent()
     url = None
     for host in hosts.values():
         if current in host.threads.keys():

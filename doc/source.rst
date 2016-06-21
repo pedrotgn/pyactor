@@ -3,12 +3,12 @@
 Source
 ********
 
-.. _actor_source:
+.. _context_source:
 
-Actor
-======
+Context
+=========
 
-.. literalinclude:: ..\pyactor\actor.py
+.. literalinclude:: ../pyactor/context.py
     :linenos:
 
 .. _proxy_source:
@@ -16,23 +16,24 @@ Actor
 Proxy
 ======
 
-.. literalinclude:: ..\pyactor\proxy.py
+.. literalinclude:: ../pyactor/proxy.py
     :linenos:
 
-.. _context_source:
+.. _actor_source:
 
-Context
-=========
+Actor
+======
 
-.. literalinclude:: ..\pyactor\context.py
+.. literalinclude:: ../pyactor/actor.py
     :linenos:
+
 
 .. _intervals_source:
 
 Intervals
 =========
 
-.. literalinclude:: ..\pyactor\intervals.py
+.. literalinclude:: ../pyactor/intervals.py
     :linenos:
 
 .. _parallels_source:
@@ -40,5 +41,5 @@ Intervals
 Parallel
 =========
 
-.. literalinclude:: ..\pyactor\parallels.py
+.. literalinclude:: ../pyactor/parallels.py
     :linenos:
