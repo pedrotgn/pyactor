@@ -6,13 +6,14 @@ Main Code
 .. automodule:: pyactor
 
 
-Actor
-=====
+Context
+=======
 
-:ref:`See source <actor_source>`
+:ref:`See source <context_source>`
 
-.. automodule:: pyactor.actor
+.. automodule:: pyactor.context
     :members:
+
 
 Proxy
 =====
@@ -22,29 +23,6 @@ Proxy
 .. automodule:: pyactor.proxy
     :members:
 
-Context
-=======
-
-:ref:`See source <context_source>`
-
-.. automodule:: pyactor.context
-    :members:
-
-Intervals
-==========
-
-:ref:`See source <intervals_source>`
-
-.. automodule:: pyactor.intervals
-    :members:
-
-Parallel
-========
-
-:ref:`See source <parallels_source>`
-
-.. automodule:: pyactor.parallels
-    :members:
 
 Util
 ====

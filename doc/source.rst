@@ -19,27 +19,52 @@ Proxy
 .. literalinclude:: ../pyactor/proxy.py
     :linenos:
 
-.. _actor_source:
+.. _tactor_source:
 
-Actor
-======
+Thread Actor
+============
 
-.. literalinclude:: ../pyactor/actor.py
+.. literalinclude:: ../pyactor/thread/actor.py
     :linenos:
 
 
-.. _intervals_source:
+.. _tintervals_source:
 
-Intervals
-=========
+Thread Intervals
+================
 
-.. literalinclude:: ../pyactor/intervals.py
+.. literalinclude:: ../pyactor/thread/intervals.py
     :linenos:
 
-.. _parallels_source:
+.. _tparallels_source:
 
-Parallel
-=========
+Thread Parallel
+================
 
-.. literalinclude:: ../pyactor/parallels.py
+.. literalinclude:: ../pyactor/thread/parallels.py
+    :linenos:
+
+.. _gactor_source:
+
+Green Thread Actor
+===================
+
+.. literalinclude:: ../pyactor/green_thread/actor.py
+    :linenos:
+
+
+.. _gintervals_source:
+
+Grenn Thread Intervals
+=======================
+
+.. literalinclude:: ../pyactor/green_thread/intervals.py
+    :linenos:
+
+.. _gparallels_source:
+
+Green Thread Parallel
+=======================
+
+.. literalinclude:: ../pyactor/green_thread/parallels.py
     :linenos:

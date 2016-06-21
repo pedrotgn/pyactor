@@ -14,6 +14,8 @@ Contents:
    :maxdepth: 2
 
    code
+   thread
+   green_thread
    tutorial
 
 
