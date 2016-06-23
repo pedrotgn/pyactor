@@ -1,5 +1,3 @@
-# from Queue import Queue, Empty
-# from threading import Thread
 from copy import copy
 
 import gevent
@@ -11,7 +9,7 @@ from pyactor.util import *
 class Channel(Queue):
     """
     Channel is the main communication mechanism between actors. It is
-    actually a simple facade to the gevent.Queue python class.
+    actually a simple facade to the gevent.Queue class.
     """
     def __init__(self):
         Queue.__init__(self)

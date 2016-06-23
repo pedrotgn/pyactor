@@ -1,5 +1,4 @@
 import uuid
-# from threading import Lock
 
 from actor import *
 
@@ -9,8 +8,8 @@ class ActorParallel(Actor):
     Actor with parallel methods. Parallel methods are invoked in new
     threads, so their invocation do not block the actor allowing it to
     process many queries at a time.
-    To aboid concurrence problems, this actors use Locks to guarantee
-    its correct state.
+    Green threads do not have concurrernce problems so no need to use
+    Locks in this implementation.
     '''
     def __init__(self, url, klass, obj):
         super(ActorParallel, self).__init__(url, klass, obj)
@@ -71,11 +70,8 @@ class ActorParallel(Actor):
         del self.pending[rpc_id]
         self.send_response(result, msg)
 
+# For compatibility. Green threads do no use Locks.
     def get_lock(self):
-        '''
-        :return: :class:`Lock` of the actor. Green Thread does not have
-            lock.
-        '''
         return None
 
 

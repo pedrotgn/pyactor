@@ -2,7 +2,6 @@
 Basic host creation sample.
 '''
 from pyactor.context import set_context, create_host, sleep
-# from pyactor.intervals import sleep
 
 
 class Echo:

@@ -3,8 +3,6 @@ Sync/async queries sample.
 '''
 from pyactor.context import set_context, create_host, sleep
 
-# from time import sleep
-
 
 class Echo:
     _tell = ['echo', 'bye']

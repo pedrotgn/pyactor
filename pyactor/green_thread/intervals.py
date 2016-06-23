@@ -4,15 +4,21 @@ import gevent
 
 
 def sleep(seconds):
+    '''
+    Facade for the sleep function. Do not use time.sleep if you are
+    running green threads.
+    '''
     gevent.sleep(seconds)
 
 
 def later(timeout, f, *args, **kwargs):
     '''
     Sets a timer that will call the *f* function past *timeout* seconds.
+    
     See example in :ref:`sample_inter`
 
-    :return: :class:`Greenlet`
+    :return: :class:`Greenlet` new 'thread' which will perform the call
+        when specified.
     '''
     def wrap(*args, **kwargs):
         sleep(timeout)
@@ -23,8 +29,8 @@ def later(timeout, f, *args, **kwargs):
 
 def interval_host(host, time, f, *args, **kwargs):
     '''
-    Creates an Event attached to the *host* that will execute the *f*
-    function every *time* seconds.
+    Creates an Event attached to the *host* for management that will
+    execute the *f* function every *time* seconds.
 
     See example in :ref:`sample_inter`
 

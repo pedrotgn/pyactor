@@ -3,12 +3,19 @@ import time as timep
 
 
 def sleep(time):
+    '''
+    Facade for the sleep function. Aboid using time.sleep.
+
+    :param  int time: time to sleep, in seconds. (Float for second
+        divisions)
+    '''
     timep.sleep(time)
 
 
 def later(timeout, f, *args, **kwargs):
     '''
     Sets a timer that will call the *f* function past *timeout* seconds.
+
     See example in :ref:`sample_inter`
 
     :return: :class:`Timer`

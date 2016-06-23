@@ -18,7 +18,8 @@ To install the library use::
 
     python setup.py install
 
-You can check that works with the examples explained in this page. Tested with Python 2.7.
+You can check that works with the examples explained in this page that you can find in the
+./examples directory in this project. Tested with Python 2.7.
 
 
 .. _global:
@@ -26,7 +27,14 @@ You can check that works with the examples explained in this page. Tested with P
 Global indications
 ================================================================================
 
-First of all, a :class:`~.context.Host` is needed in order to create some actors. To create a host, use the
+This library is implemented using two types of concurrence: threads and green threads (Gevent).
+To define which one you want, always use the function :func:`~.set_context` at the begining of your program.
+The default value uses threads but you can specify the mode with one of the following strings:
+
+* ``'thread'``
+* ``'green_thread'``
+
+Then, first of all, a :class:`~.context.Host` is needed in order to create some actors. To create a host, use the
 function :func:`~.create_host` which returns the instance of a :class:`~.Host`. Then, use it to spawn
 actors by giving the class type of the actor to create and one string that will identify it among the host.
 The :meth:`~.context.Host.spawn` method will return the proxy (:class:`~.proxy.Proxy`)
@@ -66,13 +74,19 @@ Then, queries an async method of this actor. This is the full code of this sampl
 This example is similar to the one shown above in :ref:`global`, but here we'll explain it more carefully.
 
 In this case, we need to import the :func:`~.create_host` function from the project in order to use it.
-We also import the *sleep* function to give time to the actor to work.
+We also import the *sleep* function to give time to the actor to work and the setting function for the
+type :func:`~.set_context`.
 
 The actor to create in this example will be an :class:`Echo`. This class only has one method which prints
 the message *msg*, given by parameter. As you can see, the classes destinated to be actors must have the
 atributes ``_tell=[]`` and ``_ask=[]`` that include the names of the methods that can be
 remotely invoked in an asynchronous or synchronous way, respectively. In this sample we have the echo method,
 which is async, as no response from it is needed.
+
+The first thing to do is define which model are we going to use. For the moment we are using the classic threads,
+so we'll call the function without parameters to use the default solution. ::
+
+    set_context()
 
 To begin the execution we'll need a :class:`~.Host` to contain the actors. For that, we create a new variable
 by using the function we imported before. ::
@@ -114,6 +128,9 @@ its actors. This function (:meth:`~.shutdown`) should be allways called at the e
     h.shutdown()
 
 .. note:: As the host is an actor itself, it has sync and async methods and can recieve remote queries if we use its proxy.
+
+.. note:: Now you can try and see how it works with green threads by just specifying 'green_thread' in the setting function.
+    ``set_context('green_thread')``
 
 .. _sample2:
 
@@ -258,6 +275,7 @@ the host down at the end, we call::
 This will maintain the host alive in lower process consumption until the user presses ``Ctrl+C`` allowing other hosts
 to lookup and call methods from actors in this host.
 
+.. _sample7:
 
 Sample 7 - references
 ================================================================================
@@ -272,16 +290,28 @@ The previous examples pass proxy references by parameter in its methods, but the
 This could cause various problems of concurrency so we might want diferent proxies in different spots. To achive that, you
 have to indicate that a method recieves or returns a proxy with ``@ref`` which is imported from ``pyactor.proxy``.
 
+.. _sample8:
+
+Sample 8 - Parallel
+================================================================================
+
+
+.. _sample9:
+
+Sample 9 - Multiple Hosts
+================================================================================
+
+
 
 .. _sample_inter:
 
-Intervals
-===========
+Sample 10 - Intervals
+================================================================================
 
 This example tests the usage of intervals that allow an actor to periadically do an action. This is the full code of this sample,
- which you can find and test in ``pyactor\examples\intervals.py``:
+ which you can find and test in ``pyactor\examples\sample10.py``:
 
-.. literalinclude:: ../examples/intervals.py
+.. literalinclude:: ../examples/sample10.py
     :linenos:
 
 To generate intervals, we need to import :func:`~.interval_host` and :func:`~.later` from intervals module.
@@ -289,7 +319,3 @@ The class will call the first one giving the interval time and the function to e
 that can be obtained with ``self.proxy``. This function returns an interval instance that we have to keep in order
 to stop it after by calling *.set()*.
 In this example we use :func:`~.later` to set a timer that will stop the interval after a certain time.
-
-
-Parallel
-==========

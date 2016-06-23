@@ -1,6 +1,5 @@
 from Queue import Empty
 
-# from actor import Channel
 from util import *
 
 

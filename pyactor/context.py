@@ -13,6 +13,19 @@ available_types = ['thread', 'green_thread']
 
 
 def set_context(module_name='thread'):
+    '''
+    This function initializes the context of execution deciding which
+    type of threads are being used, normal python threads or green
+    threads, provided by Gevent.
+
+    This should be called first of all in every execution, otherwise,
+    the library would not work.
+
+    The default module is 'thread'.
+
+    :param str. module_name: Name of the module you want to use
+        ('thread' or 'green_thread').
+    '''
     global core_type
     if core_type is None and module_name in available_types:
         core_type = module_name
@@ -42,8 +55,14 @@ def create_host(url="local://local:6666/host"):
     spawn actors. It will be set by default at local address if no
     parameter *url* is given. This function shuould be called once for
     execution or after callig :meth:`~.shutdown` to the previous host.
-    Only one host can be alive at a time, trying to create more than
-    one will raise an exception.
+
+    It is possible to create locally more than one host and simulate a
+    remote communication between them, but the first one created will
+    be the main host, which is the one that will host the queries from
+    the main function.
+    Of course, every host must be initialized with a diferent URL(port)
+    Even so, more than one host should not be requiered for any real
+    project.
 
     :param str. url: URL where to start and bind the host.
     :return: :class:`~.Host` created.
@@ -64,6 +83,7 @@ def create_host(url="local://local:6666/host"):
 class Host(object):
     '''
     Host must be created using the function :func:`~create_host`.
+    Do not create a Host directly.
 
     Host is the container of the actors. It manages the spawn and
     elimination of actors and their communication through channels. Also
@@ -282,13 +302,13 @@ class Host(object):
             self.running = True
 
     def signal_handler(self, signal=None, frame=None):
-        '''
-        This gets the signal of Ctrl+C and stops the host. It also ends
-        the execution. Needs the invocation of :meth:`serve_forever`.
-
-        :param signal: SIGINT signal interruption sent with a Ctrl+C.
-        :param frame: the current stack frame. (not used)
-        '''
+        # '''
+        # This gets the signal of Ctrl+C and stops the host. It also ends
+        # the execution. Needs the invocation of :meth:`serve_forever`.
+        #
+        # :param signal: SIGINT signal interruption sent with a Ctrl+C.
+        # :param frame: the current stack frame. (not used)
+        # '''
         print 'You pressed Ctrl+C!'
         self.shutdown()
         self.serving = False
@@ -376,12 +396,37 @@ class Host(object):
 
 
 def sleep(seconds):
+    '''
+    Facade for the sleep function. Do not use time.sleep if you are
+    running green threads.
+    '''
     intervals.sleep(seconds)
 
 
 def interval_host(host, time, f, *args, **kwargs):
+    '''
+    Creates an Event attached to the *host* for management that will
+    execute the *f* function every *time* seconds.
+
+    See example in :ref:`sample_inter`
+
+    :param Proxy host: proxy of the host. Can be obtained from inside a
+        class with ``self.host``.
+    :param int time: seconds for the intervals.
+    :param func f: function to be called every *time* seconds.
+    :param list args: arguments for *f*.
+    :return: :class:`Event` instance of the interval.
+    '''
     return intervals.interval_host(host, time, f, *args, **kwargs)
 
 
 def later(timeout, f, *args, **kwargs):
+    '''
+    Sets a timer that will call the *f* function past *timeout* seconds.
+
+    See example in :ref:`sample_inter`
+
+    :return: manager of the later (Timer in thread,
+        Greenlet in green_thread)
+    '''
     return intervals.later(timeout, f, *args, **kwargs)

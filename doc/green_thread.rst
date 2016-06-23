@@ -1,6 +1,6 @@
 .. _gthread:
 
-Gevent TYPE
+Gevent Type
 **************
 
 Actor
