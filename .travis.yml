@@ -5,6 +5,7 @@ install:
     - python setup.py install
     - pip install coverage
     - pip install pep8
+    - pip install gevent
 script:
     - find ./pyactor -name \*.py -exec pep8 --ignore=E402 {} +
     - coverage run testing/tests.py

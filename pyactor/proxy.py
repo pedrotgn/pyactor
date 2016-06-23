@@ -5,7 +5,7 @@ from util import *
 
 def set_actor(module_name):
     global actorm
-    actorm = __import__(module_name+'.actor', globals(), locals(),
+    actorm = __import__(module_name + '.actor', globals(), locals(),
                         ['Channel'], -1)
 
 
