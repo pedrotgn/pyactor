@@ -31,13 +31,13 @@ def set_context(module_name='thread'):
         core_type = module_name
         util.core_type = core_type
         global actor
-        actor = __import__(module_name+'.actor', globals(), locals(),
+        actor = __import__(module_name + '.actor', globals(), locals(),
                            ['Actor', 'ActorRef'], -1)
         global intervals
-        intervals = __import__(module_name+'.intervals', globals(), locals(),
+        intervals = __import__(module_name + '.intervals', globals(), locals(),
                                ['interval_host', 'sleep', 'later'], -1)
         global parallels
-        parallels = __import__(module_name+'.parallels', globals(), locals(),
+        parallels = __import__(module_name + '.parallels', globals(), locals(),
                                ['ActorParallel'], -1)
         set_actor(module_name)
         global signal
