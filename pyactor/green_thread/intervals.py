@@ -14,7 +14,7 @@ def sleep(seconds):
 def later(timeout, f, *args, **kwargs):
     '''
     Sets a timer that will call the *f* function past *timeout* seconds.
-    
+
     See example in :ref:`sample_inter`
 
     :return: :class:`Greenlet` new 'thread' which will perform the call
