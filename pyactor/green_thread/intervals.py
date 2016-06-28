@@ -1,6 +1,7 @@
 from gevent.event import Event
-from gevent import getcurrent
-import gevent
+from gevent import getcurrent, spawn
+from gevent import sleep as gsleep
+# import gevent
 
 
 def sleep(seconds):
@@ -8,7 +9,7 @@ def sleep(seconds):
     Facade for the sleep function. Do not use time.sleep if you are
     running green threads.
     '''
-    gevent.sleep(seconds)
+    gsleep(seconds)
 
 
 def later(timeout, f, *args, **kwargs):
@@ -24,7 +25,7 @@ def later(timeout, f, *args, **kwargs):
         sleep(timeout)
         return f(*args, **kwargs)
 
-    return gevent.spawn(wrap, *args, **kwargs)
+    return spawn(wrap, *args, **kwargs)
 
 
 def interval_host(host, time, f, *args, **kwargs):
@@ -55,7 +56,7 @@ def interval_host(host, time, f, *args, **kwargs):
     args = list(args)
     args.insert(0, t2_stop)
     args = tuple(args)
-    t = gevent.spawn(wrap, *args, **kwargs)
+    t = spawn(wrap, *args, **kwargs)
     thread_id = t
     host.attach_interval(thread_id, t2_stop)
     return t2_stop

@@ -1,6 +1,7 @@
 from copy import copy
 
-import gevent
+# import gevent
+from gevent import spawn
 from gevent.queue import Queue, Empty
 
 from pyactor.util import *
@@ -153,4 +154,4 @@ class Actor(ActorRef):
         while the actor :meth:`is_alive`, making it able to receive
         queries.
         '''
-        self.thread = gevent.spawn(self.__processQueue)
+        self.thread = spawn(self.__processQueue)
