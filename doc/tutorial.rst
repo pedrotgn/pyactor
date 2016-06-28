@@ -145,7 +145,7 @@ should be allways called at the end::
     h.shutdown()
 
 .. note:: As the host is an actor itself, it has sync and async methods and can
-recieve remote queries if we use its proxy.
+    recieve remote queries if we use its proxy.
 
 .. note:: Now you can try and see how it works with green threads by just
     specifying 'green_thread' in the setting function.
@@ -350,7 +350,7 @@ blocked with another job (an I/O call or a synchronous call to another actor).
 
 To make one method execute parallely, you need to specify it in the class attribute
 _parallel, which is a list. The method must also be in one of the lists _tell or
-_ask. The methods with this tag will be executed in new threads so theri execution
+_ask. The methods with this tag will be executed in new threads so their execution
 do not interfere with other queries.
 
 In this example we have three classes: File, Web and Workload. File represents a
@@ -419,7 +419,7 @@ through TCP connections.
 
 
 One thing important to know about this is that only one host can be used to manage
-the main execution of your program, so there always will be a man host and the
+the main execution of your program, so there always will be a main host and the
 other ones will be created as secondary hosts.
 
 This main host will auutomatically assigned to the first one created. If that

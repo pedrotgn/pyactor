@@ -6,7 +6,7 @@ setup(
     version='0.1',
     author='Pedro Garcia Lopez',
     author_email='pedro.garcia@urv.cat',
-    packages=['pyactor'],
+    packages=['pyactor', 'pyactor.green_thread', 'pyactor.thread'],
     url='https://github.com/pedrotgn/pyactor',
     license='LICENSE.txt',
     description='Python Actor Middleware',

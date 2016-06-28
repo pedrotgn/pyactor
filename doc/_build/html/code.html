@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="PyActor 0.1 documentation" href="index.html" />
-    <link rel="next" title="Threading TYPE" href="thread.html" />
+    <link rel="next" title="Threading Type" href="thread.html" />
     <link rel="prev" title="Welcome to PyActor’s documentation!" href="index.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="thread.html" title="Threading TYPE"
+          <a href="thread.html" title="Threading Type"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to PyActor’s documentation!"
@@ -62,7 +62,8 @@
 <span class="target" id="module-pyactor.context"></span><dl class="class">
 <dt id="pyactor.context.Host">
 <em class="property">class </em><code class="descclassname">pyactor.context.</code><code class="descname">Host</code><span class="sig-paren">(</span><em>url</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host" title="Permalink to this definition">¶</a></dt>
-<dd><p>Host must be created using the function <a class="reference internal" href="#pyactor.context.create_host" title="pyactor.context.create_host"><code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code></a>.</p>
+<dd><p>Host must be created using the function <a class="reference internal" href="#pyactor.context.create_host" title="pyactor.context.create_host"><code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code></a>.
+Do not create a Host directly.</p>
 <p>Host is the container of the actors. It manages the spawn and
 elimination of actors and their communication through channels. Also
 configures the TCP socket where the actors will be able to receive
@@ -189,25 +190,6 @@ new host (<a class="reference internal" href="#pyactor.context.create_host" titl
 </dd></dl>
 
 <dl class="method">
-<dt id="pyactor.context.Host.signal_handler">
-<code class="descname">signal_handler</code><span class="sig-paren">(</span><em>signal=None</em>, <em>frame=None</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.signal_handler" title="Permalink to this definition">¶</a></dt>
-<dd><p>This gets the signal of Ctrl+C and stops the host. It also ends
-the execution. Needs the invocation of <a class="reference internal" href="#pyactor.context.Host.serve_forever" title="pyactor.context.Host.serve_forever"><code class="xref py py-meth docutils literal"><span class="pre">serve_forever()</span></code></a>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>signal</strong> &#8211; SIGINT signal interruption sent with a Ctrl+C.</li>
-<li><strong>frame</strong> &#8211; the current stack frame. (not used)</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
 <dt id="pyactor.context.Host.spawn">
 <code class="descname">spawn</code><span class="sig-paren">(</span><em>id</em>, <em>klass</em>, <em>args=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.Host.spawn" title="Permalink to this definition">¶</a></dt>
 <dd><p>This method creates an actor attached to this host. It will be
@@ -249,9 +231,14 @@ already in use.</p>
 <dd><p>This is the main function to create a new Host to which you can
 spawn actors. It will be set by default at local address if no
 parameter <em>url</em> is given. This function shuould be called once for
-execution or after callig <a class="reference internal" href="#pyactor.context.Host.shutdown" title="pyactor.context.Host.shutdown"><code class="xref py py-meth docutils literal"><span class="pre">shutdown()</span></code></a> to the previous host.
-Only one host can be alive at a time, trying to create more than
-one will raise an exception.</p>
+execution or after callig <a class="reference internal" href="#pyactor.context.Host.shutdown" title="pyactor.context.Host.shutdown"><code class="xref py py-meth docutils literal"><span class="pre">shutdown()</span></code></a> to the previous host.</p>
+<p>It is possible to create locally more than one host and simulate a
+remote communication between them, but the first one created will
+be the main host, which is the one that will host the queries from
+the main function.
+Of course, every host must be initialized with a diferent URL(port)
+Even so, more than one host should not be requiered for any real
+project.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -264,6 +251,75 @@ one will raise an exception.</p>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.context.interval_host">
+<code class="descclassname">pyactor.context.</code><code class="descname">interval_host</code><span class="sig-paren">(</span><em>host</em>, <em>time</em>, <em>f</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.interval_host" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an Event attached to the <em>host</em> for management that will
+execute the <em>f</em> function every <em>time</em> seconds.</p>
+<p>See example in <a class="reference internal" href="tutorial.html#sample-inter"><span class="std std-ref">Sample 10 - Intervals</span></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>host</strong> (<a class="reference internal" href="#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><em>Proxy</em></a>) &#8211; proxy of the host. Can be obtained from inside a
+class with <code class="docutils literal"><span class="pre">self.host</span></code>.</li>
+<li><strong>time</strong> (<em>int</em>) &#8211; seconds for the intervals.</li>
+<li><strong>f</strong> (<em>func</em>) &#8211; function to be called every <em>time</em> seconds.</li>
+<li><strong>args</strong> (<em>list</em>) &#8211; arguments for <em>f</em>.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><code class="xref py py-class docutils literal"><span class="pre">Event</span></code> instance of the interval.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.context.later">
+<code class="descclassname">pyactor.context.</code><code class="descname">later</code><span class="sig-paren">(</span><em>timeout</em>, <em>f</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.later" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets a timer that will call the <em>f</em> function past <em>timeout</em> seconds.</p>
+<p>See example in <a class="reference internal" href="tutorial.html#sample-inter"><span class="std std-ref">Sample 10 - Intervals</span></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">manager of the later (Timer in thread,
+Greenlet in green_thread)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.context.set_context">
+<code class="descclassname">pyactor.context.</code><code class="descname">set_context</code><span class="sig-paren">(</span><em>module_name='thread'</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.set_context" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function initializes the context of execution deciding which
+type of threads are being used, normal python threads or green
+threads, provided by Gevent.</p>
+<p>This should be called first of all in every execution, otherwise,
+the library would not work.</p>
+<p>The default module is &#8216;thread&#8217;.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>module_name</strong> (<em>str.</em>) &#8211; Name of the module you want to use
+(&#8216;thread&#8217; or &#8216;green_thread&#8217;).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyactor.context.sleep">
+<code class="descclassname">pyactor.context.</code><code class="descname">sleep</code><span class="sig-paren">(</span><em>seconds</em><span class="sig-paren">)</span><a class="headerlink" href="#pyactor.context.sleep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Facade for the sleep function. Do not use time.sleep if you are
+running green threads.</p>
 </dd></dl>
 
 </div>
@@ -286,7 +342,7 @@ to manage the result reply.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>channel</strong> (<a class="reference internal" href="thread.html#pyactor.thread.actor.Channel" title="pyactor.thread.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the query.</li>
+<li><strong>channel</strong> (<a class="reference internal" href="green_thread.html#pyactor.green_thread.actor.Channel" title="pyactor.green_thread.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the query.</li>
 <li><strong>method</strong> (<em>str.</em>) &#8211; name of the method this query is gonna invoke.</li>
 <li><strong>actor_url</strong> (<em>str.</em>) &#8211; URL address where the actor is set.</li>
 </ul>
@@ -397,7 +453,7 @@ sends it through the channel.</p>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>channel</strong> (<a class="reference internal" href="thread.html#pyactor.thread.actor.Channel" title="pyactor.thread.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the query.</li>
+<li><strong>channel</strong> (<a class="reference internal" href="green_thread.html#pyactor.green_thread.actor.Channel" title="pyactor.green_thread.actor.Channel"><em>Channel</em></a>) &#8211; communication way for the query.</li>
 <li><strong>method</strong> (<em>str.</em>) &#8211; name of the method this query is gonna invoke.</li>
 <li><strong>actor_url</strong> (<em>str.</em>) &#8211; URL address where the actor is set.</li>
 </ul>
@@ -572,7 +628,7 @@ sends it through the channel.</p>
                         title="previous chapter">Welcome to PyActor&#8217;s documentation!</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="thread.html"
-                        title="next chapter">Threading TYPE</a></p>
+                        title="next chapter">Threading Type</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -604,7 +660,7 @@ sends it through the channel.</p>
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="thread.html" title="Threading TYPE"
+          <a href="thread.html" title="Threading Type"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Welcome to PyActor’s documentation!"

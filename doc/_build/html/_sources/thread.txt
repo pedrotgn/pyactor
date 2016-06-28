@@ -1,6 +1,6 @@
 .. _thread:
 
-Threading TYPE
+Threading Type
 **************
 
 Actor

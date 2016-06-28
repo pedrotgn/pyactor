@@ -435,7 +435,54 @@
 384
 385
 386
-387</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">signal</span> <span class="k">import</span> <span class="n">SIGINT</span>
+387
+388
+389
+390
+391
+392
+393
+394
+395
+396
+397
+398
+399
+400
+401
+402
+403
+404
+405
+406
+407
+408
+409
+410
+411
+412
+413
+414
+415
+416
+417
+418
+419
+420
+421
+422
+423
+424
+425
+426
+427
+428
+429
+430
+431
+432
+433
+434</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">signal</span> <span class="k">import</span> <span class="n">SIGINT</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 
 <span class="kn">from</span> <span class="nn">urlparse</span> <span class="k">import</span> <span class="n">urlparse</span>
@@ -450,18 +497,33 @@
 
 
 <span class="k">def</span> <span class="nf">set_context</span><span class="p">(</span><span class="n">module_name</span><span class="o">=</span><span class="s1">&#39;thread&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    This function initializes the context of execution deciding which</span>
+<span class="sd">    type of threads are being used, normal python threads or green</span>
+<span class="sd">    threads, provided by Gevent.</span>
+
+<span class="sd">    This should be called first of all in every execution, otherwise,</span>
+<span class="sd">    the library would not work.</span>
+
+<span class="sd">    The default module is &#39;thread&#39;.</span>
+
+<span class="sd">    :param str. module_name: Name of the module you want to use</span>
+<span class="sd">        (&#39;thread&#39; or &#39;green_thread&#39;).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">global</span> <span class="n">core_type</span>
     <span class="k">if</span> <span class="n">core_type</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">module_name</span> <span class="ow">in</span> <span class="n">available_types</span><span class="p">:</span>
         <span class="n">core_type</span> <span class="o">=</span> <span class="n">module_name</span>
         <span class="n">util</span><span class="o">.</span><span class="n">core_type</span> <span class="o">=</span> <span class="n">core_type</span>
         <span class="k">global</span> <span class="n">actor</span>
-        <span class="n">actor</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">module_name</span><span class="o">+</span><span class="s1">&#39;.actor&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span>
-                           <span class="p">[</span><span class="s1">&#39;Actor&#39;</span><span class="p">,</span> <span class="s1">&#39;ActorRef&#39;</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">actor</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;pyactor.&#39;</span> <span class="o">+</span> <span class="n">module_name</span> <span class="o">+</span> <span class="s1">&#39;.actor&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span>
+                           <span class="nb">locals</span><span class="p">(),</span> <span class="p">[</span><span class="s1">&#39;Actor&#39;</span><span class="p">,</span> <span class="s1">&#39;ActorRef&#39;</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">global</span> <span class="n">intervals</span>
-        <span class="n">intervals</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">module_name</span><span class="o">+</span><span class="s1">&#39;.intervals&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span>
+        <span class="n">intervals</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;pyactor.&#39;</span> <span class="o">+</span> <span class="n">module_name</span> <span class="o">+</span> <span class="s1">&#39;.intervals&#39;</span><span class="p">,</span>
+                               <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span>
                                <span class="p">[</span><span class="s1">&#39;interval_host&#39;</span><span class="p">,</span> <span class="s1">&#39;sleep&#39;</span><span class="p">,</span> <span class="s1">&#39;later&#39;</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">global</span> <span class="n">parallels</span>
-        <span class="n">parallels</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">module_name</span><span class="o">+</span><span class="s1">&#39;.parallels&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span>
+        <span class="n">parallels</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;pyactor.&#39;</span> <span class="o">+</span> <span class="n">module_name</span> <span class="o">+</span> <span class="s1">&#39;.parallels&#39;</span><span class="p">,</span>
+                               <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span>
                                <span class="p">[</span><span class="s1">&#39;ActorParallel&#39;</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">set_actor</span><span class="p">(</span><span class="n">module_name</span><span class="p">)</span>
         <span class="k">global</span> <span class="n">signal</span>
@@ -479,8 +541,14 @@
 <span class="sd">    spawn actors. It will be set by default at local address if no</span>
 <span class="sd">    parameter *url* is given. This function shuould be called once for</span>
 <span class="sd">    execution or after callig :meth:`~.shutdown` to the previous host.</span>
-<span class="sd">    Only one host can be alive at a time, trying to create more than</span>
-<span class="sd">    one will raise an exception.</span>
+
+<span class="sd">    It is possible to create locally more than one host and simulate a</span>
+<span class="sd">    remote communication between them, but the first one created will</span>
+<span class="sd">    be the main host, which is the one that will host the queries from</span>
+<span class="sd">    the main function.</span>
+<span class="sd">    Of course, every host must be initialized with a diferent URL(port)</span>
+<span class="sd">    Even so, more than one host should not be requiered for any real</span>
+<span class="sd">    project.</span>
 
 <span class="sd">    :param str. url: URL where to start and bind the host.</span>
 <span class="sd">    :return: :class:`~.Host` created.</span>
@@ -501,6 +569,7 @@
 <span class="k">class</span> <span class="nc">Host</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Host must be created using the function :func:`~create_host`.</span>
+<span class="sd">    Do not create a Host directly.</span>
 
 <span class="sd">    Host is the container of the actors. It manages the spawn and</span>
 <span class="sd">    elimination of actors and their communication through channels. Also</span>
@@ -719,13 +788,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="nf">signal_handler</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">signal</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">frame</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        This gets the signal of Ctrl+C and stops the host. It also ends</span>
-<span class="sd">        the execution. Needs the invocation of :meth:`serve_forever`.</span>
-
-<span class="sd">        :param signal: SIGINT signal interruption sent with a Ctrl+C.</span>
-<span class="sd">        :param frame: the current stack frame. (not used)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># &#39;&#39;&#39;</span>
+        <span class="c1"># This gets the signal of Ctrl+C and stops the host. It also ends</span>
+        <span class="c1"># the execution. Needs the invocation of :meth:`serve_forever`.</span>
+        <span class="c1">#</span>
+        <span class="c1"># :param signal: SIGINT signal interruption sent with a Ctrl+C.</span>
+        <span class="c1"># :param frame: the current stack frame. (not used)</span>
+        <span class="c1"># &#39;&#39;&#39;</span>
         <span class="nb">print</span> <span class="s1">&#39;You pressed Ctrl+C!&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">serving</span> <span class="o">=</span> <span class="kc">False</span>
@@ -813,14 +882,39 @@
 
 
 <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Facade for the sleep function. Do not use time.sleep if you are</span>
+<span class="sd">    running green threads.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">intervals</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">interval_host</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Creates an Event attached to the *host* for management that will</span>
+<span class="sd">    execute the *f* function every *time* seconds.</span>
+
+<span class="sd">    See example in :ref:`sample_inter`</span>
+
+<span class="sd">    :param Proxy host: proxy of the host. Can be obtained from inside a</span>
+<span class="sd">        class with ``self.host``.</span>
+<span class="sd">    :param int time: seconds for the intervals.</span>
+<span class="sd">    :param func f: function to be called every *time* seconds.</span>
+<span class="sd">    :param list args: arguments for *f*.</span>
+<span class="sd">    :return: :class:`Event` instance of the interval.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">intervals</span><span class="o">.</span><span class="n">interval_host</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">later</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Sets a timer that will call the *f* function past *timeout* seconds.</span>
+
+<span class="sd">    See example in :ref:`sample_inter`</span>
+
+<span class="sd">    :return: manager of the later (Timer in thread,</span>
+<span class="sd">        Greenlet in green_thread)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">return</span> <span class="n">intervals</span><span class="o">.</span><span class="n">later</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
@@ -1022,16 +1116,14 @@
 193
 194
 195
-196
-197</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+196</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
 
-<span class="c1"># from actor import Channel</span>
 <span class="kn">from</span> <span class="nn">util</span> <span class="k">import</span> <span class="o">*</span>
 
 
 <span class="k">def</span> <span class="nf">set_actor</span><span class="p">(</span><span class="n">module_name</span><span class="p">):</span>
     <span class="k">global</span> <span class="n">actorm</span>
-    <span class="n">actorm</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">module_name</span><span class="o">+</span><span class="s1">&#39;.actor&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span>
+    <span class="n">actorm</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">module_name</span> <span class="o">+</span> <span class="s1">&#39;.actor&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span>
                         <span class="p">[</span><span class="s1">&#39;Channel&#39;</span><span class="p">],</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
 
@@ -1594,17 +1686,31 @@
 51
 52
 53
-54</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">currentThread</span>
+54
+55
+56
+57
+58
+59
+60
+61</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span><span class="p">,</span> <span class="n">Timer</span><span class="p">,</span> <span class="n">Event</span><span class="p">,</span> <span class="n">currentThread</span>
 <span class="kn">import</span> <span class="nn">time</span> <span class="k">as</span> <span class="nn">timep</span>
 
 
 <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="n">time</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Facade for the sleep function. Aboid using time.sleep.</span>
+
+<span class="sd">    :param  int time: time to sleep, in seconds. (Float for second</span>
+<span class="sd">        divisions)</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">timep</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">later</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Sets a timer that will call the *f* function past *timeout* seconds.</span>
+
 <span class="sd">    See example in :ref:`sample_inter`</span>
 
 <span class="sd">    :return: :class:`Timer`</span>
@@ -2084,11 +2190,7 @@
 153
 154
 155
-156
-157
-158</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="c1"># from Queue import Queue, Empty</span>
-<span class="c1"># from threading import Thread</span>
-<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
+156</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">copy</span>
 
 <span class="kn">import</span> <span class="nn">gevent</span>
 <span class="kn">from</span> <span class="nn">gevent.queue</span> <span class="k">import</span> <span class="n">Queue</span><span class="p">,</span> <span class="n">Empty</span>
@@ -2099,7 +2201,7 @@
 <span class="k">class</span> <span class="nc">Channel</span><span class="p">(</span><span class="n">Queue</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Channel is the main communication mechanism between actors. It is</span>
-<span class="sd">    actually a simple facade to the gevent.Queue python class.</span>
+<span class="sd">    actually a simple facade to the gevent.Queue class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">Queue</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -2303,21 +2405,33 @@
 52
 53
 54
-55</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gevent.event</span> <span class="k">import</span> <span class="n">Event</span>
+55
+56
+57
+58
+59
+60
+61</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gevent.event</span> <span class="k">import</span> <span class="n">Event</span>
 <span class="kn">from</span> <span class="nn">gevent</span> <span class="k">import</span> <span class="n">getcurrent</span>
 <span class="kn">import</span> <span class="nn">gevent</span>
 
 
 <span class="k">def</span> <span class="nf">sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Facade for the sleep function. Do not use time.sleep if you are</span>
+<span class="sd">    running green threads.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">gevent</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">later</span><span class="p">(</span><span class="n">timeout</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Sets a timer that will call the *f* function past *timeout* seconds.</span>
+
 <span class="sd">    See example in :ref:`sample_inter`</span>
 
-<span class="sd">    :return: :class:`Greenlet`</span>
+<span class="sd">    :return: :class:`Greenlet` new &#39;thread&#39; which will perform the call</span>
+<span class="sd">        when specified.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">sleep</span><span class="p">(</span><span class="n">timeout</span><span class="p">)</span>
@@ -2328,8 +2442,8 @@
 
 <span class="k">def</span> <span class="nf">interval_host</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Creates an Event attached to the *host* that will execute the *f*</span>
-<span class="sd">    function every *time* seconds.</span>
+<span class="sd">    Creates an Event attached to the *host* for management that will</span>
+<span class="sd">    execute the *f* function every *time* seconds.</span>
 
 <span class="sd">    See example in :ref:`sample_inter`</span>
 
@@ -2491,12 +2605,7 @@
 126
 127
 128
-129
-130
-131
-132
-133</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">uuid</span>
-<span class="c1"># from threading import Lock</span>
+129</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">uuid</span>
 
 <span class="kn">from</span> <span class="nn">actor</span> <span class="k">import</span> <span class="o">*</span>
 
@@ -2506,8 +2615,8 @@
 <span class="sd">    Actor with parallel methods. Parallel methods are invoked in new</span>
 <span class="sd">    threads, so their invocation do not block the actor allowing it to</span>
 <span class="sd">    process many queries at a time.</span>
-<span class="sd">    To aboid concurrence problems, this actors use Locks to guarantee</span>
-<span class="sd">    its correct state.</span>
+<span class="sd">    Green threads do not have concurrernce problems so no need to use</span>
+<span class="sd">    Locks in this implementation.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">ActorParallel</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">klass</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
@@ -2568,11 +2677,8 @@
         <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">pending</span><span class="p">[</span><span class="n">rpc_id</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">send_response</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">msg</span><span class="p">)</span>
 
+<span class="c1"># For compatibility. Green threads do no use Locks.</span>
     <span class="k">def</span> <span class="nf">get_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        :return: :class:`Lock` of the actor. Green Thread does not have</span>
-<span class="sd">            lock.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="kc">None</span>
 
 

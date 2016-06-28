@@ -42,7 +42,7 @@ class ActorRef(object):
     URL where it is located, the communication :class:`~.Channel` and
     the class of the actor as also the synchronous and asynchronous
     methods the class implements. When no channel is specified a new
-    one will be created wich is also the default procedure.
+    one will be created which is also the default procedure.
 
     .. note:: This is a superclass of :py:class:`Actor` and has no
         direct functionality.

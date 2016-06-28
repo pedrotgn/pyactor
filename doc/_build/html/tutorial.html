@@ -25,7 +25,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="PyActor 0.1 documentation" href="index.html" />
-    <link rel="prev" title="Gevent TYPE" href="green_thread.html" /> 
+    <link rel="prev" title="Gevent Type" href="green_thread.html" /> 
   </head>
   <body role="document">
     <div class="related" role="navigation" aria-label="related navigation">
@@ -38,7 +38,7 @@
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="green_thread.html" title="Gevent TYPE"
+          <a href="green_thread.html" title="Gevent Type"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">PyActor 0.1 documentation</a> &raquo;</li> 
       </ul>
@@ -54,28 +54,41 @@
 <p>A quik guide on how to use the PyActor library through examples.</p>
 <div class="section" id="installation">
 <span id="install"></span><h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>This library allows the creation and management of actors in a distributed system using Python. It follows the
-classic actor model and tries to be a simple way to get two remote objects to quickly commnicate.</p>
+<p>This library allows the creation and management of actors in a distributed system
+using Python. It follows the classic actor model and tries to be a simple way to
+get two remote objects to quickly commnicate.</p>
 <p>To install the library use:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">setup</span><span class="o">.</span><span class="n">py</span> <span class="n">install</span>
 </pre></div>
 </div>
-<p>You can check that works with the examples explained in this page. Tested with Python 2.7.</p>
+<p>You can check that works with the examples explained in this page that you can
+find in the ./examples directory in this project. Tested with Python 2.7.</p>
 </div>
 <div class="section" id="global-indications">
 <span id="global"></span><h2>Global indications<a class="headerlink" href="#global-indications" title="Permalink to this headline">¶</a></h2>
-<p>First of all, a <code class="xref py py-class docutils literal"><span class="pre">Host</span></code> is needed in order to create some actors. To create a host, use the
-function <code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code> which returns the instance of a <code class="xref py py-class docutils literal"><span class="pre">Host</span></code>. Then, use it to spawn
-actors by giving the class type of the actor to create and one string that will identify it among the host.
-The <code class="xref py py-meth docutils literal"><span class="pre">spawn()</span></code> method will return the proxy (<a class="reference internal" href="code.html#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a>)
-that manages that actor. See example:</p>
+<p>This library is implemented using two types of concurrence: threads and green
+threads (Gevent). To define which one you want, always use the function
+<a class="reference internal" href="code.html#pyactor.context.set_context" title="pyactor.context.set_context"><code class="xref py py-func docutils literal"><span class="pre">set_context()</span></code></a> at the begining of your program. The default value uses
+threads but you can specify the mode with one of the following strings:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">'thread'</span></code></li>
+<li><code class="docutils literal"><span class="pre">'green_thread'</span></code></li>
+</ul>
+<p>Then, first of all, a <a class="reference internal" href="code.html#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a> is needed in order to create some
+actors. To create a host, use the function <a class="reference internal" href="code.html#pyactor.context.create_host" title="pyactor.context.create_host"><code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code></a> which returns
+the instance of a <a class="reference internal" href="code.html#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a>. Then, use it to spawn actors by giving the
+class type of the actor to create and one string that will identify it among the
+host. The <a class="reference internal" href="code.html#pyactor.context.Host.spawn" title="pyactor.context.Host.spawn"><code class="xref py py-meth docutils literal"><span class="pre">spawn()</span></code></a> method will return the proxy
+(<a class="reference internal" href="code.html#pyactor.proxy.Proxy" title="pyactor.proxy.Proxy"><code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code></a>) that manages that actor. See example:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
 <span class="n">actor1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;id1&#39;</span><span class="p">,</span><span class="n">MyClass</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>The class of an actor must have defined its methods in the _tell and _ask lists so they can be called through the proxy.
-In the _tell list will be named those methods meant to be asynchronous and in the _ask list, the synchronous ones.
-In this example we have a class MyClass with a sync method <em>ask_me()</em> and an async method <em>tell_me()</em>:</p>
+<p>The class of an actor must have defined its methods in the _tell and _ask lists
+so they can be called through the proxy. In the _tell list will be named those
+methods meant to be asynchronous and in the _ask list, the synchronous ones.
+In this example we have a class MyClass with a sync method <em>ask_me()</em> and an
+async method <em>tell_me()</em>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyClass</span><span class="p">:</span>
     <span class="n">_tell</span> <span class="o">=</span><span class="p">[</span><span class="s1">&#39;tell_me&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ask_me&#39;</span><span class="p">]</span>
@@ -85,14 +98,16 @@ In this example we have a class MyClass with a sync method <em>ask_me()</em> and
         <span class="k">return</span> <span class="s1">&#39;hello back&#39;</span>
 </pre></div>
 </div>
-<p>As you can see, the async method recieves a message and simply prints it while the sync method returns a result.
-More detailed examples can be found in the &#8216;pyactor/examples&#8217; directory of the project.
-They are also explained below as a tutorial for this library.</p>
+<p>As you can see, the async method recieves a message and simply prints it while
+the sync method returns a result. More detailed examples can be found in the
+&#8216;pyactor/examples&#8217; directory of the project. They are also explained below as a
+tutorial for this library.</p>
 </div>
 <div class="section" id="sample-1-basic">
 <span id="sample1"></span><h2>Sample 1 - Basic<a class="headerlink" href="#sample-1-basic" title="Permalink to this headline">¶</a></h2>
-<p>This example shows and tests the most basic elements of this library. It creates a <code class="xref py py-class docutils literal"><span class="pre">Host</span></code> and adds an actor to it.
-Then, queries an async method of this actor. This is the full code of this sample, which you can find and test in
+<p>This example shows and tests the most basic elements of this library. It creates
+a <a class="reference internal" href="code.html#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a> and adds an actor to it. Then, queries an async method of this
+actor. This is the full code of this sample, which you can find and test in
 <code class="docutils literal"><span class="pre">pyactor\examples\sample1.py</span></code>:</p>
 <div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
@@ -117,12 +132,10 @@ Then, queries an async method of this actor. This is the full code of this sampl
 21
 22
 23
-24
-25</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+24</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Basic host creation sample.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">set_context</span><span class="p">,</span> <span class="n">create_host</span><span class="p">,</span> <span class="n">sleep</span>
-<span class="c1"># from pyactor.intervals import sleep</span>
 
 
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
@@ -145,58 +158,82 @@ Then, queries an async method of this actor. This is the full code of this sampl
 <span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>This example is similar to the one shown above in <a class="reference internal" href="#global"><span class="std std-ref">Global indications</span></a>, but here we&#8217;ll explain it more carefully.</p>
-<p>In this case, we need to import the <code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code> function from the project in order to use it.
-We also import the <em>sleep</em> function to give time to the actor to work.</p>
-<p>The actor to create in this example will be an <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code>. This class only has one method which prints
-the message <em>msg</em>, given by parameter. As you can see, the classes destinated to be actors must have the
-atributes <code class="docutils literal"><span class="pre">_tell=[]</span></code> and <code class="docutils literal"><span class="pre">_ask=[]</span></code> that include the names of the methods that can be
-remotely invoked in an asynchronous or synchronous way, respectively. In this sample we have the echo method,
-which is async, as no response from it is needed.</p>
-<p>To begin the execution we&#8217;ll need a <code class="xref py py-class docutils literal"><span class="pre">Host</span></code> to contain the actors. For that, we create a new variable
-by using the function we imported before.</p>
+<p>This example is similar to the one shown above in <a class="reference internal" href="#global"><span class="std std-ref">Global indications</span></a>, but here we&#8217;ll
+explain it more carefully.</p>
+<p>In this case, we need to import the <a class="reference internal" href="code.html#pyactor.context.create_host" title="pyactor.context.create_host"><code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code></a> function from the
+project in order to use it. We also import the <em>sleep</em> function to give time to
+the actor to work and the setting function for the type <a class="reference internal" href="code.html#pyactor.context.set_context" title="pyactor.context.set_context"><code class="xref py py-func docutils literal"><span class="pre">set_context()</span></code></a>.</p>
+<p>The actor to create in this example will be an <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code>. This class only
+has one method which prints the message <em>msg</em>, given by parameter. As you can
+see, the classes destinated to be actors must have the atributes <code class="docutils literal"><span class="pre">_tell=[]</span></code>
+and <code class="docutils literal"><span class="pre">_ask=[]</span></code> that include the names of the methods that can be remotely
+invoked in an asynchronous or synchronous way, respectively. In this sample we
+have the echo method, which is async, as no response from it is needed.</p>
+<p>The first thing to do is define which model are we going to use. For the moment
+we are using the classic threads, so we&#8217;ll call the function without parameters
+to use the default solution.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">set_context</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>To begin the execution we&#8217;ll need a <a class="reference internal" href="code.html#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a> to contain the actors. For
+that, we create a new variable by using the function we imported before.</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Now we have a <code class="xref py py-class docutils literal"><span class="pre">Host</span></code> in the &#8216;h&#8217; variable. It can create actors atached to itself. To do that, we use
-the <code class="xref py py-meth docutils literal"><span class="pre">spawn()</span></code> method. The first parameter is a string with the id of the actor that will identify it
-among the host so no repeated values are allowed. The second is the class the actor will be instance of. In this case
-we create an actor which will be an <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code> and with the id &#8216;echo1&#8217;:</p>
+<p>Now we have a <a class="reference internal" href="code.html#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a> in the &#8216;h&#8217; variable. It can create actors atached
+to itself. To do that, we use the <a class="reference internal" href="code.html#pyactor.context.Host.spawn" title="pyactor.context.Host.spawn"><code class="xref py py-meth docutils literal"><span class="pre">spawn()</span></code></a> method. The first
+parameter is a string with the id of the actor that will identify it among the
+host so no repeated values are allowed. The second is the class the actor will
+be instance of. In this case we create an actor which will be an <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code>
+and with the id &#8216;echo1&#8217;:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span><span class="n">Echo</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>&#8216;e1&#8217; will now represent that actor (the <code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code> that manages it).</p>
-<p>As we have the actor, we can invoke his methods as we would do normally since the proxy will redirect the queries
-to the actual ubication of it. If we didn&#8217;t have specified the methods in the statements appointed before (_tell and _ask),
-we would&#8217;t be able to do this now.
-The execution shold work properly and print on screen:</p>
+<p>As we have the actor, we can invoke his methods as we would do normally since
+the proxy will redirect the queries to the actual ubication of it. If we didn&#8217;t
+have specified the methods in the statements appointed before (_tell and _ask),
+we would&#8217;t be able to do this now.The execution shold work properly and print
+on screen:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>hello there !!
 </pre></div>
 </div>
-<p>The host is also a living actor so it could recieve queries remotely in the future. To get its proxy, we use:</p>
+<p>The host is also a living actor so it could recieve queries remotely in the
+future. To get its proxy, we use:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">hr</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">proxy</span>
 </pre></div>
 </div>
-<p>And now we have a proxy managing the host in <em>hr</em> that we could use to send references remotely. This allows to
-spawn remotely, although in this example we are doing it all locally:</p>
+<p>And now we have a proxy managing the host in <em>hr</em> that we could use to send
+references remotely. This allows to spawn remotely, although in this example we
+are doing it all locally:</p>
 <blockquote>
 <div>e2 = hr.spawn(&#8216;echo2&#8217;,Echo).get()</div></blockquote>
-<p>The use of <em>.get()</em> at the end is necessary since &#8216;hr&#8217; is a <code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code> of the host
-and <code class="xref py py-meth docutils literal"><span class="pre">spawn()</span></code> is treated like an async method which result has to be obtained.</p>
-<p>Then, the sleep gives time to the actor for doing the work and finally, we close the host, which will stop all
-its actors. This function (<code class="xref py py-meth docutils literal"><span class="pre">shutdown()</span></code>) should be allways called at the end:</p>
+<p>The use of <em>.get()</em> at the end is necessary since &#8216;hr&#8217; is a <code class="xref py py-class docutils literal"><span class="pre">Proxy</span></code> of
+the host and <a class="reference internal" href="code.html#pyactor.context.Host.spawn" title="pyactor.context.Host.spawn"><code class="xref py py-meth docutils literal"><span class="pre">spawn()</span></code></a> is treated like an async method which result has
+to be obtained.</p>
+<p>Then, the sleep gives time to the actor for doing the work and finally, we close
+the host, which will stop all its actors. This function (<a class="reference internal" href="code.html#pyactor.context.Host.shutdown" title="pyactor.context.Host.shutdown"><code class="xref py py-meth docutils literal"><span class="pre">shutdown()</span></code></a>)
+should be allways called at the end:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">As the host is an actor itself, it has sync and async methods and can recieve remote queries if we use its proxy.</p>
+<p class="last">As the host is an actor itself, it has sync and async methods and can
+recieve remote queries if we use its proxy.</p>
+</div>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Now you can try and see how it works with green threads by just
+specifying &#8216;green_thread&#8217; in the setting function.
+<code class="docutils literal"><span class="pre">set_context('green_thread')</span></code></p>
 </div>
 </div>
 <div class="section" id="sample-2-sync">
 <span id="sample2"></span><h2>Sample 2 - Sync<a class="headerlink" href="#sample-2-sync" title="Permalink to this headline">¶</a></h2>
-<p>This example extends the content of the previous one by including sync queries. It still creates a <code class="xref py py-class docutils literal"><span class="pre">Host</span></code>
-and adds an actor to it. This is the full code of this sample, which you can find and test in
+<p>This example extends the content of the previous one by including sync queries.
+It still creates a <a class="reference internal" href="code.html#pyactor.context.Host" title="pyactor.context.Host"><code class="xref py py-class docutils literal"><span class="pre">Host</span></code></a> and adds an actor to it. This is the full
+code of this sample, which you can find and test in
 <code class="docutils literal"><span class="pre">pyactor\examples\sample2.py</span></code>:</p>
 <div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
@@ -226,14 +263,10 @@ and adds an actor to it. This is the full code of this sample, which you can fin
 26
 27
 28
-29
-30
-31</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+29</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">Sync/async queries sample.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">set_context</span><span class="p">,</span> <span class="n">create_host</span><span class="p">,</span> <span class="n">sleep</span>
-
-<span class="c1"># from time import sleep</span>
 
 
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
@@ -261,10 +294,12 @@ and adds an actor to it. This is the full code of this sample, which you can fin
 <span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>Now <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code> has two new methods, <code class="xref py py-meth docutils literal"><span class="pre">bye()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">say_something()</span></code>. The first one is async like
-the previous <code class="xref py py-meth docutils literal"><span class="pre">echo()</span></code>, but the other one is synchronous.</p>
-<p>In this example we see that, when invoking a synchronous method is needed to add the <em>.get()</em> in order to actually
-execute the method and obtain a result from it. If you forget to use it, the function will return a <a class="reference internal" href="code.html#pyactor.proxy.Future" title="pyactor.proxy.Future"><code class="xref py py-class docutils literal"><span class="pre">Future</span></code></a>
+<p>Now <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code> has two new methods, <code class="xref py py-meth docutils literal"><span class="pre">bye()</span></code> and <code class="xref py py-meth docutils literal"><span class="pre">say_something()</span></code>.
+The first one is async like the previous <code class="xref py py-meth docutils literal"><span class="pre">echo()</span></code>, but the other one is
+synchronous.</p>
+<p>In this example we see that, when invoking a synchronous method is needed to add
+the <em>.get()</em> in order to actually execute the method and obtain a result from
+it. If you forget to use it, the function will return a <a class="reference internal" href="code.html#pyactor.proxy.Future" title="pyactor.proxy.Future"><code class="xref py py-class docutils literal"><span class="pre">Future</span></code></a>
 which is the formulation of the query, but it has not been invoked yet.</p>
 <p>The correct output for this sample is the following:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>hello there !!
@@ -275,8 +310,9 @@ something
 </div>
 <div class="section" id="sample-3-callback">
 <span id="sample3"></span><h2>Sample 3 - Callback<a class="headerlink" href="#sample-3-callback" title="Permalink to this headline">¶</a></h2>
-<p>This example tries the functionality of the callback element of the synchronous queries. This is the full code of this
-sample, which you can find and test in <code class="docutils literal"><span class="pre">pyactor\examples\sample3.py</span></code>:</p>
+<p>This example tries the functionality of the callback element of the synchronous
+queries. This is the full code of this sample, which you can find and test in
+<code class="docutils literal"><span class="pre">pyactor\examples\sample3.py</span></code>:</p>
 <div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -366,14 +402,18 @@ sample, which you can find and test in <code class="docutils literal"><span clas
 <span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>This time we keep having the same initialitzation as before, but now threre is a new class. <code class="xref py py-class docutils literal"><span class="pre">Bot</span></code> has three async
-methods that will allow to prove the correctness of the callback functionality. <code class="xref py py-meth docutils literal"><span class="pre">set_echo()</span></code> registers an <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code>
-to the Bot so it can call it. <span class="math">\(ping\)</span> creates the query for the <code class="xref py py-meth docutils literal"><span class="pre">say_something()</span></code> method and sets the callback for this
-to his other method <code class="xref py py-meth docutils literal"><span class="pre">pong()</span></code>. This second will recieve the result of the execution of the <code class="xref py py-meth docutils literal"><span class="pre">say_something()</span></code> method.</p>
+<p>This time we keep having the same initialitzation as before, but now threre is
+a new class. <code class="xref py py-class docutils literal"><span class="pre">Bot</span></code> has three async methods that will allow to prove the
+correctness of the callback functionality. <code class="xref py py-meth docutils literal"><span class="pre">set_echo()</span></code> registers an
+<code class="xref py py-class docutils literal"><span class="pre">Echo</span></code> to the Bot so it can call it. <span class="math">\(ping\)</span> creates the query for
+the <code class="xref py py-meth docutils literal"><span class="pre">say_something()</span></code> method and sets the callback for this to his other
+method <code class="xref py py-meth docutils literal"><span class="pre">pong()</span></code>. This second will recieve the result of the execution of the
+<code class="xref py py-meth docutils literal"><span class="pre">say_something()</span></code> method.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last"><a class="reference internal" href="code.html#pyactor.proxy.Future.add_callback" title="pyactor.proxy.Future.add_callback"><code class="xref py py-meth docutils literal"><span class="pre">add_callback()</span></code></a> needs to be called from an actor to another actor, specifing a method of the first one that has
-one parameter, which will be the result of the method invoked.</p>
+<p class="last"><a class="reference internal" href="code.html#pyactor.proxy.Future.add_callback" title="pyactor.proxy.Future.add_callback"><code class="xref py py-meth docutils literal"><span class="pre">add_callback()</span></code></a> needs to be called from an actor to another
+actor, specifing a method of the first one that has one parameter, which
+will be the result of the method invoked.</p>
 </div>
 <p>The correct output for this sample is the following:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">pinging</span><span class="o">...</span>
@@ -383,8 +423,8 @@ one parameter, which will be the result of the method invoked.</p>
 </div>
 <div class="section" id="sample-4-timeout">
 <span id="sample4"></span><h2>Sample 4 - Timeout<a class="headerlink" href="#sample-4-timeout" title="Permalink to this headline">¶</a></h2>
-<p>This example tests the raising of timeouts. This is the full code of this sample, which you can find and test in
-<code class="docutils literal"><span class="pre">pyactor\examples\sample4.py</span></code>:</p>
+<p>This example tests the raising of timeouts. This is the full code of this
+sample, which you can find and test in <code class="docutils literal"><span class="pre">pyactor\examples\sample4.py</span></code>:</p>
 <div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -452,13 +492,15 @@ one parameter, which will be the result of the method invoked.</p>
 <span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>Now we have the same <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code> class but in the sync method we added a sleep of 2 seconds. Also, we sorrounded
-the call of the method by a try structure catching a <code class="xref py py-class docutils literal"><span class="pre">Timeout</span></code> exception. Since we are giving to the invocation
+<p>Now we have the same <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code> class but in the sync method we added a sleep
+of 2 seconds. Also, we sorrounded the call of the method by a try structure
+catching a <code class="xref py py-class docutils literal"><span class="pre">Timeout</span></code> exception. Since we are giving to the invocation
 a expire time of 1 second, the timeout will be reached and the exception rised.</p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">The parameter of the .get() method is the time, in seconds, that is given as a timeout to the query. The
-default one, in case none is specified, is 1 second.</p>
+<p class="last">The parameter of the .get() method is the time, in seconds, that is
+given as a timeout to the query. The default one, in case none is specified,
+is 1 second.</p>
 </div>
 <p>The correct output for this sample is the following:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>hello there !!
@@ -469,8 +511,9 @@ timeout catched
 </div>
 <div class="section" id="sample-5-lookup">
 <span id="sample5"></span><h2>Sample 5 - Lookup<a class="headerlink" href="#sample-5-lookup" title="Permalink to this headline">¶</a></h2>
-<p>This example shows the usage of the lookup methods applied to a host. This is the full code of this sample, which
-you can find and test in <code class="docutils literal"><span class="pre">pyactor\examples\sample5.py</span></code>:</p>
+<p>This example shows the usage of the lookup methods applied to a host. This is
+the full code of this sample, which you can find and test in
+<code class="docutils literal"><span class="pre">pyactor\examples\sample5.py</span></code>:</p>
 <div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -534,24 +577,28 @@ you can find and test in <code class="docutils literal"><span class="pre">pyacto
 <span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>We have two ways to get the reference of one already existing actor of a host. If it is local, of the same host,
-it is fine to use the method <code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code> giving by parameter only the id of the actor you wish:</p>
+<p>We have two ways to get the reference of one already existing actor of a host.
+If it is local, of the same host, it is fine to use the method <a class="reference internal" href="code.html#pyactor.context.Host.lookup" title="pyactor.context.Host.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a>
+giving by parameter only the id of the actor you wish:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">e</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>If you are working remotly, you could need <code class="xref py py-meth docutils literal"><span class="pre">lookup_url()</span></code> to get the reference. In this example, it is used
-also to get a local reference giving the standard local url at which the host is initialized by default:</p>
+<p>If you are working remotly, you could need <a class="reference internal" href="code.html#pyactor.context.Host.lookup_url" title="pyactor.context.Host.lookup_url"><code class="xref py py-meth docutils literal"><span class="pre">lookup_url()</span></code></a> to get the
+reference. In this example, it is used also to get a local reference giving the
+standard local url at which the host is initialized by default:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ee</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">lookup_url</span><span class="p">(</span><span class="s1">&#39;local://local:6666/echo1&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
-<p class="last">Remember that if you are using the proxy for the host, you need to use <em>.get()</em>.</p>
+<p class="last">Remember that if you are using the proxy for the host, you need to
+use <em>.get()</em>.</p>
 </div>
 </div>
 <div class="section" id="sample-6-self-id-proxy-and-host">
 <span id="sample6"></span><h2>Sample 6 - self.id, proxy and host<a class="headerlink" href="#sample-6-self-id-proxy-and-host" title="Permalink to this headline">¶</a></h2>
-<p>This example tests the self references to actors id and proxy. This is the full code of this sample, which you can find and test in
+<p>This example tests the self references to actors id and proxy. This is the full
+code of this sample, which you can find and test in
 <code class="docutils literal"><span class="pre">pyactor\examples\sample6.py</span></code>:</p>
 <div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
@@ -634,16 +681,19 @@ also to get a local reference giving the standard local url at which the host is
 <span class="n">h</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>This sample demonstrates how to get references to an actor from the actor itself. With <code class="docutils literal"><span class="pre">self.id</span></code> we obtain the string
-that identifies the actor in the host it is located.
-Then, with <code class="docutils literal"><span class="pre">self.proxy</span></code> you can get a reference to a proxy managing the actor so you can give it to
-another function, class or module in a safe and easy way.</p>
-<p>It is also possible to use <code class="docutils literal"><span class="pre">self.host</span></code>, which will give a proxy to the host in which the actor is
-so you can <code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code> other actors from there.</p>
-<p>In the example, we use these three calls to send various salutations from a <code class="xref py py-class docutils literal"><span class="pre">Bot</span></code> to an <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code>
-giving by parameter also a proxy from the Bot so the Echo can call one of Bot&#8217;s methods in order to get its id.
-Also, the <code class="xref py py-meth docutils literal"><span class="pre">set_echo()</span></code> method, in this case, do not recieve the Echo by parameter. It uses the inside reference
-it already has to call a <code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code> to the host and get the wanted reference.</p>
+<p>This sample demonstrates how to get references to an actor from the actor
+itself. With <code class="docutils literal"><span class="pre">self.id</span></code> we obtain the string that identifies the actor in the
+host it is located. Then, with <code class="docutils literal"><span class="pre">self.proxy</span></code> you can get a reference to a proxy
+managing the actor so you can give it to another function, class or module in a
+safe and easy way.</p>
+<p>It is also possible to use <code class="docutils literal"><span class="pre">self.host</span></code>, which will give a proxy to the host in
+which the actor is so you can <a class="reference internal" href="code.html#pyactor.context.Host.lookup" title="pyactor.context.Host.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> other actors from there.</p>
+<p>In the example, we use these three calls to send various salutations from a
+<code class="xref py py-class docutils literal"><span class="pre">Bot</span></code> to an <code class="xref py py-class docutils literal"><span class="pre">Echo</span></code> giving by parameter also a proxy from the Bot
+so the Echo can call one of Bot&#8217;s methods in order to get its id. Also, the
+<code class="xref py py-meth docutils literal"><span class="pre">set_echo()</span></code> method, in this case, do not recieve the Echo by parameter.
+It uses the inside reference it already has to call a <a class="reference internal" href="code.html#pyactor.context.Host.lookup" title="pyactor.context.Host.lookup"><code class="xref py py-meth docutils literal"><span class="pre">lookup()</span></code></a> to the
+host and get the wanted reference.</p>
 <p>The correct output for this sample is the following:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span>hello from: bot1
 hi from: bot1
@@ -652,21 +702,22 @@ what`s up? from: bot1
 Press Ctrl+C to kill the execution
 </pre></div>
 </div>
-<p>In this sample, we also see the usage of the <code class="xref py py-func docutils literal"><span class="pre">serve_forever()</span></code> function wich is very useful in remote communication
-in order to keep a host alive as another one send queries to his actors. The usage is very simple, instead of shuting
-the host down at the end, we call:</p>
+<p>In this sample, we also see the usage of the <code class="xref py py-func docutils literal"><span class="pre">serve_forever()</span></code> function
+wich is very useful in remote communication in order to keep a host alive as
+another one send queries to his actors. The usage is very simple, instead of
+shuting the host down at the end, we call:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">serve_forever</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>This will maintain the host alive in lower process consumption until the user presses <code class="docutils literal"><span class="pre">Ctrl+C</span></code> allowing other hosts
-to lookup and call methods from actors in this host.</p>
+<p>This will maintain the host alive in lower process consumption until the user
+presses <code class="docutils literal"><span class="pre">Ctrl+C</span></code> allowing other hosts to lookup and call methods from actors
+in this host.</p>
 </div>
 <div class="section" id="sample-7-references">
-<h2>Sample 7 - references<a class="headerlink" href="#sample-7-references" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt>This example tests sending of proxy references by parameter using the ref decorator. This is the full code of this sample,</dt>
-<dd>which you can find and test in <code class="docutils literal"><span class="pre">pyactor\examples\sample7.py</span></code>:</dd>
-</dl>
+<span id="sample7"></span><h2>Sample 7 - references<a class="headerlink" href="#sample-7-references" title="Permalink to this headline">¶</a></h2>
+<p>This example tests sending of proxy references by parameter using the ref
+decorator. This is the full code of this sample, which you can find and test in
+<code class="docutils literal"><span class="pre">pyactor\examples\sample7.py</span></code>:</p>
 <div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -706,23 +757,48 @@ to lookup and call methods from actors in this host.</p>
 37
 38
 39
-40</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">Self references sample. Actor id/proxy. + serve_forever</span>
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Proxy references by parameter sample.</span>
 <span class="sd">&#39;&#39;&#39;</span>
 <span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">set_context</span><span class="p">,</span> <span class="n">create_host</span><span class="p">,</span> <span class="n">sleep</span>
 
 
 <span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
-    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="s1">&#39;echo2&#39;</span><span class="p">,</span> <span class="s1">&#39;echo3&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_ref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">,</span> <span class="s1">&#39;echo2&#39;</span><span class="p">,</span> <span class="s1">&#39;echo3&#39;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">sender</span><span class="p">):</span>
-        <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;from:&#39;</span><span class="p">,</span> <span class="n">sender</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+        <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;from:&#39;</span><span class="p">,</span> <span class="n">sender</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="nb">id</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">echo2</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">sndrs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sender</span> <span class="ow">in</span> <span class="n">sndrs</span><span class="p">:</span>
+            <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;from:&#39;</span><span class="p">,</span> <span class="n">sender</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="nb">id</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">echo3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">sndrs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">sender</span> <span class="ow">in</span> <span class="n">sndrs</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span> <span class="s1">&#39;from:&#39;</span><span class="p">,</span> <span class="n">sender</span><span class="o">.</span><span class="n">get_name</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span> <span class="nb">id</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">Bot</span><span class="p">:</span>
     <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;set_echo&#39;</span><span class="p">,</span> <span class="s1">&#39;say_hi&#39;</span><span class="p">]</span>
     <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;get_name&#39;</span><span class="p">]</span>
+    <span class="n">_ref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;get_name&#39;</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">greetings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;hello&#39;</span><span class="p">,</span> <span class="s1">&#39;hi&#39;</span><span class="p">,</span> <span class="s1">&#39;hey&#39;</span><span class="p">,</span> <span class="s1">&#39;what`s up?&#39;</span><span class="p">]</span>
@@ -737,27 +813,328 @@ to lookup and call methods from actors in this host.</p>
         <span class="k">for</span> <span class="n">salute</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">greetings</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">echo</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="n">salute</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proxy</span><span class="p">)</span>
 
+
 <span class="n">set_context</span><span class="p">()</span>
 <span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
 <span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
 <span class="n">bot</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;bot1&#39;</span><span class="p">,</span> <span class="n">Bot</span><span class="p">)</span>
+<span class="n">bot2</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;bot2&#39;</span><span class="p">,</span> <span class="n">Bot</span><span class="p">)</span>
 <span class="n">bot</span><span class="o">.</span><span class="n">set_echo</span><span class="p">()</span>
+<span class="n">bot2</span><span class="o">.</span><span class="n">set_echo</span><span class="p">()</span>
 <span class="n">bot</span><span class="o">.</span><span class="n">say_hi</span><span class="p">()</span>
+<span class="n">e1</span><span class="o">.</span><span class="n">echo2</span><span class="p">(</span><span class="s1">&#39;hello there!!&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">bot2</span><span class="p">])</span>
+<span class="n">e1</span><span class="o">.</span><span class="n">echo3</span><span class="p">(</span><span class="s1">&#39;hello there!!&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;bot1&#39;</span><span class="p">:</span> <span class="n">bot</span><span class="p">,</span> <span class="s1">&#39;bot2&#39;</span><span class="p">:</span> <span class="n">bot2</span><span class="p">})</span>
 
 <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">h</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+<span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>The previous examples pass proxy references by parameter in its methods, but them are sharing the same instance of a proxy.
-This could cause various problems of concurrency so we might want diferent proxies in different spots. To achive that, you
-have to indicate that a method recieves or returns a proxy with <code class="docutils literal"><span class="pre">&#64;ref</span></code> which is imported from <code class="docutils literal"><span class="pre">pyactor.proxy</span></code>.</p>
+<p>The previous examples pass proxy references by parameter in its methods, but
+them are sharing the same instance of a proxy. This could cause various problems
+of concurrency so we might want diferent proxies in different spots. To achive
+that, you have to indicate that a method recieves or returns a proxy with
+<code class="docutils literal"><span class="pre">&#64;ref</span></code> which is imported from <code class="docutils literal"><span class="pre">pyactor.proxy</span></code>.</p>
 </div>
-<div class="section" id="intervals">
-<span id="sample-inter"></span><h2>Intervals<a class="headerlink" href="#intervals" title="Permalink to this headline">¶</a></h2>
-<dl class="docutils">
-<dt>This example tests the usage of intervals that allow an actor to periadically do an action. This is the full code of this sample,</dt>
-<dd>which you can find and test in <code class="docutils literal"><span class="pre">pyactor\examples\intervals.py</span></code>:</dd>
-</dl>
+<div class="section" id="sample-8-parallel">
+<span id="sample8"></span><h2>Sample 8 - Parallel<a class="headerlink" href="#sample-8-parallel" title="Permalink to this headline">¶</a></h2>
+<p>This example tests the creation and execution of actors with parallel methods.
+This is the full code of this sample, which you can find and test in
+<code class="docutils literal"><span class="pre">pyactor\examples\sample8.py</span></code>:</p>
+<div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Parallel methods sample.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">set_context</span><span class="p">,</span> <span class="n">create_host</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">pyactor.util</span> <span class="k">import</span> <span class="ne">TimeoutError</span>
+
+
+<span class="k">class</span> <span class="nc">File</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;download&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="s1">&#39;downloading &#39;</span> <span class="o">+</span> <span class="n">filename</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+
+<span class="k">class</span> <span class="nc">Web</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_ask</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;list_files&#39;</span><span class="p">,</span> <span class="s1">&#39;get_file&#39;</span><span class="p">]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;remote_server&#39;</span><span class="p">]</span>
+    <span class="n">_parallel</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;list_files&#39;</span><span class="p">,</span> <span class="s1">&#39;get_file&#39;</span><span class="p">,</span> <span class="s1">&#39;remote_server&#39;</span><span class="p">]</span>
+<span class="c1"># Comment the line above to check the raise of timeouts if paral are not used.</span>
+    <span class="n">_ref</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;remote_server&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;a1.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;a2.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;a3.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;a4.zip&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">remote_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_server</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">file_server</span>
+
+    <span class="k">def</span> <span class="nf">list_files</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">files</span>
+
+    <span class="k">def</span> <span class="nf">get_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">download</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">Workload</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_ask</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;launch&#39;</span><span class="p">,</span> <span class="s1">&#39;download&#39;</span><span class="p">,</span> <span class="s1">&#39;remote_server&#39;</span><span class="p">]</span>
+    <span class="n">_parallel</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_ref</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;remote_server&quot;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">launch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">list_files</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TimeoutError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="n">e</span>
+
+    <span class="k">def</span> <span class="nf">remote_server</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">web_server</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span> <span class="o">=</span> <span class="n">web_server</span>
+
+    <span class="k">def</span> <span class="nf">download</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">server</span><span class="o">.</span><span class="n">get_file</span><span class="p">(</span><span class="s1">&#39;a1.txt&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+        <span class="nb">print</span> <span class="s1">&#39;download finished&#39;</span>
+
+<span class="n">set_context</span><span class="p">(</span><span class="s1">&#39;green_thread&#39;</span><span class="p">)</span>
+
+<span class="n">host</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
+
+<span class="n">f1</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;file1&#39;</span><span class="p">,</span> <span class="n">File</span><span class="p">)</span>
+<span class="n">web</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;web1&#39;</span><span class="p">,</span> <span class="n">Web</span><span class="p">)</span>
+<span class="n">web</span><span class="o">.</span><span class="n">remote_server</span><span class="p">(</span><span class="n">f1</span><span class="p">)</span>
+<span class="n">load</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;wl1&#39;</span><span class="p">,</span> <span class="n">Workload</span><span class="p">)</span>
+<span class="n">load</span><span class="o">.</span><span class="n">remote_server</span><span class="p">(</span><span class="n">web</span><span class="p">)</span>
+<span class="n">load2</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;wl2&#39;</span><span class="p">,</span> <span class="n">Workload</span><span class="p">)</span>
+<span class="n">load2</span><span class="o">.</span><span class="n">remote_server</span><span class="p">(</span><span class="n">web</span><span class="p">)</span>
+
+<span class="n">load</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+<span class="n">load2</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
+
+<span class="n">sleep</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span>
+<span class="nb">print</span> <span class="n">host</span><span class="o">.</span><span class="n">pthreads</span>
+<span class="c1"># print host.threads</span>
+<span class="n">host</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+<p>Parallels are a way of letting one actor to process many queries at a time.
+This will allow the actor to keep receiving calls when another call has been
+blocked with another job (an I/O call or a synchronous call to another actor).</p>
+<p>To make one method execute parallely, you need to specify it in the class attribute
+_parallel, which is a list. The method must also be in one of the lists _tell or
+_ask. The methods with this tag will be executed in new threads so their execution
+do not interfere with other queries.</p>
+<p>In this example we have three classes: File, Web and Workload. File represents a
+server that seve the download of files. Simulates the work with a sleep.
+Web represents a web server which contains a list of files. It has to have a file
+server that provide the files and can list its files (list_files) and return one
+of them (get_file). Workload is the class that will do the work. It asks the web
+to list ist files ten times, or request to download one of the files.</p>
+<p>The execution is simple, we create one file server, one web server and attach the
+file server to the web:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">web</span><span class="o">.</span><span class="n">remote_server</span><span class="p">(</span><span class="n">f1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Then lets do the work. Create two Workload instance and pass to them the web server
+we created:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">load</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;wl1&#39;</span><span class="p">,</span> <span class="n">Workload</span><span class="p">)</span>
+<span class="n">load</span><span class="o">.</span><span class="n">remote_server</span><span class="p">(</span><span class="n">web</span><span class="p">)</span>
+<span class="n">load2</span> <span class="o">=</span> <span class="n">host</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;wl2&#39;</span><span class="p">,</span> <span class="n">Workload</span><span class="p">)</span>
+<span class="n">load2</span><span class="o">.</span><span class="n">remote_server</span><span class="p">(</span><span class="n">web</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The first worker will make the ten queries to list_files, while the second one
+will download a file:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">load</span><span class="o">.</span><span class="n">launch</span><span class="p">()</span>
+<span class="n">load2</span><span class="o">.</span><span class="n">download</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>As the method get_file is marked as parallel, its execution will be done in another
+thread, so when the method blocks downloading (in the sleep), it will free the actor
+so it con keep serving answers to the first load.</p>
+<p>If we do not use parallels in this example (which you can try by commenting the
+right line as indicated) some of the calls to the list_files method will raise
+TimeoutError as the thread of that actor is blocked with the download.</p>
+</div>
+<div class="section" id="sample-9-multiple-hosts">
+<span id="sample9"></span><h2>Sample 9 - Multiple Hosts<a class="headerlink" href="#sample-9-multiple-hosts" title="Permalink to this headline">¶</a></h2>
+<p>This example tests the creation of multiple host at the same time on one unique
+execution. This is the full code of this sample, which you can find and test in
+<code class="docutils literal"><span class="pre">pyactor\examples\sample9.py</span></code>:</p>
+<div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">Multiple hosts.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="kn">from</span> <span class="nn">pyactor.context</span> <span class="k">import</span> <span class="n">set_context</span><span class="p">(),</span> <span class="n">create_host</span><span class="p">,</span> <span class="n">sleep</span>
+
+
+<span class="k">class</span> <span class="nc">Echo</span><span class="p">:</span>
+    <span class="n">_tell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
+    <span class="n">_ask</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">_ref</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;echo&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">echo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="n">pref</span><span class="p">):</span>
+        <span class="nb">print</span> <span class="n">msg</span><span class="p">,</span> <span class="n">pref</span>
+
+
+<span class="n">set_context</span><span class="p">()</span>
+<span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
+<span class="n">e1</span> <span class="o">=</span> <span class="n">h</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
+<span class="n">e1</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;hello there !!&#39;</span><span class="p">,</span> <span class="n">e1</span><span class="p">)</span>
+<span class="nb">print</span> <span class="n">e1</span>
+
+<span class="n">h2</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">(</span><span class="s2">&quot;local://local:7777/host&quot;</span><span class="p">)</span>
+<span class="n">e2</span> <span class="o">=</span> <span class="n">h2</span><span class="o">.</span><span class="n">spawn</span><span class="p">(</span><span class="s1">&#39;echo1&#39;</span><span class="p">,</span> <span class="n">Echo</span><span class="p">)</span>
+<span class="n">e2</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;hello 2&#39;</span><span class="p">,</span> <span class="n">e1</span><span class="p">)</span>
+<span class="nb">print</span> <span class="n">e2</span>
+
+<span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">e1</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;hello 3&#39;</span><span class="p">,</span> <span class="n">e2</span><span class="p">)</span>  <span class="c1"># This line raises TCPthing</span>
+    <span class="n">e2</span><span class="o">.</span><span class="n">echo</span><span class="p">(</span><span class="s1">&#39;hello 2&#39;</span><span class="p">,</span> <span class="n">e2</span><span class="p">)</span>  <span class="c1"># This one also</span>
+<span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+    <span class="nb">print</span> <span class="n">e</span>
+
+<span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">h</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+<span class="n">h2</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
+</pre></div>
+</td></tr></table></div>
+<p>The first thing to make clear is that you should never need to create more than
+host locally, since they are meant for remote communication. This is for testing
+purposes.</p>
+<p>To create more hosts, you only need to call again the function <a class="reference internal" href="code.html#pyactor.context.create_host" title="pyactor.context.create_host"><code class="xref py py-func docutils literal"><span class="pre">create_host()</span></code></a>.
+But you will need to specify diferent locations for each host, since those are their
+identifiers. In the example we create two hosts in the same location, but attending
+different ports:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">h</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">()</span>
+<span class="n">h2</span> <span class="o">=</span> <span class="n">create_host</span><span class="p">(</span><span class="s2">&quot;local://local:7777/host&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now, each host will manage its own actors and threads, so they will need to communicate
+through TCP connections.</p>
+<p>One thing important to know about this is that only one host can be used to manage
+the main execution of your program, so there always will be a main host and the
+other ones will be created as secondary hosts.</p>
+<p>This main host will auutomatically assigned to the first one created. If that
+one is closed and there still are other hosts operative, the oldest of them will
+asume the paper of main host.</p>
+</div>
+<div class="section" id="sample-10-intervals">
+<span id="sample-inter"></span><h2>Sample 10 - Intervals<a class="headerlink" href="#sample-10-intervals" title="Permalink to this headline">¶</a></h2>
+<p>This example tests the usage of intervals that allow an actor to periadically do
+an action. This is the full code of this sample, which you can find and test in
+<code class="docutils literal"><span class="pre">pyactor\examples\sample10.py</span></code>:</p>
 <div class="highlight-default"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre> 1
  2
  3
@@ -811,14 +1188,13 @@ have to indicate that a method recieves or returns a proxy with <code class="doc
 <span class="n">host</span><span class="o">.</span><span class="n">shutdown</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>To generate intervals, we need to import <a class="reference internal" href="thread.html#pyactor.thread.intervals.interval_host" title="pyactor.thread.intervals.interval_host"><code class="xref py py-func docutils literal"><span class="pre">interval_host()</span></code></a> and <a class="reference internal" href="green_thread.html#pyactor.green_thread.intervals.later" title="pyactor.green_thread.intervals.later"><code class="xref py py-func docutils literal"><span class="pre">later()</span></code></a> from intervals module.
-The class will call the first one giving the interval time and the function to execute, along with the host proxy
-that can be obtained with <code class="docutils literal"><span class="pre">self.proxy</span></code>. This function returns an interval instance that we have to keep in order
-to stop it after by calling <em>.set()</em>.
-In this example we use <a class="reference internal" href="green_thread.html#pyactor.green_thread.intervals.later" title="pyactor.green_thread.intervals.later"><code class="xref py py-func docutils literal"><span class="pre">later()</span></code></a> to set a timer that will stop the interval after a certain time.</p>
-</div>
-<div class="section" id="parallel">
-<h2>Parallel<a class="headerlink" href="#parallel" title="Permalink to this headline">¶</a></h2>
+<p>To generate intervals, we need to import <a class="reference internal" href="code.html#pyactor.context.interval_host" title="pyactor.context.interval_host"><code class="xref py py-func docutils literal"><span class="pre">interval_host()</span></code></a> and
+<a class="reference internal" href="green_thread.html#pyactor.green_thread.intervals.later" title="pyactor.green_thread.intervals.later"><code class="xref py py-func docutils literal"><span class="pre">later()</span></code></a> from intervals module. The class will call the first one giving
+the interval time and the function to execute, along with the host proxy that
+can be obtained with <code class="docutils literal"><span class="pre">self.proxy</span></code>. This function returns an interval instance
+that we have to keep in order to stop it after by calling <em>.set()</em>.
+In this example we use <a class="reference internal" href="green_thread.html#pyactor.green_thread.intervals.later" title="pyactor.green_thread.intervals.later"><code class="xref py py-func docutils literal"><span class="pre">later()</span></code></a> to set a timer that will stop the
+interval after a certain time.</p>
 </div>
 </div>
 
@@ -840,15 +1216,16 @@ In this example we use <a class="reference internal" href="green_thread.html#pya
 <li><a class="reference internal" href="#sample-5-lookup">Sample 5 - Lookup</a></li>
 <li><a class="reference internal" href="#sample-6-self-id-proxy-and-host">Sample 6 - self.id, proxy and host</a></li>
 <li><a class="reference internal" href="#sample-7-references">Sample 7 - references</a></li>
-<li><a class="reference internal" href="#intervals">Intervals</a></li>
-<li><a class="reference internal" href="#parallel">Parallel</a></li>
+<li><a class="reference internal" href="#sample-8-parallel">Sample 8 - Parallel</a></li>
+<li><a class="reference internal" href="#sample-9-multiple-hosts">Sample 9 - Multiple Hosts</a></li>
+<li><a class="reference internal" href="#sample-10-intervals">Sample 10 - Intervals</a></li>
 </ul>
 </li>
 </ul>
 
   <h4>Previous topic</h4>
   <p class="topless"><a href="green_thread.html"
-                        title="previous chapter">Gevent TYPE</a></p>
+                        title="previous chapter">Gevent Type</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -880,7 +1257,7 @@ In this example we use <a class="reference internal" href="green_thread.html#pya
           <a href="py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="green_thread.html" title="Gevent TYPE"
+          <a href="green_thread.html" title="Gevent Type"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">PyActor 0.1 documentation</a> &raquo;</li> 
       </ul>
