@@ -3,12 +3,12 @@
 Source
 ********
 
-.. _actor_source:
+.. _context_source:
 
-Actor
-======
+Context
+=========
 
-.. literalinclude:: ..\pyactor\actor.py
+.. literalinclude:: ../pyactor/context.py
     :linenos:
 
 .. _proxy_source:
@@ -16,21 +16,55 @@ Actor
 Proxy
 ======
 
-.. literalinclude:: ..\pyactor\proxy.py
+.. literalinclude:: ../pyactor/proxy.py
     :linenos:
 
-.. _context_source:
+.. _tactor_source:
 
-Context
-=========
+Thread Actor
+============
 
-.. literalinclude:: ..\pyactor\context.py
+.. literalinclude:: ../pyactor/thread/actor.py
     :linenos:
 
-.. _intervals_source:
 
-Intervals
-=========
+.. _tintervals_source:
 
-.. literalinclude:: ..\pyactor\intervals.py
+Thread Intervals
+================
+
+.. literalinclude:: ../pyactor/thread/intervals.py
+    :linenos:
+
+.. _tparallels_source:
+
+Thread Parallel
+================
+
+.. literalinclude:: ../pyactor/thread/parallels.py
+    :linenos:
+
+.. _gactor_source:
+
+Green Thread Actor
+===================
+
+.. literalinclude:: ../pyactor/green_thread/actor.py
+    :linenos:
+
+
+.. _gintervals_source:
+
+Grenn Thread Intervals
+=======================
+
+.. literalinclude:: ../pyactor/green_thread/intervals.py
+    :linenos:
+
+.. _gparallels_source:
+
+Green Thread Parallel
+=======================
+
+.. literalinclude:: ../pyactor/green_thread/parallels.py
     :linenos:

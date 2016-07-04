@@ -6,13 +6,14 @@ Main Code
 .. automodule:: pyactor
 
 
-Actor
-=====
+Context
+=======
 
-:ref:`See source <actor_source>`
+:ref:`See source <context_source>`
 
-.. automodule:: pyactor.actor
+.. automodule:: pyactor.context
     :members:
+
 
 Proxy
 =====
@@ -22,13 +23,6 @@ Proxy
 .. automodule:: pyactor.proxy
     :members:
 
-Context
-=======
-
-:ref:`See source <context_source>`
-
-.. automodule:: pyactor.context
-    :members:
 
 Util
 ====
