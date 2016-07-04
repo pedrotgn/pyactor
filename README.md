@@ -16,7 +16,7 @@ It supports two versions:
 
 <!-- +grafic tests -->
 
-#### Installation
+### Installation
 Install using:
 
     python setup.py install
@@ -38,6 +38,8 @@ This library is implemented using two types of concurrence:
 
 * ``'thread'`` : classic threads
 * ``'green_thread'`` : Gevent
+
+Green threads give a performance almost three times better.
 
 You will need to specify which one you are going to use at the beginning of your
 program with ``set_context('TYPE')``.
@@ -69,7 +71,7 @@ the sync method returns a result. You can now call this methods from your main
 code:
 
     actor1.tell_me('Hello')
-    actor1.ask_me().get()
+    print actor1.ask_me().get()
 
 More detailed examples can be found in the
 'pyactor/examples' directory of the project. They are also explained in the
