@@ -2,8 +2,10 @@ from pyactor.context import set_context, create_host, sleep
 
 from time import time
 
+
 NUM_NODES = 100
 NUM_MSGS = 100000
+
 
 class Node(object):
     _tell = ['set_next', 'init_token', 'take_token']
@@ -34,14 +36,14 @@ class Node(object):
 
 set_context('green_thread')
 
-print 'TEST ',NUM_NODES,' nodes and', NUM_MSGS, "messages."
+print 'TEST ', NUM_NODES, ' nodes and', NUM_MSGS, "messages."
 
 host = create_host()
 
-nf  = host.spawn('ini', Node)
+nf = host.spawn('ini', Node)
 
-ni = nf;
-for i in range (NUM_NODES-2):
+ni = nf
+for i in range(NUM_NODES - 2):
     ni = host.spawn(str(i), Node, [ni])
 
 n1 = host.spawn('end', Node, [ni])
@@ -57,6 +59,6 @@ while (not n1.is_finished().get()):
 
 end = time()
 
-print ((end - init)*1000),' ms.'
+print ((end - init) * 1000), ' ms.'
 
 host.shutdown()
