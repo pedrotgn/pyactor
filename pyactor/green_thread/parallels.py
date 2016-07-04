@@ -1,5 +1,6 @@
 import uuid
 
+from gevent import spawn
 from actor import *
 
 
@@ -96,7 +97,7 @@ class ParallelAskWraper():
                 return result
             else:
                 param = (self.__method, rpc_id, args, kwargs)
-                t = gevent.spawn(self.invoke, *param)
+                t = spawn(self.invoke, *param)
                 get_host().new_parallel(self.__actor.url, t)
 
     def invoke(self, func, rpc_id, args=[], kwargs=[]):
@@ -120,7 +121,7 @@ class ParallelTellWraper():
 
     def __call__(self, *args, **kwargs):
         param = (self.__method, args, kwargs)
-        t = gevent.spawn(self.invoke, *param)
+        t = spawn(self.invoke, *param)
         get_host().new_parallel(self.__actor.url, t)
 
     def invoke(self, func, args=[], kwargs=[]):

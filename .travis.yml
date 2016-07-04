@@ -6,7 +6,7 @@ install:
     - python setup.py install
 script:
     - find ./pyactor -name \*.py -exec pep8 --ignore=E402 {} +
-    - nosetests --with-coverage --cover-erase --cover-package=pyactor
+    - nosetests -v --with-coverage --cover-erase --cover-package=pyactor
 after_success:
     - pip install coveralls
     - coveralls

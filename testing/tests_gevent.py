@@ -161,6 +161,7 @@ class Workload(object):
 
 class TestBasic(unittest.TestCase):
     def setUp(self):
+        unittest.TestCase.setUp(self)
         self.bu = sys.stdout
         sys.stdout = open(os.devnull, 'w')
         # self.out = ""
@@ -293,6 +294,7 @@ class TestBasic(unittest.TestCase):
 
     def test_7parallels(self):
         global cnt
+        cnt = 0
         f1 = self.hr.spawn('file1', File)
         web = self.hr.spawn('web1', Web)
         web.remote_server(f1)
@@ -303,7 +305,7 @@ class TestBasic(unittest.TestCase):
         load2.remote_server(web)
         load.launch()
         load2.download()
-        sleep(10)
+        sleep(7)
 
         self.assertNotEqual(cnt, 1000)
 
@@ -315,7 +317,7 @@ class TestBasic(unittest.TestCase):
 
         load.launch()
         load2.download()
-        sleep(10)
+        sleep(7)
 
         self.assertEqual(cnt, 1000)
 

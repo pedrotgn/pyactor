@@ -52,8 +52,8 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyActor'
-copyright = u'2016, URV'
-author = u'URV'
+copyright = u'2016, AST DEIM'
+author = u'AST DEIM'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
