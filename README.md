@@ -3,9 +3,6 @@
 ###### _The minimalistic python actor middleware_
 -------------------------------------
 
-[![Build Status](https://travis-ci.org/pedrotgn/pyactor.svg?branch=master)](https://travis-ci.org/pedrotgn/pyactor)
-[![Coverage Status](https://codecov.io/gh/pedrotgn/pyactor/branch/master/graph/badge.svg)](https://codecov.io/gh/pedrotgn/pyactor)
-
 PyActor is a python actor middleware for an object oriented architecture
 constructed with the idea of getting two remote objects
 to quickly communicate in a very simple, lightwighted and minimalistic way.
@@ -30,6 +27,20 @@ Check that works executing the examples:
 Check also the docs for a tutorial:
 
 [![Documentation Status](https://readthedocs.org/projects/pyactor/badge/?version=latest)](http://pyactor.readthedocs.io/en/latest/?badge=latest)
+
+Commits are build and tested automatically at [Travis-CI](https://travis-ci.org/pedrotgn/pyactor).
+
+[![Build Status](https://travis-ci.org/pedrotgn/pyactor.svg?branch=master)](https://travis-ci.org/pedrotgn/pyactor)
+
+See code coverage at [codecov.io](https://codecov.io/gh/pedrotgn/pyactor) or [coveralls.io](https://coveralls.io/github/pedrotgn/pyactor)
+
+[![Coverage Status](https://codecov.io/gh/pedrotgn/pyactor/branch/master/graph/badge.svg)](https://codecov.io/gh/pedrotgn/pyactor)
+<!-- [![Coverage Status](https://coveralls.io/repos/github/pedrotgn/pyactor/badge.svg?branch=master)](https://coveralls.io/github/pedrotgn/pyactor?branch=master) -->
+
+The code is also checked for its health at every push by [landscape.io](https://landscape.io/github/pedrotgn/pyactor)
+(PEP8, common bad smells, etc):
+
+[![Code Health](https://landscape.io/github/pedrotgn/pyactor/master/landscape.svg?style=flat)](https://landscape.io/github/pedrotgn/pyactor/master)
 
 
 ## First steps
