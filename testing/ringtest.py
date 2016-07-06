@@ -35,6 +35,7 @@ class Node(object):
 
 
 set_context('green_thread')
+# set_context('thread')
 
 print 'TEST ', NUM_NODES, ' nodes and', NUM_MSGS, "messages."
 

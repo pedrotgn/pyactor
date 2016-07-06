@@ -45,7 +45,7 @@ class Workload(object):
             try:
                 print self.server.list_files().get(2)
             except TimeoutError as e:
-                print e
+                print i, e
 
     def remote_server(self, web_server):
         self.server = web_server

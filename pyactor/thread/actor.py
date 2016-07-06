@@ -1,8 +1,8 @@
-from Queue import Queue, Empty
+from Queue import Queue
 from threading import Thread
 from copy import copy
 
-from pyactor.util import *
+from pyactor.util import AskResponse, TellRequest, ASK, TELL, FUTURE
 
 
 class Channel(Queue):

@@ -5,7 +5,7 @@ from pyactor.context import set_context, create_host, sleep
 from pyactor.util import TimeoutError
 
 
-class Echo:
+class Echo(object):
     _tell = ['echo', 'bye']
     _ask = ['say_something']
 

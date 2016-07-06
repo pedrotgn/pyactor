@@ -1,10 +1,10 @@
 '''
 Multiple hosts.
 '''
-from pyactor.context import set_context(), create_host, sleep
+from pyactor.context import set_context, create_host, sleep
 
 
-class Echo:
+class Echo(object):
     _tell = ['echo']
     _ask = []
     _ref = ['echo']

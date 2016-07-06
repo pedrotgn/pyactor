@@ -5,7 +5,7 @@
 
 PyActor is a python actor middleware for an object oriented architecture
 constructed with the idea of getting two remote objects
-to quickly communicate in a very simple, lightwighted and minimalistic way.
+to quickly communicate in a very simple, lightweight and minimalistic way.
 
 It supports two versions:
 * Threading

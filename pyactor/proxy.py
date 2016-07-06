@@ -1,6 +1,9 @@
 from Queue import Empty
 
-from util import *
+from util import ASK, FUTURE, TELL
+from util import AskRequest, FutureRequest, TellRequest
+from util import AlreadyExistsError, TimeoutError
+from util import get_current, get_host, get_lock
 
 
 def set_actor(module_name):
@@ -9,7 +12,7 @@ def set_actor(module_name):
                         ['Channel'], -1)
 
 
-class Proxy:
+class Proxy(object):
     '''
     Proxy is the class that supports to create a remote reference to an
     actor and invoke its methods.
@@ -102,7 +105,7 @@ class Future(object):
                 return result
         except AlreadyExistsError, ae:
             raise ae
-        except Empty, e:
+        except Empty:
             if self.__lock:
                 self.__lock.acquire()
             raise TimeoutError(self.__method)
@@ -137,7 +140,7 @@ class Future(object):
 class FutureRef(Future):
     def get(self, timeout=1):
         result = super(FutureRef, self).get(timeout)
-        return get_host()._loads(result)
+        return get_host().loads(result)
 
 
 class TellWrapper(object):
@@ -185,12 +188,12 @@ class AskRefWrapper(AskWrapper):
     Wrapper for Ask queries that have a proxy in parameters or returns.
     '''
     def __call__(self, *args, **kwargs):
-        new_args = get_host()._dumps(list(args))
+        new_args = get_host().dumps(list(args))
         return FutureRef(self._channel, self._method, new_args, self.target)
 
 
 class TellRefWrapper(TellWrapper):
     '''Wrapper for Tell queries that have a proxy in parameters.'''
     def __call__(self, *args, **kwargs):
-        new_args = get_host()._dumps(list(args))
-        result = super(TellRefWrapper, self).__call__(*new_args, **kwargs)
+        new_args = get_host().dumps(list(args))
+        return super(TellRefWrapper, self).__call__(*new_args, **kwargs)

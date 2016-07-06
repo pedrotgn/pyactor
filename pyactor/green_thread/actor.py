@@ -1,10 +1,9 @@
 from copy import copy
 
-# import gevent
 from gevent import spawn
-from gevent.queue import Queue, Empty
+from gevent.queue import Queue
 
-from pyactor.util import *
+from pyactor.util import AskResponse, TellRequest, ASK, TELL, FUTURE
 
 
 class Channel(Queue):

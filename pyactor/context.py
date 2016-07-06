@@ -1,10 +1,8 @@
 from signal import SIGINT
-import sys
 
 from urlparse import urlparse
-from copy import copy
 from proxy import Proxy, set_actor
-from util import *
+from util import HostDownError, AlreadyExistsError, NotFoundError
 import util
 
 CLEAN_INT = 4
@@ -136,7 +134,7 @@ class Host(object):
         #     dispatcher = self.tcp.get_dispatcher(self.addr)
         #     launch_actor(self.addr,dispatcher)
 
-    def spawn(self, id, klass, args=[]):
+    def spawn(self, aid, klass, param=[]):
         '''
         This method creates an actor attached to this host. It will be
         an instance of the class *klass* and it will be assigned an ID
@@ -144,10 +142,10 @@ class Host(object):
 
         This method can be called remotely synchronously.
 
-        :param str. id: identifier for the spawning actor. Unique within
+        :param str. aid: identifier for the spawning actor. Unique within
             the host.
         :param class klass: class type of the spawning actor.
-        :param list args: arguments for the init function of the
+        :param list param: arguments for the init function of the
             spawning actor class.
         :return: :class:`~.Proxy` of the actor spawned.
         :raises: :class:`AlreadyExistsError`, if the ID specified is
@@ -156,12 +154,12 @@ class Host(object):
         '''
         if not self.alive:
             raise HostDownError()
-        url = '%s://%s/%s' % (self.transport, self.host_url.netloc, id)
+        url = '%s://%s/%s' % (self.transport, self.host_url.netloc, aid)
         if url in self.actors.keys():
             raise AlreadyExistsError(url)
         else:
-            obj = klass(*args)
-            obj.id = id
+            obj = klass(*param)
+            obj.id = aid
             if self.running:
                 obj.host = self.proxy
             # else:
@@ -180,21 +178,21 @@ class Host(object):
             self.launch_actor(url, new_actor)
             return Proxy(new_actor)
 
-    def lookup(self, id):
+    def lookup(self, aid):
         '''
         Gets a new proxy that references to the actor of this host
         identified by the given ID.
 
         This method can be called remotely synchronously.
 
-        :param str. id: identifier of the actor you want.
+        :param str. aid: identifier of the actor you want.
         :return: :class:`~.Proxy` of the actor requiered.
         :raises: :class:`NotFoundError`  if the actor does not exist.
         :raises: :class:`HostDownError`  if the host is down.
         '''
         if not self.alive:
             raise HostDownError()
-        url = '%s://%s/%s' % (self.transport, self.host_url.netloc, id)
+        url = '%s://%s/%s' % (self.transport, self.host_url.netloc, aid)
         if url in self.actors.keys():
             return Proxy(self.actors[url])
         else:
@@ -343,7 +341,7 @@ class Host(object):
         '''Deletes an interval event from the host registry.'''
         del self.intervals[interval_id]
 
-    def _dumps(self, param):
+    def dumps(self, param):
         '''
         Checks the parameters generating new proxy instances to avoid
         query concurrences from shared proxies.
@@ -351,16 +349,16 @@ class Host(object):
         if isinstance(param, Proxy):
             return self.lookup_url(param.actor.url)
         elif isinstance(param, list):
-            return [self._dumps(elem) for elem in param]
+            return [self.dumps(elem) for elem in param]
         elif isinstance(param, dict):
             new_dict = param
             for key in new_dict.keys():
-                new_dict[key] = self._dumps(new_dict[key])
+                new_dict[key] = self.dumps(new_dict[key])
             return new_dict
         else:
             return param
 
-    def _loads(self, param):
+    def loads(self, param):
         '''
         Checks the return parameters generating new proxy instances to
         avoid query concurrences from shared proxies.
@@ -368,11 +366,11 @@ class Host(object):
         if isinstance(param, Proxy):
             return self.lookup_url(param.actor.url)
         elif isinstance(param, list):
-            return [self._loads(elem) for elem in param]
+            return [self.loads(elem) for elem in param]
         elif isinstance(param, dict):
             new_dict = param
             for key in new_dict.keys():
-                new_dict[key] = self._loads(new_dict[key])
+                new_dict[key] = self.loads(new_dict[key])
             return new_dict
         else:
             return param

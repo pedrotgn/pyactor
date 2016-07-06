@@ -311,7 +311,7 @@ class TestBasic(unittest.TestCase):
         self.assertNotEqual(cnt, 1000)
 
         sleep(1)
-        
+
         web2 = self.hr.spawn('web2', WebNP)
         web2.remote_server(f1)
         self.assertNotEqual(web2.actor.__class__.__name__, 'ActorParallel')

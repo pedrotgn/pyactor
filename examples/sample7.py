@@ -4,7 +4,7 @@ Proxy references by parameter sample.
 from pyactor.context import set_context, create_host, sleep
 
 
-class Echo:
+class Echo(object):
     _tell = ['echo', 'echo2', 'echo3']
     _ask = []
     _ref = ['echo', 'echo2', 'echo3']
@@ -21,7 +21,7 @@ class Echo:
             print msg, 'from:', sender.get_name().get(), id(sender)
 
 
-class Bot:
+class Bot(object):
     _tell = ['set_echo', 'say_hi']
     _ask = ['get_name']
     _ref = ['get_name']

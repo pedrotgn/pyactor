@@ -4,7 +4,7 @@ Self references sample. Actor id/proxy. + serve_forever
 from pyactor.context import set_context, create_host, sleep
 
 
-class Echo:
+class Echo(object):
     _tell = ['echo']
     _ask = []
 
@@ -12,7 +12,7 @@ class Echo:
         print msg, 'from:', sender.get_name().get()
 
 
-class Bot:
+class Bot(object):
     _tell = ['set_echo', 'say_hi']
     _ask = ['get_name']
 

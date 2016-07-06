@@ -4,7 +4,7 @@ Callback sample.
 from pyactor.context import set_context, create_host, sleep
 
 
-class Echo:
+class Echo(object):
     _tell = ['echo', 'bye']
     _ask = ['say_something']
 
@@ -18,7 +18,7 @@ class Echo:
         return 'something'
 
 
-class Bot:
+class Bot(object):
     _tell = ['set_echo', 'ping', 'pong']
     _ask = []
 

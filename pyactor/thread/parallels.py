@@ -1,7 +1,8 @@
 import uuid
 from threading import Lock, Thread
 
-from actor import *
+from actor import Actor
+from pyactor.util import get_host
 
 
 class ActorParallel(Actor):
@@ -80,7 +81,7 @@ class ActorParallel(Actor):
         return self.__lock
 
 
-class ParallelAskWraper():
+class ParallelAskWraper(object):
     '''Wrapper for ask methods that have to be called in a parallel form.'''
     def __init__(self, method, actor, lock):
         self.__method = method
@@ -88,24 +89,17 @@ class ParallelAskWraper():
         self.__lock = lock
 
     def __call__(self, *args, **kwargs):
-        try:
-            args = list(args)
-            rpc_id = args[0]
-            del args[0]
-            args = tuple(args)
-        except Exception:
-            rpc_id = None
-        finally:
-            if rpc_id is None:
-                result = self.__method(*args, **kwargs)
-                return result
-            else:
-                param = (self.__method, rpc_id, args, kwargs)
-                t = Thread(target=self.invoke, args=param)
-                t.start()
-                get_host().new_parallel(self.__actor.url, t)
+        args = list(args)
+        rpc_id = args[0]
+        del args[0]
+        args = tuple(args)
 
-    def invoke(self, func, rpc_id, args=[], kwargs=[]):
+        param = (self.__method, rpc_id, args, kwargs)
+        t = Thread(target=self.invoke, args=param)
+        t.start()
+        get_host().new_parallel(self.__actor.url, t)
+
+    def invoke(self, func, rpc_id, args, kwargs):
         self.__lock.acquire()
         try:
             result = func(*args, **kwargs)
@@ -115,7 +109,7 @@ class ParallelAskWraper():
         self.__actor.receive_from_ask(result, rpc_id)
 
 
-class ParallelTellWraper():
+class ParallelTellWraper(object):
     '''
     Wrapper for tell methods that have to be called in a parallel form.
     '''
@@ -130,7 +124,7 @@ class ParallelTellWraper():
         t.start()
         get_host().new_parallel(self.__actor.url, t)
 
-    def invoke(self, func, args=[], kwargs=[]):
+    def invoke(self, func, args, kwargs):
         self.__lock.acquire()
         func(*args, **kwargs)
         self.__lock.release()

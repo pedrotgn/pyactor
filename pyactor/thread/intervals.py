@@ -20,7 +20,7 @@ def later(timeout, f, *args, **kwargs):
 
     :return: :class:`Timer`
     '''
-    t = Timer(timeout, f, args)
+    t = Timer(timeout, f, args, kwargs)
     t.start()
     return t
 

@@ -2,7 +2,7 @@ from pyactor.context import (set_context, create_host, sleep,
                              interval_host, later)
 
 
-class Registry():
+class Registry(object):
     _ask = []
     _tell = ['hello', 'init_start']
 
