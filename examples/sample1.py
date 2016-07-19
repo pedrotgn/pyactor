@@ -17,7 +17,7 @@ e1 = h.spawn('echo1', Echo)
 e1.echo('hello there !!')
 
 hr = h.proxy
-e2 = hr.spawn('echo2', Echo).get()
+e2 = hr.spawn('echo2', Echo)
 e2.echo('remote hello!!')
 
 sleep(1)

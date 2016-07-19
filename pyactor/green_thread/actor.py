@@ -3,7 +3,8 @@ from copy import copy
 from gevent import spawn
 from gevent.queue import Queue
 
-from pyactor.util import AskResponse, TellRequest, ASK, TELL, FUTURE
+from pyactor.util import AskResponse, TellRequest, FutureResponse
+from pyactor.util import ASK, TELL, FUTURE
 
 
 class Channel(Queue):
@@ -136,7 +137,7 @@ class Actor(ActorRef):
 
             except Exception, e:
                 result = e
-                print result
+                # print result
             self.send_response(result, msg)
 
     def send_response(self, result, msg):
@@ -144,7 +145,7 @@ class Actor(ActorRef):
             response = AskResponse(result)
             msg.channel.send(response)
         if msg.type == FUTURE:
-            response = TellRequest(TELL, msg.callback, [result], msg.from_url)
+            response = FutureResponse(msg.future_id, result)
             msg.channel.send(response)
 
     def run(self):

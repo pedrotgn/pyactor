@@ -31,7 +31,7 @@ class Web(object):
         return self.files
 
     def get_file(self, filename):
-        return self.server.download(filename).get(6)
+        return self.server.download(filename, timeout=6)
 
 
 class Workload(object):
@@ -43,7 +43,7 @@ class Workload(object):
     def launch(self):
         for i in range(10):
             try:
-                print self.server.list_files().get(2)
+                print self.server.list_files(timeout=2)
             except TimeoutError as e:
                 print i, e
 
@@ -51,7 +51,7 @@ class Workload(object):
         self.server = web_server
 
     def download(self):
-        self.server.get_file('a1.txt').get(10)
+        self.server.get_file('a1.txt', timeout=10)
         print 'download finished'
 
 # set_context('green_thread')
@@ -61,6 +61,7 @@ host = create_host()
 
 f1 = host.spawn('file1', File)
 web = host.spawn('web1', Web)
+sleep(1)
 web.remote_server(f1)
 load = host.spawn('wl1', Workload)
 load.remote_server(web)

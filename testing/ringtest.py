@@ -55,7 +55,7 @@ init = time()
 
 nf.init_token()
 
-while (not n1.is_finished().get()):
+while (not n1.is_finished()):
     sleep(0.01)
 
 end = time()

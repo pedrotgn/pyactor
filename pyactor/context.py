@@ -39,6 +39,10 @@ def set_context(module_name='thread'):
         parallels = __import__('pyactor.' + module_name + '.parallels',
                                globals(), locals(),
                                ['ActorParallel'], -1)
+        global future
+        future = __import__('pyactor.' + module_name + '.future',
+                            globals(), locals(),
+                            ['FutureManager'], -1)
         set_actor(module_name)
         global signal
         if module_name == 'green_thread':
@@ -66,7 +70,7 @@ def create_host(url="local://local:6666/host"):
 
     :param str. url: URL where to start and bind the host.
     :return: :class:`~.Host` created.
-    :rise: Exception if there is a host already created.
+    :raises: Exception if there is a host already created.
     '''
     if url in util.hosts.keys():
         raise Exception('Host already created. Only one host can' +
@@ -98,7 +102,7 @@ class Host(object):
     :param str. url: URL that identifies the host.
     '''
     _tell = ['attach_interval', 'detach_interval']
-    _ask = ['spawn', 'lookup', 'spawn_n', 'lookup_url']
+    _ask = ['spawn', 'lookup', 'lookup_url']
 
     def __init__(self, url):
         self.actors = {}
@@ -111,6 +115,8 @@ class Host(object):
         self.alive = True
         self.load_transport(url)
         self.init_host()
+
+        self.future_manager = future.FutureManager()
 
         # self.cleaner = interval_host(get_host(), CLEAN_INT, self.do_clean)
 
@@ -214,6 +220,8 @@ class Host(object):
             for interval_event in self.intervals.values():
                 interval_event.set()
 
+            self.future_manager.stop()
+
             for actor in self.actors.values():
                 Proxy(actor).stop()
 
@@ -244,7 +252,7 @@ class Host(object):
 
         :param srt. url: address that identifies an actor.
         :return: :class:`~.Proxy` of the actor requested.
-        :raise: :class:`NotFoundError`, if the URL specified do not
+        :raises: :class:`NotFoundError`, if the URL specified do not
             correspond to any actor in the host.
         :raises: :class:`HostDownError`  if the host is down.
         '''

@@ -1,3 +1,6 @@
+'''
+Intervals sample
+'''
 from pyactor.context import (set_context, create_host, sleep,
                              interval_host, later)
 

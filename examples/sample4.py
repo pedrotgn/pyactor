@@ -26,7 +26,7 @@ e1.echo('hello there !!')
 e1.bye()
 
 try:
-    x = e1.say_something().get(1)
+    x = e1.say_something(timeout=1)
 except TimeoutError:
     print 'timeout catched'
 sleep(1)

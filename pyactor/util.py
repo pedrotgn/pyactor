@@ -120,10 +120,15 @@ AskResponse = collections.namedtuple('AskResponse', 'result')
 A namedtuple for the responses of the requests :class:`AskRequest`.
 '''
 FutureRequest = collections.namedtuple('FutureRequest',
-                                       'type method params callback channel \
-                                        to_url from_url')
+                                       'type method params channel to_url \
+                                       future_id')
 '''
 A namedtuple for the future requests.
+'''
+FutureResponse = collections.namedtuple('FutureResponse',
+                                        'future_id result')
+'''
+A namedtuple for the future results.
 '''
 
 # global AskRequest, TellRquest, AskResponse, FutureRequest

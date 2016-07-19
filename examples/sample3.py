@@ -15,6 +15,7 @@ class Echo(object):
         print 'bye'
 
     def say_something(self):
+        sleep(1)
         return 'something'
 
 
@@ -26,11 +27,13 @@ class Bot(object):
         self.echo = echo
 
     def ping(self):
-        future = self.echo.say_something()
+        future = self.echo.say_something(future=True)
+        future.add_callback('pong')
         future.add_callback('pong')
         print 'pinging..'
 
-    def pong(self, msg):
+    def pong(self, future):
+        msg = future.result()
         print 'callback', msg
 
 set_context()
@@ -40,5 +43,5 @@ bot = h.spawn('bot', Bot)
 bot.set_echo(e1)
 bot.ping()
 
-sleep(1)
+sleep(2)
 h.shutdown()

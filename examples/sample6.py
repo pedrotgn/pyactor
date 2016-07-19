@@ -9,7 +9,7 @@ class Echo(object):
     _ask = []
 
     def echo(self, msg, sender):
-        print msg, 'from:', sender.get_name().get()
+        print msg, 'from:', sender.get_name()
 
 
 class Bot(object):
@@ -20,7 +20,7 @@ class Bot(object):
         self.greetings = ['hello', 'hi', 'hey', 'what`s up?']
 
     def set_echo(self):
-        self.echo = self.host.lookup('echo1').get()
+        self.echo = self.host.lookup('echo1')
 
     def get_name(self):
         return self.id

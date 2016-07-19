@@ -23,7 +23,7 @@ e1 = h.spawn('echo1', Echo)
 e1.echo('hello there !!')
 e1.bye()
 
-print e1.say_something().get()
+print e1.say_something()
 
 sleep(1)
 h.shutdown()

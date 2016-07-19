@@ -22,10 +22,10 @@ h = create_host()
 e1 = h.spawn('echo1', Echo)
 
 e = h.lookup('echo1')
-print e.say_something().get()
+print e.say_something()
 
 ee = h.lookup_url('local://local:6666/echo1')
-print ee.say_something().get()
+print ee.say_something()
 
 sleep(1)
 h.shutdown()
