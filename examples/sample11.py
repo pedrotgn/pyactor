@@ -5,7 +5,7 @@ from pyactor.context import set_context, create_host, sleep
 
 
 class Echo(object):
-    _tell = ['echo', 'bye']
+    _tell = ['echo']
     _ask = ['say_something', 'raise_something']
 
     def echo(self, msg):

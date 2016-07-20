@@ -1,6 +1,6 @@
 import uuid
 from threading import Condition, Thread
-from pyactor.util import get_current
+from pyactor.util import get_current, get_host
 from pyactor.util import TellRequest, TELL, FutureRequest, FUTURE
 from pyactor.util import TimeoutError
 
@@ -17,7 +17,7 @@ class Future(object):
     could not be resolved yet.
     """
     def __init__(self, fid, actor_channel, method, params, manager_channel,
-                 actor_url):
+                 actor_url, lock):
         self.__condition = Condition()
         self.__state = PENDING
         self.__result = None
@@ -29,6 +29,7 @@ class Future(object):
         self.__actor_channel = actor_channel
         self.__target = actor_url
         self.__channel = manager_channel
+        self.__lock = lock
         self.__id = fid
 
     def _invoke_callbacks(self):
@@ -37,7 +38,8 @@ class Future(object):
                 msg = TellRequest(TELL, callback[0], [self], callback[2])
                 callback[1].send(msg)
             except Exception, e:
-                raise Exception('exception calling callback for %r', self)
+                raise Exception('exception calling callback for %r: %r'
+                                % (self, e))
 
     def running(self):
         """Return True if the future is currently executing."""
@@ -50,7 +52,7 @@ class Future(object):
             return self.__state == FINISHED
 
     def __get__result(self):
-        if self.__exception:
+        if self.__exception is not None:
             raise self.__exception
         else:
             return self.__result
@@ -97,7 +99,11 @@ class Future(object):
             if self.__state == FINISHED:
                 return self.__get__result()
 
+            if self.__lock is not None:
+                self.__lock.release()
             self.__condition.wait(timeout)
+            if self.__lock is not None:
+                self.__lock.acquire()
 
             if self.__state == FINISHED:
                 return self.__get__result()
@@ -119,7 +125,11 @@ class Future(object):
             if self.__state == FINISHED:
                 return self.__exception
 
+            if self.__lock is not None:
+                self.__lock.release()
             self.__condition.wait(timeout)
+            if self.__lock is not None:
+                self.__lock.acquire()
 
             if self.__state == FINISHED:
                 return self.__exception
@@ -208,19 +218,18 @@ class FutureManager(object):
                 else:
                     future.set_result(result)
 
-    def new_future(self, method, params, actor_channel, actor_url, ref=False):
+    def new_future(self, method, params, actor_channel, actor_url, lock,
+                   ref=False):
         future_id = str(uuid.uuid4())
         if not ref:
             future = Future(future_id, actor_channel, method, params,
-                            self.channel, actor_url)
+                            self.channel, actor_url, lock)
         else:
             future = FutureRef(future_id, actor_channel, method, params,
-                               self.channel, actor_url)
-        try:
-            future.send_work()
-            self.futures[future_id] = future
-        except Exception, e:
-            raise e
+                               self.channel, actor_url, lock)
+        future.send_work()
+        self.futures[future_id] = future
+
         if not self.running:
             self.t = Thread(target=self.__queue_management)
             self.t.start()

@@ -2,8 +2,8 @@ from Queue import Queue
 from threading import Thread
 from copy import copy
 
-from pyactor.util import AskResponse, TellRequest, FutureResponse
-from pyactor.util import ASK, TELL, FUTURE
+from pyactor.util import AskResponse, FutureResponse
+from pyactor.util import ASK, FUTURE
 
 
 class Channel(Queue):

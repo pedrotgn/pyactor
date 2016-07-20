@@ -1,9 +1,8 @@
 from Queue import Empty
 
-from util import ASK, FUTURE, TELL
-from util import AskRequest, FutureRequest, TellRequest
+from util import ASK, TELL, AskRequest, TellRequest
 from util import AlreadyExistsError, TimeoutError, NotFoundError
-from util import get_current, get_host, get_lock
+from util import get_host, get_lock
 
 
 def set_actor(module_name):
@@ -79,27 +78,27 @@ class AskWrapper(object):
     :param str. actor_url: URL address where the actor is set.
     '''
     def __init__(self, channel, method, actor_url):
-        self.__actor_channel = channel
-        self.__method = method
+        self._actor_channel = channel
+        self._method = method
         self.target = actor_url
 
     def __call__(self, *args, **kwargs):
         future = kwargs['future'] if 'future' in kwargs.keys() else False
 
+        self.__lock = get_lock()
         if not future:
             self.__channel = actorm.Channel()
-            self.__lock = get_lock()
             timeout = kwargs['timeout'] if 'timeout' in kwargs.keys() else 1
             #  SENDING MESSAGE ASK
-            msg = AskRequest(ASK, self.__method, args, self.__channel,
+            msg = AskRequest(ASK, self._method, args, self.__channel,
                              self.target)
-            self.__actor_channel.send(msg)
-            if self.__lock:
+            self._actor_channel.send(msg)
+            if self.__lock is not None:
                 self.__lock.release()
             try:
                 response = self.__channel.receive(timeout)
                 result = response.result
-                if self.__lock:
+                if self.__lock is not None:
                     self.__lock.acquire()
                 if isinstance(result, Exception):
                     raise result
@@ -110,13 +109,14 @@ class AskWrapper(object):
             except NotFoundError, nf:
                 raise nf
             except Empty:
-                if self.__lock:
+                if self.__lock is not None:
                     self.__lock.acquire()
-                raise TimeoutError(self.__method)
+                raise TimeoutError(self._method)
         else:
-            return get_host().future_manager.new_future(self.__method, args,
-                                                        self.__actor_channel,
-                                                        self.target)
+            return get_host().future_manager.new_future(self._method, args,
+                                                        self._actor_channel,
+                                                        self.target,
+                                                        self.__lock)
 
 
 class AskRefWrapper(AskWrapper):
@@ -127,9 +127,11 @@ class AskRefWrapper(AskWrapper):
         future = kwargs['future'] if 'future' in kwargs.keys() else False
         new_args = get_host().dumps(list(args))
         if future:
-            return get_host().future_manager.new_future(self.__method, args,
-                                                        self.__actor_channel,
-                                                        self.target, ref=True)
+            self.__lock = get_lock()
+            return get_host().future_manager.new_future(self._method, args,
+                                                        self._actor_channel,
+                                                        self.target,
+                                                        self.__lock, ref=True)
         else:
             result = super(AskRefWrapper, self).__call__(*new_args, **kwargs)
             return get_host().loads(result)

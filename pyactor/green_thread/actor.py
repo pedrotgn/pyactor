@@ -3,8 +3,8 @@ from copy import copy
 from gevent import spawn
 from gevent.queue import Queue
 
-from pyactor.util import AskResponse, TellRequest, FutureResponse
-from pyactor.util import ASK, TELL, FUTURE
+from pyactor.util import AskResponse, FutureResponse
+from pyactor.util import ASK, FUTURE
 
 
 class Channel(Queue):

@@ -29,14 +29,16 @@ class Echo:
         return 'something'
 
     def raise_something(self):
+        sleep(1)
         raise Exception('raising something')
 
+
 class Bot:
-    _tell = ['set_echo', 'ping', 'pong']
+    _tell = ['set_echo', 'ping', 'pong', 'multiping']
     _ask = ['get_name', 'get_proxy', 'get_host', 'get_echo', 'get_echo_ref',
             'check_ref', 'get_real_host']
     _ref = ['get_name', 'set_echo', 'get_proxy', 'get_host', 'get_echo_ref',
-            'check_ref']
+            'check_ref', 'multiping']
 
     def get_name(self):
         return self.id
@@ -64,10 +66,24 @@ class Bot:
         future.add_callback('pong')
         # print 'pinging..'
 
+    def multiping(self, bot=None):
+        future = self.echo.say_something(future=True)
+        # print 'pinging..'
+        if bot is not None:
+            future.add_callback('pong', bot)
+            future.add_callback('pong', bot)
+        future.add_callback('pong')
+        sleep(1)
+        # print 'late callback:'
+        future.add_callback('pong')
+
     def pong(self, future):
         global out
+        global cnt
+        cnt += 1
         msg = future.result()
-        out = msg
+        if future.exception() is None:
+            out = msg
         # print 'callback', msg
 
     def get_real_host(self):
@@ -118,6 +134,26 @@ class Web(object):
 
     def get_file(self, filename):
         return self.server.download(filename, timeout=10)
+
+
+class WebF(object):
+    _ask = ['list_files', 'get_file']
+    _tell = ['remote_server']
+    _parallel = ['list_files', 'remote_server', 'get_file']
+    _ref = ["remote_server"]
+
+    def __init__(self):
+        self.files = ['a1.txt', 'a2.txt', 'a3.txt', 'a4.zip']
+
+    def remote_server(self, file_server):
+        self.server = file_server
+
+    def list_files(self):
+        return self.files
+
+    def get_file(self, filename):
+        future = self.server.download(filename, future=True)
+        return future.result(6)
 
 
 class WebNP(object):
@@ -220,9 +256,14 @@ class TestBasic(unittest.TestCase):
         self.assertNotEqual(b1.check_ref([{'e': self.e1}])[0]['e'],
                             self.e1)
 
+        future = b1.check_ref(self.e1, future=True)
+        self.assertNotEqual(future.result(), self.e1)
+
     def test_3queries(self):
         global out
+        global cnt
         out = ""
+        cnt = 0
         self.assertEqual(self.e1.echo.__class__.__name__, 'TellWrapper')
         s = self.e1.echo('hello there!!')
         sleep(0.1)
@@ -230,12 +271,19 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(out, 'hello there!!')
 
         ask = self.e1.say_something(future=True)
+        with self.assertRaises(Exception):
+            ask.send_work()
         self.assertEqual(ask.__class__.__name__, 'Future')
         self.assertEqual(ask.result(1), 'something')
+        self.assertTrue(ask.done())
 
         ask = self.e1.raise_something(future=True)
         self.assertTrue(ask.running())
         self.assertFalse(ask.done())
+        with self.assertRaises(TimeoutError):
+            ask.exception(0.2)
+        with self.assertRaises(TimeoutError):
+            ask.result(0.2)
         self.assertEqual(ask.__class__.__name__, 'Future')
         self.assertEqual(ask.exception(1).__str__(), 'raising something')
         with self.assertRaises(Exception):
@@ -245,12 +293,18 @@ class TestBasic(unittest.TestCase):
 
         bot = self.h.spawn('bot', Bot)
         bot.set_echo(self.e1)
+        sleep(0.1)
         self.assertNotEqual(self.e1, bot.get_echo())
         self.assertNotEqual(bot.get_echo(), bot.get_echo_ref())
         bot.ping()
-
         sleep(1)
         self.assertEqual(out, 'something')
+
+        bot2 = self.h.spawn('bot2', Bot)
+        bot.multiping(bot2)
+        sleep(2)
+        self.assertEqual(out, 'something')
+        self.assertEqual(cnt, 5)
 
         with self.assertRaises(TimeoutError):
             self.e1.say_something_slow()
@@ -335,6 +389,18 @@ class TestBasic(unittest.TestCase):
         sleep(7)
 
         self.assertEqual(cnt, 1000)
+
+        sleep(1)
+        cnt = 0
+        web3 = self.hr.spawn('web3', WebF)
+        web3.remote_server(f1)
+        load.remote_server(web3)
+        load2.remote_server(web3)
+        load.launch()
+        load2.download()
+        sleep(7)
+
+        self.assertNotEqual(cnt, 1000)
 
     def test_checklist(self):
         w = self.hr.spawn('web', Web)
