@@ -271,8 +271,6 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(out, 'hello there!!')
 
         ask = self.e1.say_something(future=True)
-        with self.assertRaises(Exception):
-            ask.send_work()
         self.assertEqual(ask.__class__.__name__, 'Future')
         self.assertEqual(ask.result(1), 'something')
         self.assertTrue(ask.done())
@@ -280,6 +278,8 @@ class TestBasic(unittest.TestCase):
         ask = self.e1.raise_something(future=True)
         self.assertTrue(ask.running())
         self.assertFalse(ask.done())
+        with self.assertRaises(Exception):
+            ask.send_work()
         with self.assertRaises(TimeoutError):
             ask.exception(0.2)
         with self.assertRaises(TimeoutError):

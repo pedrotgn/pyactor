@@ -6,7 +6,7 @@ Threading Type
 Actor
 =====
 
-:ref:`See source <tactor_source>`
+:ref:`<See source> <tactor_source>`
 
 .. automodule:: pyactor.thread.actor
     :members:
@@ -14,7 +14,7 @@ Actor
 Intervals
 ==========
 
-:ref:`See source <tintervals_source>`
+:ref:`<See source> <tintervals_source>`
 
 .. automodule:: pyactor.thread.intervals
     :members:
@@ -22,7 +22,15 @@ Intervals
 Parallel
 ========
 
-:ref:`See source <tparallels_source>`
+:ref:`<See source> <tparallels_source>`
 
 .. automodule:: pyactor.thread.parallels
+    :members:
+
+Future
+========
+
+:ref:`<See source> <tfuture_source>`
+
+.. automodule:: pyactor.thread.future
     :members:

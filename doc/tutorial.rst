@@ -19,8 +19,8 @@ To install the library use::
 
     python setup.py install
 
-You can check that works with the examples explained in this page that you can
-find in the ./examples directory in this project. Tested with Python 2.7.
+You can check that works with the examples explained in this page, that you can
+find in the ./examples directory of this project. Tested with Python 2.7.
 
 
 .. _global:
@@ -30,7 +30,7 @@ Global indications
 
 This library is implemented using two types of concurrence: threads and green
 threads (Gevent). To define which one you want, always use the function
-:func:`~.set_context` at the begining of your program. The default value uses
+:func:`~.set_context` at the begining of your script. The default value uses
 threads but you can specify the mode with one of the following strings:
 
 * ``'thread'``
@@ -44,7 +44,7 @@ host. The :meth:`~.context.Host.spawn` method will return the proxy
 (:class:`~.proxy.Proxy`) that manages that actor. See example::
 
     h = create_host()
-    actor1 = h.spawn('id1',MyClass)
+    actor1 = h.spawn('id1', MyClass)
 
 The class of an actor must have defined its methods in the _tell and _ask lists
 so they can be called through the proxy. In the _tell list will be named those
@@ -78,12 +78,12 @@ actor. This is the full code of this sample, which you can find and test in
 .. literalinclude:: ../examples/sample1.py
     :linenos:
 
-This example is similar to the one shown above in :ref:`global`, but here we'll
+The example is similar to the one shown above in :ref:`global`, but here we'll
 explain it more carefully.
 
 In this case, we need to import the :func:`~.create_host` function from the
-project in order to use it. We also import the *sleep* function to give time to
-the actor to work and the setting function for the type :func:`~.set_context`.
+project in order to use it. We also import the *sleep* function, to give time to
+the actor to work, and the setting function for the type :func:`~.set_context`.
 
 The actor to create in this example will be an :class:`Echo`. This class only
 has one method which prints the message *msg*, given by parameter. As you can
@@ -112,7 +112,8 @@ and with the id 'echo1'::
 
     e1 = h.spawn('echo1',Echo)
 
-'e1' will now represent that actor (the :class:`Proxy` that manages it).
+'e1' will now represent that actor (actually, the :class:`Proxy` that manages
+it).
 
 As we have the actor, we can invoke his methods as we would do normally since
 the proxy will redirect the queries to the actual ubication of it. If we didn't
@@ -131,11 +132,7 @@ And now we have a proxy managing the host in *hr* that we could use to send
 references remotely. This allows to spawn remotely, although in this example we
 are doing it all locally:
 
-    e2 = hr.spawn('echo2',Echo).get()
-
-The use of *.get()* at the end is necessary since 'hr' is a :class:`Proxy` of
-the host and :meth:`~.spawn` is treated like an async method which result has
-to be obtained.
+    e2 = hr.spawn('echo2',Echo)
 
 
 Then, the sleep gives time to the actor for doing the work and finally, we close
@@ -168,10 +165,7 @@ Now :class:`Echo` has two new methods, :meth:`bye` and :meth:`say_something`.
 The first one is async like the previous :meth:`echo`, but the other one is
 synchronous.
 
-In this example we see that, when invoking a synchronous method is needed to add
-the *.get()* in order to actually execute the method and obtain a result from
-it. If you forget to use it, the function will return a :class:`~.Future`
-which is the formulation of the query, but it has not been invoked yet.
+The invocation of ask methods is simply the same you would do normally.
 
 The correct output for this sample is the following::
 
@@ -194,15 +188,36 @@ queries. This is the full code of this sample, which you can find and test in
 
 This time we keep having the same initialitzation as before, but now threre is
 a new class. :class:`Bot` has three async methods that will allow to prove the
-correctness of the callback functionality. :meth:`set_echo` registers an
+callback functionality. :meth:`set_echo` registers an
 :class:`Echo` to the Bot so it can call it. :math:`ping` creates the query for
 the :meth:`say_something` method and sets the callback for this to his other
 method :meth:`pong`. This second will recieve the result of the execution of the
 :meth:`say_something` method.
 
+In order to add a callback, the sync call must be defined as a Future. We do
+this by adding the parameter `future=True` to the call. This will make the query
+return a :class:`~.Future` instance instead of the result. That means that the
+execution of the query may has not been completed yet. To get the result from a
+Future, use the method :meth:`~.result` as you can see inside the `pong` method.
+
+To add a callback use the Future method :meth:`~.add_callback` which takes by
+parameter the name of the method to callback, which is one from the actor that
+calls it. You can add various callbacks to one future, and them will be called
+in order when the work is finished. Also, if you add a callback to a finished
+future, it will be directly invoked.
+
+It is also possible to add a callback to a method from another actor by passing
+also its proxy. See :ref:`sample11` for more deep detail in Futures.
+
 .. note:: :meth:`~.add_callback` needs to be called from an actor to another
-    actor, specifing a method of the first one that has one parameter, which
-    will be the result of the method invoked.
+    actor, specifing a method of an actor (also the actor if it is different
+    from the one that makes the addition).
+
+.. note:: The method treated as a callback must have one unique parameter, which
+    is the future. Inside the method you can use :meth:`~.result` to get the
+    result of the call (exceptions can be raised) or :meth:`~.exception` to get
+    the instance of a possible raised exeption. You can also check the state of
+    the future with one of its methods: :meth:`~.done` or :meth:`~.running`.
 
 The correct output for this sample is the following::
 
@@ -222,14 +237,20 @@ sample, which you can find and test in ``pyactor\examples\sample4.py``:
 .. literalinclude:: ../examples/sample4.py
     :linenos:
 
+
+
 Now we have the same :class:`Echo` class but in the sync method we added a sleep
 of 2 seconds. Also, we sorrounded the call of the method by a try structure
-catching a :class:`~.Timeout` exception. Since we are giving to the invocation
+catching a :class:`~.TimeoutError` exception. Since we are giving to the invocation
 a expire time of 1 second, the timeout will be reached and the exception rised.
 
-.. note:: The parameter of the .get() method is the time, in seconds, that is
-    given as a timeout to the query. The default one, in case none is specified,
-    is 1 second.
+
+You can set a timeout for the query if you like. For that, add the parameter with
+the tag `timeout=X` in the call, in seconds. ::
+
+    x = e1.say_something(timeout=3)
+
+The default timeout is 1 second. To wait indefinitely, just set it to `None`.
 
 The correct output for this sample is the following::
 
@@ -262,10 +283,6 @@ standard local url at which the host is initialized by default::
 
     ee = h.lookup_url('local://local:6666/echo1')
 
-.. note:: Remember that if you are using the proxy for the host, you need to
-    use *.get()*.
-
-
 
 .. _sample6:
 
@@ -291,7 +308,7 @@ which the actor is so you can :meth:`~.lookup` other actors from there.
 In the example, we use these three calls to send various salutations from a
 :class:`Bot` to an :class:`Echo` giving by parameter also a proxy from the Bot
 so the Echo can call one of Bot's methods in order to get its id. Also, the
-:meth:`set_echo` method, in this case, do not recieve the Echo by parameter.
+:meth:`set_echo` method, in this case, does not recieve the Echo by parameter.
 It uses the inside reference it already has to call a :meth:`~.lookup` to the
 host and get the wanted reference.
 
@@ -305,7 +322,7 @@ The correct output for this sample is the following::
 
 In this sample, we also see the usage of the :func:`~.serve_forever` function
 wich is very useful in remote communication in order to keep a host alive as
-another one send queries to his actors. The usage is very simple, instead of
+another one sends queries to his actors. The usage is very simple, instead of
 shuting the host down at the end, we call::
 
     serve_forever()
@@ -319,7 +336,7 @@ in this host.
 Sample 7 - references
 ================================================================================
 
-This example tests sending of proxy references by parameter using the ref
+This example tests the sending of proxy references by parameter using the ref
 decorator. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample7.py``:
 
@@ -329,8 +346,11 @@ decorator. This is the full code of this sample, which you can find and test in
 The previous examples pass proxy references by parameter in its methods, but
 them are sharing the same instance of a proxy. This could cause various problems
 of concurrency so we might want diferent proxies in different spots. To achive
-that, you have to indicate that a method recieves or returns a proxy with
-``@ref`` which is imported from ``pyactor.proxy``.
+that, you have to indicate that a method recieves or returns a proxy by adding
+it to the _ref list of the class (it yet must be in _ask or _tell).
+
+As seen in the example, this checks for proxies in the parameters, even inside
+lists or dictionaries, to create new ones adapted to where they are.
 
 .. _sample8:
 
@@ -387,6 +407,7 @@ If we do not use parallels in this example (which you can try by commenting the
 right line as indicated) some of the calls to the list_files method will raise
 TimeoutError as the thread of that actor is blocked with the download.
 
+.. note:: `sample8b` combines this example with the use of Futures.
 
 .. _sample9:
 
@@ -414,8 +435,8 @@ different ports::
 
 .. note: Remember that the default adress for a host is ``local://local:6666/host``
 
-Now, each host will manage its own actors and threads, so they will need to communicate
-through TCP connections.
+Now, each host will manage its own actors and threads, so they will need to
+communicate through TCP connections.
 
 
 One thing important to know about this is that only one host can be used to manage
@@ -447,3 +468,32 @@ can be obtained with ``self.proxy``. This function returns an interval instance
 that we have to keep in order to stop it after by calling *.set()*.
 In this example we use :func:`~.later` to set a timer that will stop the
 interval after a certain time.
+
+
+.. _sample11:
+
+Sample 11 - Futures
+================================================================================
+
+This example tests more deeply the functionalities of futures. This is the full
+code of this sample, which you can find and test in
+``pyactor\examples\sample10.py``:
+
+.. literalinclude:: ../examples/sample11.py
+    :linenos:
+
+Not much to explain here, just see it by yourself. The example is like Sample 3,
+but here we set various callbacks and some to another actor.
+
+Also shows the usage of the consulting methods of futures: :meth:`~.done`,
+:meth:`~.result`, :meth:`~.exception`.
+
+Change between this lines::
+
+    ask = e1.raise_something(future=True)
+    ask = e1.say_something(future=True)
+
+to check the raising of exceptions.
+
+Finaly, note that the only argument for :meth:`~.result` (also for
+:meth:`~.exception`) is the timeout, the time, in seconds, to wait for a result.

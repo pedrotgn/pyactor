@@ -164,6 +164,7 @@ class Future(object):
 
     def set_result(self, result):
         """Sets the return value of work associated with the future.
+        Only called internally.
         """
         with self.__condition:
             self.__result = result
@@ -173,6 +174,7 @@ class Future(object):
 
     def set_exception(self, exception):
         """Sets the result of the future as being the given exception.
+        Only called internally.
         """
         with self.__condition:
             self.__exception = exception

@@ -44,6 +44,14 @@ Thread Parallel
 .. literalinclude:: ../pyactor/thread/parallels.py
     :linenos:
 
+.. _tfuture_source:
+
+Thread Future
+================
+
+.. literalinclude:: ../pyactor/thread/future.py
+    :linenos:
+
 .. _gactor_source:
 
 Green Thread Actor
@@ -67,4 +75,12 @@ Green Thread Parallel
 =======================
 
 .. literalinclude:: ../pyactor/green_thread/parallels.py
+    :linenos:
+
+.. _gfuture_source:
+
+Green Thread Future
+=====================
+
+.. literalinclude:: ../pyactor/green_thread/future.py
     :linenos:

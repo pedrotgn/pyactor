@@ -40,7 +40,8 @@ class Future(object):
                 msg = TellRequest(TELL, callback[0], [self], callback[2])
                 callback[1].send(msg)
             except Exception, e:
-                raise Exception('exception calling callback for %r', self)
+                raise Exception('exception calling callback for %r: %r'
+                                % (self, e))
 
     def running(self):
         """Return True if the future is currently executing."""
@@ -166,6 +167,7 @@ class Future(object):
 
     def set_result(self, result):
         """Sets the return value of work associated with the future.
+        Only called internally.
         """
         # with self.__condition:
         self.__result = result
@@ -175,6 +177,7 @@ class Future(object):
 
     def set_exception(self, exception):
         """Sets the result of the future as being the given exception.
+        Only called internally.
         """
         # with self.__condition:
         self.__exception = exception

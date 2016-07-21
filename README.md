@@ -50,15 +50,15 @@ This library is implemented using two types of concurrence:
 * ``'thread'`` : classic threads
 * ``'green_thread'`` : Gevent
 
-Green threads give a performance almost three times better.
+Green threads give a performance almost twice better.
 
 You will need to specify which one you are going to use at the beginning of your
-program with ``set_context('TYPE')``.
+script with ``set_context('TYPE')``. Where type is one of the two keywords
+above.
 
-Then, first of all, a `Host` is needed in order to create some
-actors. Use it to spawn actors by giving the
-class type of the actor to create and one string that will identify it among the
-host. See example:
+Then, first of all, a `Host` is needed in order to create some actors.
+Use it to spawn actors by giving the class type of the actor to create
+and one string that will identify it among the host. See example:
 
     h = create_host()
     actor1 = h.spawn('id1',MyClass)
@@ -66,7 +66,7 @@ host. See example:
 The class of an actor must have defined its methods in the _tell and _ask lists
 so they can be called through the proxy. In the _tell list will be named those
 methods meant to be asynchronous and in the _ask list, the synchronous ones.
-In this example we have a class MyClass with a sync method *ask_me()* and an
+In this example we have a class ``MyClass`` with a sync method *ask_me()* and an
 async method *tell_me()*:
 
     class MyClass:
@@ -82,8 +82,8 @@ the sync method returns a result. You can now call this methods from your main
 code:
 
     actor1.tell_me('Hello')
-    print actor1.ask_me().get()
+    print actor1.ask_me()
 
-More detailed examples can be found in the
+More detailed examples with much more functionalities can be found in the
 'pyactor/examples' directory of the project. They are also explained in the
-documentation, hosted at readthedocs.org which you can find above.
+documentation as a tutorial, hosted at readthedocs.org which you can find above.
