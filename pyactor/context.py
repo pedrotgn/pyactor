@@ -122,7 +122,7 @@ class Host(object):
 
     def load_transport(self, url):
         '''
-        ### Not yet functional
+        ### Not yet functional.
         For TCP communication. Sets the communication socket of the host
         at the address and port specified.
 

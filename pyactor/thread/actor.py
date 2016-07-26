@@ -117,9 +117,8 @@ class Actor(ActorRef):
         to the channel included in the message as an
         :class:`~.AskResponse`.
 
-        If it is a :class:`~.Future`, generates a :class:`~.TellRequest`
-        to send the result to the sender's method specified in the
-        callback field of the tuple.
+        If it is a :class:`~.Future`, generates a :class:`~.FutureResponse`
+        to send the result to the manager.
 
         :param msg: The message is a namedtuple of the defined in
             util.py (:class:`~.AskRequest`, :class:`~.TellRequest`,

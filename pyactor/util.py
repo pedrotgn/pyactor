@@ -60,7 +60,7 @@ def get_lock():
     if core_type == 'thread':
         current = current_thread()
     else:
-        current = getcurrent()
+        return None
     url = None
     for host in hosts.values():
         if current in host.threads.keys():
@@ -68,9 +68,7 @@ def get_lock():
         elif current in host.pthreads.keys():
             url = host.pthreads[current]
         if url in host.locks.keys():
-            # print "At locks",url
             lock = host.locks[url]
-            # print lock
             return lock
 
 

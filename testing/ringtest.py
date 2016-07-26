@@ -3,8 +3,8 @@ from pyactor.context import set_context, create_host, sleep
 from time import time
 
 
-NUM_NODES = 100
-NUM_MSGS = 100000
+NUM_NODES = 10000
+NUM_MSGS = 100
 
 
 class Node(object):

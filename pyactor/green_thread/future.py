@@ -19,7 +19,7 @@ class Future(object):
     could not be resolved yet.
     """
     def __init__(self, fid, actor_channel, method, params, manager_channel,
-                 actor_url, lock):
+                 actor_url):
         self.__condition = Event()
         self.__state = PENDING
         self.__result = None
@@ -31,7 +31,6 @@ class Future(object):
         self.__actor_channel = actor_channel
         self.__target = actor_url
         self.__channel = manager_channel
-        self.__lock = lock
         self.__id = fid
 
     def _invoke_callbacks(self):
@@ -101,11 +100,7 @@ class Future(object):
         if self.__state == FINISHED:
             return self.__get__result()
 
-        if self.__lock is not None:
-            self.__lock.release()
         self.__condition.wait(timeout)
-        if self.__lock is not None:
-            self.__lock.acquire()
 
         if self.__state == FINISHED:
             return self.__get__result()
@@ -127,11 +122,7 @@ class Future(object):
         if self.__state == FINISHED:
             return self.__exception
 
-        if self.__lock is not None:
-            self.__lock.release()
         self.__condition.wait(timeout)
-        if self.__lock is not None:
-            self.__lock.acquire()
 
         if self.__state == FINISHED:
             return self.__exception
@@ -228,10 +219,10 @@ class FutureManager(object):
         future_id = str(uuid.uuid4())
         if not ref:
             future = Future(future_id, actor_channel, method, params,
-                            self.channel, actor_url, lock)
+                            self.channel, actor_url)
         else:
             future = FutureRef(future_id, actor_channel, method, params,
-                               self.channel, actor_url, lock)
+                               self.channel, actor_url)
         future.send_work()
         self.futures[future_id] = future
 
@@ -247,7 +238,7 @@ class FutureManager(object):
             self.t = None
         self.futures = {}
 
-    def clean_futures(self):
-        for key, future in self.futures.items():
-            if future.done():
-                del self.futures[key]
+    # def clean_futures(self):
+    #     for key, future in self.futures.items():
+    #         if future.done():
+    #             del self.futures[key]

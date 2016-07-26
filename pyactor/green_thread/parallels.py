@@ -15,7 +15,6 @@ class ActorParallel(Actor):
     '''
     def __init__(self, url, klass, obj):
         super(ActorParallel, self).__init__(url, klass, obj)
-        # self.__lock = Lock()
         self.pending = {}
         self.ask_parallel = list((set(self.ask) | set(self.ask_ref)) &
                                  set(klass._parallel))
@@ -58,9 +57,7 @@ class ActorParallel(Actor):
                     return
 
                 else:
-                    # self.__lock.acquire()
                     result = invoke(*params)
-                    # self.__lock.release()
             except Exception, e:
                 result = e
                 print result
@@ -82,7 +79,6 @@ class ParallelAskWraper(object):
     def __init__(self, method, actor):
         self.__method = method
         self.__actor = actor
-        # self.__lock = lock
 
     def __call__(self, *args, **kwargs):
         args = list(args)
@@ -95,12 +91,10 @@ class ParallelAskWraper(object):
         get_host().new_parallel(self.__actor.url, t)
 
     def invoke(self, func, rpc_id, args, kwargs):
-        # self.__lock.acquire()
         try:
             result = func(*args, **kwargs)
         except Exception, e:
             result = e
-        # self.__lock.release()
         self.__actor.receive_from_ask(result, rpc_id)
 
 
@@ -111,7 +105,6 @@ class ParallelTellWraper(object):
     def __init__(self, method, actor):
         self.__method = method
         self.__actor = actor
-        # self.__lock = lock
 
     def __call__(self, *args, **kwargs):
         param = (self.__method, args, kwargs)
@@ -119,6 +112,4 @@ class ParallelTellWraper(object):
         get_host().new_parallel(self.__actor.url, t)
 
     def invoke(self, func, args, kwargs):
-        # self.__lock.acquire()
         func(*args, **kwargs)
-        # self.__lock.release()

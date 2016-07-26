@@ -25,7 +25,6 @@ class Proxy(object):
         self.__channel = actor.channel
         self.actor = actor
         self.__lock = get_lock()
-        # print "At proxy",self.__lock#, self.actor
         for method in actor.ask_ref:
             setattr(self, method, AskRefWrapper(self.__channel, method,
                                                 actor.url))
@@ -45,6 +44,9 @@ class Proxy(object):
                (self.actor, self.actor.tell, self.actor.tell_ref,
                 self.actor.ask, self.actor.ask_ref)
 
+    def get_id(self):
+        return self.actor.id
+
 
 class TellWrapper(object):
     '''
@@ -61,9 +63,7 @@ class TellWrapper(object):
         self.__target = actor_url
 
     def __call__(self, *args, **kwargs):
-        # _from = get_current()
         #  SENDING MESSAGE TELL
-        # msg = (_from, self.__target, TELL, self.__method,args)
         msg = TellRequest(TELL, self.__method, args, self.__target)
         self.__channel.send(msg)
 
@@ -98,20 +98,16 @@ class AskWrapper(object):
             try:
                 response = self.__channel.receive(timeout)
                 result = response.result
-                if self.__lock is not None:
-                    self.__lock.acquire()
-                if isinstance(result, Exception):
-                    raise result
-                else:
-                    return result
-            except AlreadyExistsError, ae:
-                raise ae
-            except NotFoundError, nf:
-                raise nf
             except Empty:
                 if self.__lock is not None:
                     self.__lock.acquire()
                 raise TimeoutError(self._method)
+            if self.__lock is not None:
+                self.__lock.acquire()
+            if isinstance(result, Exception):
+                raise result
+            else:
+                return result
         else:
             return get_host().future_manager.new_future(self._method, args,
                                                         self._actor_channel,

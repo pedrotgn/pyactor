@@ -1,5 +1,6 @@
 import uuid
 from threading import Lock, Thread
+from time import sleep
 
 from actor import Actor
 from pyactor.util import get_host
@@ -60,9 +61,9 @@ class ActorParallel(Actor):
                     return
 
                 else:
-                    self.__lock.acquire()
-                    result = invoke(*params)
-                    self.__lock.release()
+                    with self.__lock:
+                        sleep(0.01)
+                        result = invoke(*params)
             except Exception, e:
                 result = e
                 print result
@@ -100,12 +101,12 @@ class ParallelAskWraper(object):
         get_host().new_parallel(self.__actor.url, t)
 
     def invoke(self, func, rpc_id, args, kwargs):
-        self.__lock.acquire()
-        try:
-            result = func(*args, **kwargs)
-        except Exception, e:
-            result = e
-        self.__lock.release()
+        with self.__lock:
+            sleep(0.01)
+            try:
+                result = func(*args, **kwargs)
+            except Exception, e:
+                result = e
         self.__actor.receive_from_ask(result, rpc_id)
 
 
@@ -125,6 +126,6 @@ class ParallelTellWraper(object):
         get_host().new_parallel(self.__actor.url, t)
 
     def invoke(self, func, args, kwargs):
-        self.__lock.acquire()
-        func(*args, **kwargs)
-        self.__lock.release()
+        with self.__lock:
+            sleep(0.01)
+            func(*args, **kwargs)

@@ -61,7 +61,7 @@ Use it to spawn actors by giving the class type of the actor to create
 and one string that will identify it among the host. See example:
 
     h = create_host()
-    actor1 = h.spawn('id1',MyClass)
+    actor1 = h.spawn('id1', MyClass)
 
 The class of an actor must have defined its methods in the _tell and _ask lists
 so they can be called through the proxy. In the _tell list will be named those
@@ -72,7 +72,7 @@ async method *tell_me()*:
     class MyClass:
         _tell =['tell_me']
         _ask = ['ask_me']
-        def tell_me(self,msg):
+        def tell_me(self, msg):
             print msg
         def ask_me(self):
             return 'hello back'

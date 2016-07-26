@@ -245,7 +245,7 @@ class FutureManager(object):
             self.t = None
         self.futures = {}
 
-    def clean_futures(self):
-        for key, future in self.futures.items():
-            if future.done():
-                del self.futures[key]
+    # def clean_futures(self):
+    #     for key, future in self.futures.items():
+    #         if future.done():
+    #             del self.futures[key]
