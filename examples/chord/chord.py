@@ -1,7 +1,7 @@
 from pyactor.util import TimeoutError
 
 
-k = 6
+k = 7
 MAX = 2 ** k
 
 
@@ -59,12 +59,13 @@ class SuccessorError(Exception):
 
 class Node(object):
     _ask = ['init_node', 'successor', 'find_successor', 'get_predecessor',
-            'closest_preceding_finger', 'join', 'is_alive', 'find_predecessor']
+            'closest_preceding_finger', 'join', 'is_alive', 'find_predecessor',
+            'get_finger']
     _tell = ['leave', 'set_predecessor', 'set_successor', 'show_finger_node',
              'stabilize', 'notify', 'fix_finger']
     _ref = ['set_predecessor', 'get_predecessor', 'successor',
             'find_successor', 'closest_preceding_finger', 'join',
-            'set_successor', 'notify', 'find_predecessor']
+            'set_successor', 'notify', 'get_finger', 'find_predecessor']
     _parallel = ['stabilize', 'fix_finger', 'find_predecessor',
                  'find_successor']
 
@@ -82,11 +83,11 @@ class Node(object):
     def successor(self):
         return self.finger[0]
 
-    def find_successor(self, id):
+    def find_successor(self, nid):
         try:
-            if betweenE(id, long(self.predecessor.get_id()), long(self.id)):
+            if betweenE(nid, long(self.predecessor.get_id()), long(self.id)):
                 return self.proxy
-            n = self.proxy.find_predecessor(id, timeout=2)
+            n = self.proxy.find_predecessor(nid, timeout=2)
             return n.successor(timeout=2)
         except TimeoutError, e:
             raise e
@@ -98,24 +99,24 @@ class Node(object):
         self.predecessor = pred
 
     # Iterative programming
-    def find_predecessor(self, id):
+    def find_predecessor(self, nid):
         try:
-            if id == long(self.id):
+            if nid == long(self.id):
                 return self.predecessor
             n1 = self.proxy
-            while not betweenE(id, long(n1.get_id()),
+            while not betweenE(nid, long(n1.get_id()),
                                long(n1.successor(timeout=2).get_id())):
-                n1 = n1.closest_preceding_finger(id, timeout=2)
+                n1 = n1.closest_preceding_finger(nid, timeout=2)
             return n1
         except SuccessorError, e:
             raise e
         except TimeoutError, e:
             raise e
 
-    def closest_preceding_finger(self, id):
+    def closest_preceding_finger(self, nid):
         try:
             for i in range(k - 1, -1, -1):
-                if between(long(self.finger[i].get_id()), long(self.id), id):
+                if between(long(self.finger[i].get_id()), long(self.id), nid):
                     return self.finger[i]
             return self.proxy
         except(TimeoutError):
@@ -132,7 +133,7 @@ class Node(object):
         else:
             try:
                 self.init_finger_table(n1)
-            except:
+            except Exception:
                 print 'Join failed'
                 # raise Exception('Join failed')
                 return False
@@ -149,6 +150,9 @@ class Node(object):
         except TimeoutError, e:
             raise e
         else:
+            # neighbor_finger = self.finger[0].get_finger(timeout=2)
+            # for i in range(k - 1):
+            #     self.finger[i + 1] = neighbor_finger[i]
             for i in range(k - 1):
                 self.finger[i + 1] = self.finger[0]
 
@@ -161,7 +165,7 @@ class Node(object):
     def stabilize(self):
         try:
             x = self.finger[0].get_predecessor(timeout=2)
-        except:
+        except Exception:
             pass
         else:
             if (between(long(x.get_id()), long(self.id),
@@ -176,6 +180,15 @@ class Node(object):
             self.predecessor = n
 
     def fix_finger(self):
+        # try:
+        #     for i in range(4):
+        #         if(self.currentFinger <= 0 or self.currentFinger >= k ):
+        #             self.currentFinger = 1
+        #         self.finger[self.currentFinger] = self.proxy.find_successor(
+        #                             self.start[self.currentFinger], timeout=5)
+        #         self.currentFinger += 1
+        # except Exception:
+        #     pass
         try:
             if(self.currentFinger <= 0 or self.currentFinger >= k):
                 self.currentFinger = 1
@@ -185,6 +198,9 @@ class Node(object):
             pass
         else:
             self.currentFinger += 1
+
+    def get_finger(self):
+        return self.finger.values()
 
     def leave(self):
         print 'bye bye!'
@@ -197,7 +213,7 @@ class Node(object):
 
     def show_finger_node(self):
         print 'Finger table of node ' + self.id
-        print 'Predecessor' + self.predecessor.get_id()
+        print 'Predecessor ' + self.predecessor.get_id()
         print 'start: node'
         for i in range(k):
             print str(self.start[i]) + ' : ' + self.finger[i].get_id()
