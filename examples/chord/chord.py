@@ -194,7 +194,7 @@ class Node(object):
                 self.currentFinger = 1
             self.finger[self.currentFinger] = self.proxy.find_successor(
                                     self.start[self.currentFinger], timeout=5)
-        except:
+        except Exception:
             pass
         else:
             self.currentFinger += 1

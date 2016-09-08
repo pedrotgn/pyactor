@@ -1,7 +1,7 @@
 from Queue import Empty
 
 from util import ASK, TELL, AskRequest, TellRequest
-from util import AlreadyExistsError, TimeoutError, NotFoundError
+from util import TimeoutError, NotFoundError
 from util import get_host, get_lock
 
 

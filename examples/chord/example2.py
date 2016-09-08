@@ -6,12 +6,12 @@ from chord import show, update, Node, k
 from time import time
 import random
 
-def hash(line):
+def mhash(line):
     import sha
     key=long(sha.new(line).hexdigest(),16)
     return key
 
-def id():
+def cid():
     return long(random.uniform(0,2**k))
 
 
@@ -25,7 +25,7 @@ t1  = time()
 for i in range(60):
     while True:
         try:
-            nodes_h[i] = host.spawn(str(id()), Node)
+            nodes_h[i] = host.spawn(str(cid()), Node)
         except AlreadyExistsError:
             continue
         break
@@ -56,7 +56,7 @@ sleep(30)
 # sleep(1)
 # interval_host(host, 30, show, nodes_h[9])
 
-key = hash('pedro')
+key = mhash('hello')
 print key
 print key%2**k
 show(nodes_h[0])

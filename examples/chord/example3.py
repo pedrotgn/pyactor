@@ -1,7 +1,6 @@
 from pyactor.context import set_context, create_host, sleep, interval_host
-from pyactor.util import AlreadyExistsError
 
-from chord import show, update, Node
+from chord import update, Node
 
 
 nodes = [1,8,14,21,32,38,42,48,51,56]

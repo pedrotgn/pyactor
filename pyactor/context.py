@@ -140,7 +140,7 @@ class Host(object):
         #     dispatcher = self.tcp.get_dispatcher(self.addr)
         #     launch_actor(self.addr,dispatcher)
 
-    def spawn(self, aid, klass, param=[]):
+    def spawn(self, aid, klass, param=None):
         '''
         This method creates an actor attached to this host. It will be
         an instance of the class *klass* and it will be assigned an ID
@@ -158,6 +158,8 @@ class Host(object):
             already in use.
         :raises: :class:`HostDownError` if there is no host initiated.
         '''
+        if param is None:
+            param = []
         if not self.alive:
             raise HostDownError()
         url = '%s://%s/%s' % (self.transport, self.host_url.netloc, aid)
