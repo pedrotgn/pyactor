@@ -55,24 +55,26 @@ class Workload(object):
         self.server.get_file('a1.txt', timeout=10)
         print 'download finished'
 
-set_context('green_thread')
-# set_context()
 
-host = create_host()
+if __name__ == "__main__":
+    set_context('green_thread')
+    # set_context()
 
-f1 = host.spawn('file1', File)
-web = host.spawn('web1', Web)
-sleep(1)
-web.remote_server(f1)
-load = host.spawn('wl1', Workload)
-load.remote_server(web)
-load2 = host.spawn('wl2', Workload)
-load2.remote_server(web)
+    host = create_host()
 
-load.launch()
-load2.download()
+    f1 = host.spawn('file1', File)
+    web = host.spawn('web1', Web)
+    sleep(1)
+    web.remote_server(f1)
+    load = host.spawn('wl1', Workload)
+    load.remote_server(web)
+    load2 = host.spawn('wl2', Workload)
+    load2.remote_server(web)
 
-sleep(7)
-print host.pthreads
-# print host.threads
-host.shutdown()
+    load.launch()
+    load2.download()
+
+    sleep(7)
+    print host.pthreads
+    # print host.threads
+    host.shutdown()

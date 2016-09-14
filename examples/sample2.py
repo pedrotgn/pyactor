@@ -17,13 +17,15 @@ class Echo(object):
     def say_something(self):
         return 'something'
 
-set_context()
-h = create_host()
-e1 = h.spawn('echo1', Echo)
-e1.echo('hello there !!')
-e1.bye()
 
-print e1.say_something()
+if __name__ == "__main__":
+    set_context()
+    h = create_host()
+    e1 = h.spawn('echo1', Echo)
+    e1.echo('hello there !!')
+    e1.bye()
 
-sleep(1)
-h.shutdown()
+    print e1.say_something()
+
+    sleep(1)
+    h.shutdown()

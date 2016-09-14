@@ -29,12 +29,14 @@ class Bot(object):
         for salute in self.greetings:
             self.echo.echo(salute, self.proxy)
 
-set_context()
-h = create_host()
-e1 = h.spawn('echo1', Echo)
-bot = h.spawn('bot1', Bot)
-bot.set_echo()
-bot.say_hi()
 
-sleep(1)
-h.serve_forever()
+if __name__ == "__main__":
+    set_context()
+    h = create_host()
+    e1 = h.spawn('echo1', Echo)
+    bot = h.spawn('bot1', Bot)
+    bot.set_echo()
+    bot.say_hi()
+
+    sleep(1)
+    h.serve_forever()

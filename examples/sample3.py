@@ -36,12 +36,14 @@ class Bot(object):
         msg = future.result()
         print 'callback', msg
 
-set_context()
-h = create_host()
-e1 = h.spawn('echo1', Echo)
-bot = h.spawn('bot', Bot)
-bot.set_echo(e1)
-bot.ping()
 
-sleep(2)
-h.shutdown()
+if __name__ == "__main__":
+    set_context()
+    h = create_host()
+    e1 = h.spawn('echo1', Echo)
+    bot = h.spawn('bot', Bot)
+    bot.set_echo(e1)
+    bot.ping()
+
+    sleep(2)
+    h.shutdown()

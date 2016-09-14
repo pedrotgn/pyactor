@@ -16,15 +16,21 @@ from threading import current_thread
 import collections
 
 
-FROM = 0
-TO = 1
-TYPE = 2
-METHOD = 3
-PARAMS = 4
-FUTURE = 5
-ASK = 6
-TELL = 7
-SRC = 8
+FROM = 'FROM'
+TO = 'TO'
+TYPE = 'TYPE'
+METHOD = 'METHOD'
+PARAMS = 'PARAMS'
+FUTURE = 'FUTURE'
+ASK = 'ASK'
+TELL = 'TELL'
+SRC = 'SRC'
+CHANNEL = 'CHANNEL'
+CALLBACK = 'CALLBACK'
+ASKRESPONSE = 'ASKR'
+FUTURERESPONSE = 'FUTURER'
+RESULT = 'RESULT'
+RPC_ID = 'RPC_ID'
 
 main_host = None
 core_type = None
@@ -101,32 +107,32 @@ class HostDownError(Exception):
         return ("The host is down.")
 
 
-TellRequest = collections.namedtuple('TellRequest',
-                                     'type method params to_url')
-# class TellRequest (collections.namedtuple('TellRequest',
-#                                           'type method params to_url')):
-'''
-A namedtuple for the tell requests.
-'''
-AskRequest = collections.namedtuple('AskRequest',
-                                    'type method params channel to_url')
-'''
-A namedtuple for the ask requests.
-'''
-AskResponse = collections.namedtuple('AskResponse', 'result')
-'''
-A namedtuple for the responses of the requests :class:`AskRequest`.
-'''
-FutureRequest = collections.namedtuple('FutureRequest',
-                                       'type method params channel to_url \
-                                       future_id')
-'''
-A namedtuple for the future requests.
-'''
-FutureResponse = collections.namedtuple('FutureResponse',
-                                        'future_id result')
-'''
-A namedtuple for the future results.
-'''
+# TellRequest = collections.namedtuple('TellRequest',
+#                                      'type method params to_url')
+# # class TellRequest (collections.namedtuple('TellRequest',
+# #                                           'type method params to_url')):
+# '''
+# A namedtuple for the tell requests.
+# '''
+# AskRequest = collections.namedtuple('AskRequest',
+#                                     'type method params channel to_url')
+# '''
+# A namedtuple for the ask requests.
+# '''
+# AskResponse = collections.namedtuple('AskResponse', 'result')
+# '''
+# A namedtuple for the responses of the requests :class:`AskRequest`.
+# '''
+# FutureRequest = collections.namedtuple('FutureRequest',
+#                                        'type method params channel to_url \
+#                                        future_id')
+# '''
+# A namedtuple for the future requests.
+# '''
+# FutureResponse = collections.namedtuple('FutureResponse',
+#                                         'future_id result')
+# '''
+# A namedtuple for the future results.
+# '''
 
 # global AskRequest, TellRquest, AskResponse, FutureRequest

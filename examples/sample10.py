@@ -20,10 +20,11 @@ class Registry(object):
         print 'Hello'
 
 
-set_context()
-host = create_host()
-registry = host.spawn('1', Registry)
-registry.init_start()
-# host.serve_forever()
-sleep(11)
-host.shutdown()
+if __name__ == "__main__":
+    set_context()
+    host = create_host()
+    registry = host.spawn('1', Registry)
+    registry.init_start()
+    # host.serve_forever()
+    sleep(11)
+    host.shutdown()

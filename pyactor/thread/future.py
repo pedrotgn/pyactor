@@ -1,7 +1,8 @@
 import uuid
 from threading import Condition, Thread
-from pyactor.util import get_current, get_host
-from pyactor.util import TellRequest, TELL, FutureRequest, FUTURE
+
+from pyactor.util import get_current, get_host, RPC_ID, RESULT
+from pyactor.util import ASK, TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
 from pyactor.util import TimeoutError
 
 from actor import Channel
@@ -16,26 +17,27 @@ class Future(object):
     Container for the result of an ask query sent asynchronously which
     could not be resolved yet.
     """
-    def __init__(self, fid, actor_channel, method, params, manager_channel,
-                 actor_url, lock):
+    def __init__(self, fid, future_ref, manager_channel):
         self.__condition = Condition()
         self.__state = PENDING
         self.__result = None
         self.__exception = None
         self.__callbacks = []
 
-        self.__method = method
-        self.__params = params
-        self.__actor_channel = actor_channel
-        self.__target = actor_url
+        self.__method = future_ref[METHOD]
+        self.__params = future_ref[PARAMS]
+        self.__actor_channel = future_ref[CHANNEL]
+        self.__target = future_ref[TO]
         self.__channel = manager_channel
-        self.__lock = lock
+        self.__lock = future_ref['LOCK']
         self.__id = fid
 
     def _invoke_callbacks(self):
         for callback in self.__callbacks:
             try:
-                msg = TellRequest(TELL, callback[0], [self], callback[2])
+                # msg = TellRequest(TELL, callback[0], [self], callback[2])
+                msg = {TYPE: TELL, METHOD: callback[0], PARAMS: [self],
+                       TO: callback[2]}
                 callback[1].send(msg)
             except Exception, e:
                 raise Exception('exception calling callback for %r: %r'
@@ -81,7 +83,9 @@ class Future(object):
                 self.__callbacks.append(callback)
                 return
         # Invoke the callback directly
-        msg = TellRequest(TELL, method, [self], from_actor.url)
+        # msg = TellRequest(TELL, method, [self], from_actor.url)
+        msg = {TYPE: TELL, METHOD: method, PARAMS: [self],
+               TO: from_actor.url}
         from_actor.channel.send(msg)
 
     def result(self, timeout=None):
@@ -145,8 +149,11 @@ class Future(object):
         at a time.
         '''
         if self.__set_running():
-            msg = FutureRequest(FUTURE, self.__method, self.__params,
-                                self.__channel, self.__target, self.__id)
+            # msg = FutureRequest(FUTURE, self.__method, self.__params,
+            #                     self.__channel, self.__target, self.__id)
+            msg = {TYPE: FUTURE, METHOD: self.__method, PARAMS: self.__params,
+                   CHANNEL: self.__channel, TO: self.__target,
+                   RPC_ID: self.__id}
             self.__actor_channel.send(msg)
         else:
             raise Exception("Future already running.")
@@ -213,22 +220,19 @@ class FutureManager(object):
             if response == 'stop':
                 self.running = False
             else:
-                result = response.result
-                future = self.futures[response.future_id]
+                result = response[RESULT]
+                future = self.futures[response[RPC_ID]]
                 if isinstance(result, Exception):
                     future.set_exception(result)
                 else:
                     future.set_result(result)
 
-    def new_future(self, method, params, actor_channel, actor_url, lock,
-                   ref=False):
+    def new_future(self, future_ref, ref=False):
         future_id = str(uuid.uuid4())
         if not ref:
-            future = Future(future_id, actor_channel, method, params,
-                            self.channel, actor_url, lock)
+            future = Future(future_id, future_ref, self.channel)
         else:
-            future = FutureRef(future_id, actor_channel, method, params,
-                               self.channel, actor_url, lock)
+            future = FutureRef(future_id, future_ref, self.channel)
         future.send_work()
         self.futures[future_id] = future
 

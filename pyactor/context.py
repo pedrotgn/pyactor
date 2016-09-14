@@ -1,8 +1,10 @@
 from signal import SIGINT
+import types
 
 from urlparse import urlparse
 from proxy import Proxy, set_actor
 from util import HostDownError, AlreadyExistsError, NotFoundError
+from rpcactor import *   # To redifine
 import util
 
 CLEAN_INT = 4
@@ -101,8 +103,8 @@ class Host(object):
 
     :param str. url: URL that identifies the host.
     '''
-    _tell = ['attach_interval', 'detach_interval']
-    _ask = ['spawn', 'lookup', 'lookup_url']
+    _tell = ['attach_interval', 'detach_interval', 'hello']
+    _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello']
 
     def __init__(self, url):
         self.actors = {}
@@ -120,6 +122,13 @@ class Host(object):
 
         # self.cleaner = interval_host(get_host(), CLEAN_INT, self.do_clean)
 
+    def hello(self):
+        print 'Hello!!'
+
+    def say_hello(self):
+        print 'Sending hello.'
+        return 'Hello from HOST!!'
+
     def load_transport(self, url):
         '''
         ### Not yet functional.
@@ -135,6 +144,8 @@ class Host(object):
         self.transport = aurl.scheme
         self.host_url = aurl
 
+        if aurl.scheme == 'http':
+            self.launch_actor('http', RPCDispatcher(url))
         # if aurl.scheme == 'tcp':
         #     self.tcp = Server(self.addr)
         #     dispatcher = self.tcp.get_dispatcher(self.addr)
@@ -245,7 +256,7 @@ class Host(object):
                 util.main_host = (util.hosts.values()[0] if util.hosts.values()
                                   else None)
 
-    def lookup_url(self, url):
+    def lookup_url(self, url, klass, module=None):
         '''
         Gets a proxy reference to the actor indicated by the URL in the
         parameters. It can be a local reference or a TCP direction.
@@ -267,7 +278,18 @@ class Host(object):
             else:
                 return Proxy(self.actors[url])
         else:
-            raise Exception("TCPthing")
+            dispatcher = self.actors[aurl.scheme]
+            if module is not None:
+                module_ = __import__(module, globals(), locals(), [klass], -1)
+                # from module import klass as klass_
+                klass_ = getattr(module_, klass)
+            elif isinstance(klass, (types.TypeType, types.ClassType)):
+                klass_ = klass
+            else:
+                raise Exception("Error defining the class to lookup.")
+            remote_actor = actor.ActorRef(url, klass_, dispatcher.channel)
+            return Proxy(remote_actor)
+            # raise Exception("TCPthing")
             # addrl = aurl.netloc.split(':')
             # addr = addrl[0],addrl[1]
             # if actors.has_key(addr):
@@ -357,7 +379,7 @@ class Host(object):
         query concurrences from shared proxies.
         '''
         if isinstance(param, Proxy):
-            return self.lookup_url(param.actor.url)
+            return self.lookup_url(param.actor.url, param.actor._obj.__class__)
         elif isinstance(param, list):
             return [self.dumps(elem) for elem in param]
         elif isinstance(param, dict):
@@ -374,7 +396,7 @@ class Host(object):
         avoid query concurrences from shared proxies.
         '''
         if isinstance(param, Proxy):
-            return self.lookup_url(param.actor.url)
+            return self.lookup_url(param.actor.url, param.actor._obj.__class__)
         elif isinstance(param, list):
             return [self.loads(elem) for elem in param]
         elif isinstance(param, dict):

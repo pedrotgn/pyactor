@@ -1,6 +1,6 @@
 from Queue import Empty
 
-from util import ASK, TELL, AskRequest, TellRequest
+from util import ASK, TELL, TYPE, METHOD, PARAMS, CHANNEL, TO, RESULT
 from util import TimeoutError, NotFoundError
 from util import get_host, get_lock
 
@@ -64,7 +64,9 @@ class TellWrapper(object):
 
     def __call__(self, *args, **kwargs):
         #  SENDING MESSAGE TELL
-        msg = TellRequest(TELL, self.__method, args, self.__target)
+        # msg = TellRequest(TELL, self.__method, args, self.__target)
+        msg = {TYPE: TELL, METHOD: self.__method, PARAMS: args,
+               TO: self.__target}
         self.__channel.send(msg)
 
 
@@ -90,14 +92,16 @@ class AskWrapper(object):
             self.__channel = actorm.Channel()
             timeout = kwargs['timeout'] if 'timeout' in kwargs.keys() else 1
             #  SENDING MESSAGE ASK
-            msg = AskRequest(ASK, self._method, args, self.__channel,
-                             self.target)
+            # msg = AskRequest(ASK, self._method, args, self.__channel,
+            #                  self.target)
+            msg = {TYPE: ASK, METHOD: self._method, PARAMS: args,
+                   CHANNEL: self.__channel, TO: self.target}
             self._actor_channel.send(msg)
             if self.__lock is not None:
                 self.__lock.release()
             try:
                 response = self.__channel.receive(timeout)
-                result = response.result
+                result = response[RESULT]
             except Empty:
                 if self.__lock is not None:
                     self.__lock.acquire()
@@ -109,10 +113,10 @@ class AskWrapper(object):
             else:
                 return result
         else:
-            return get_host().future_manager.new_future(self._method, args,
-                                                        self._actor_channel,
-                                                        self.target,
-                                                        self.__lock)
+            future_ref = {METHOD: self._method, PARAMS: args,
+                          CHANNEL: self._actor_channel, TO: self.target,
+                          'LOCK': self.__lock}
+            return get_host().future_manager.new_future(future_ref)
 
 
 class AskRefWrapper(AskWrapper):
@@ -124,10 +128,10 @@ class AskRefWrapper(AskWrapper):
         new_args = get_host().dumps(list(args))
         if future:
             self.__lock = get_lock()
-            return get_host().future_manager.new_future(self._method, args,
-                                                        self._actor_channel,
-                                                        self.target,
-                                                        self.__lock, ref=True)
+            future_ref = {METHOD: self._method, PARAMS: args,
+                          CHANNEL: self._actor_channel, TO: self.target,
+                          'LOCK': self.__lock}
+            return get_host().future_manager.new_future(future_ref, ref=True)
         else:
             result = super(AskRefWrapper, self).__call__(*new_args, **kwargs)
             return get_host().loads(result)

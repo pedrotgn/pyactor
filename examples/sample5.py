@@ -17,15 +17,17 @@ class Echo(object):
     def say_something(self):
         return 'something'
 
-set_context()
-h = create_host()
-e1 = h.spawn('echo1', Echo)
 
-e = h.lookup('echo1')
-print e.say_something()
+if __name__ == "__main__":
+    set_context()
+    h = create_host()
+    e1 = h.spawn('echo1', Echo)
 
-ee = h.lookup_url('local://local:6666/echo1')
-print ee.say_something()
+    e = h.lookup('echo1')
+    print e.say_something()
 
-sleep(1)
-h.shutdown()
+    ee = h.lookup_url('local://local:6666/echo1')
+    print ee.say_something()
+
+    sleep(1)
+    h.shutdown()

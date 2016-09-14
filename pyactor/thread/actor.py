@@ -2,8 +2,8 @@ from Queue import Queue
 from threading import Thread
 from copy import copy
 
-from pyactor.util import AskResponse, FutureResponse
-from pyactor.util import ASK, FUTURE
+from pyactor.util import ASK, FUTURE, TYPE, TO, ASKRESPONSE, FUTURERESPONSE
+from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
 
 
 class Channel(Queue):
@@ -124,13 +124,13 @@ class Actor(ActorRef):
             util.py (:class:`~.AskRequest`, :class:`~.TellRequest`,
             :class:`~.FutureRequest`).
         '''
-        if msg.method == 'stop':
+        if msg[METHOD] == 'stop':
             self.running = False
         else:
             result = None
             try:
-                invoke = getattr(self._obj, msg.method)
-                params = msg.params
+                invoke = getattr(self._obj, msg[METHOD])
+                params = msg[PARAMS]
                 result = invoke(*params)
 
             except Exception, e:
@@ -139,12 +139,15 @@ class Actor(ActorRef):
             self.send_response(result, msg)
 
     def send_response(self, result, msg):
-        if msg.type == ASK:
-            response = AskResponse(result)
-            msg.channel.send(response)
-        if msg.type == FUTURE:
-            response = FutureResponse(msg.future_id, result)
-            msg.channel.send(response)
+        if msg[TYPE] == ASK:
+            response = {TYPE: ASKRESPONSE, RESULT: result,
+                        RPC_ID: msg[RPC_ID] if RPC_ID in msg.keys() else None}
+            # AskResponse(result)
+            msg[CHANNEL].send(response)
+        if msg[TYPE] == FUTURE:
+            response = {TYPE: FUTURERESPONSE, RPC_ID: msg[RPC_ID],
+                        RESULT: result}
+            msg[CHANNEL].send(response)
 
     def run(self):
         '''

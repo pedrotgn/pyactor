@@ -19,15 +19,17 @@ class Echo(object):
         sleep(2)
         return 'something'
 
-set_context()
-h = create_host()
-e1 = h.spawn('echo1', Echo)
-e1.echo('hello there !!')
-e1.bye()
 
-try:
-    x = e1.say_something(timeout=1)
-except TimeoutError:
-    print 'timeout catched'
-sleep(1)
-h.shutdown()
+if __name__ == "__main__":
+    set_context()
+    h = create_host()
+    e1 = h.spawn('echo1', Echo)
+    e1.echo('hello there !!')
+    e1.bye()
+
+    try:
+        x = e1.say_something(timeout=1)
+    except TimeoutError:
+        print 'timeout catched'
+    sleep(1)
+    h.shutdown()

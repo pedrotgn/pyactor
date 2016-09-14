@@ -6,13 +6,15 @@ from chord import show, update, Node, k
 from time import time
 import random
 
+
 def mhash(line):
     import sha
-    key=long(sha.new(line).hexdigest(),16)
+    key = long(sha.new(line).hexdigest(), 16)
     return key
 
+
 def cid():
-    return long(random.uniform(0,2**k))
+    return long(random.uniform(0, 2**k))
 
 
 nodes_h = {}
@@ -20,7 +22,7 @@ nodes_h = {}
 set_context('green_thread')
 host = create_host()
 
-t1  = time()
+t1 = time()
 # Create and initialize nodes
 for i in range(60):
     while True:
@@ -58,9 +60,9 @@ sleep(30)
 
 key = mhash('hello')
 print key
-print key%2**k
+print key % 2**k
 show(nodes_h[0])
-found = nodes_h[0].find_predecessor(key%2**k, timeout=30)
+found = nodes_h[0].find_predecessor(key % 2**k, timeout=30)
 print found.get_id()
 
 

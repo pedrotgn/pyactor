@@ -3,7 +3,7 @@ from threading import Lock, Thread
 from time import sleep
 
 from actor import Actor
-from pyactor.util import get_host
+from pyactor.util import get_host, METHOD
 
 
 class ActorParallel(Actor):
@@ -41,16 +41,16 @@ class ActorParallel(Actor):
             util.py (:class:`~.AskRequest`, :class:`~.TellRequest`,
             :class:`~.FutureRequest`).
         '''
-        if msg.method == 'stop':
+        if msg[METHOD] == 'stop':
             self.running = False
 
         else:
             result = None
             try:
-                invoke = getattr(self._obj, msg.method)
+                invoke = getattr(self._obj, msg[METHOD])
                 params = msg.params
 
-                if msg.method in self.ask_parallel:
+                if msg[METHOD] in self.ask_parallel:
                     rpc_id = str(uuid.uuid4())
                     # add rpc message to pendent AskResponse s
                     self.pending[rpc_id] = msg
