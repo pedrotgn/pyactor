@@ -1,23 +1,44 @@
-from pyactor.context import set_context, create_host, Host
+from pyactor.context import set_context, create_host, Host, sleep
 
-# class Echo:
-#     _tell =['echo']
-#     _ask = []
-#     def echo(self,msg):
-#         print msg, self.id
+
+class EchoC:
+    _tell = ['echo', 'set_callback', 'echoc']
+    _ask = []
+
+    def set_callback(self, future):
+        future.add_callback('echo')
+
+    def echo(self, future):
+        msg = future.result(4)
+        print msg, 'From callback!'
+
+    def echoc(self, msg):
+        print msg
 
 
 if __name__ == "__main__":
-    set_context()
+    set_context('green_thread')
     host = create_host('http://127.0.0.1:1679')
+
+    spk = host.spawn('echo', EchoC)
 
     e1 = host.lookup_url('http://127.0.0.1:1277/echo1', 'Echo', 'server')
     # print e1
-    h = host.lookup_url('http://127.0.0.1:1277/host', Host)
+    h = host.lookup_url('http://127.0.0.1:1277/', Host)
     # print h
-    h.hello()
-    print h.say_hello(timeout=None)
-    e1.echo('Daniel es grande!')
-    host.shutdown()
 
-    # e1 = h.spawn('echo1',Echo).get()
+    # e1.echo('Daniel es grande!')    # TELL message
+
+    # h.hello()
+    # print h.say_hello(timeout=2), 'ASK message!'      # ASK Message
+
+    f = h.say_hello(future=True)
+    e1.set_c(spk)
+    # e1.set_c(f)
+    # f.add_callback('echoc', e1)
+    print f.result(2), 'Future!'
+    # sleep(1)
+    # spk.set_callback(f)
+
+    sleep(4)
+    host.shutdown()

@@ -1,6 +1,6 @@
 from SimpleXMLRPCServer import SimpleXMLRPCServer
 from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
-# import cPickle
+import cPickle
 import xmlrpclib
 import threading
 
@@ -24,7 +24,7 @@ class Source(threading.Thread):
                                          requestHandler=RequestHandler,
                                          logRequests=False,
                                          allow_none=True)
-        self.server.register_introspection_functions()
+        # self.server.register_introspection_functions()
 
     def register_function(self, func):
         self.server.register_function(func, 'send')
@@ -42,4 +42,5 @@ class Sink:
         self.endpoint = xmlrpclib.ServerProxy(url)
 
     def send(self, msg):
+        msg = cPickle.dumps(msg)
         return self.endpoint.send(msg)

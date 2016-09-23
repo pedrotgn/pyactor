@@ -14,6 +14,17 @@ def set_actor(module_name):
                         ['Future'], -1)
 
 
+class ProxyRef(object):
+    def __init__(self, actor, kclass, modul):
+        self.url = actor
+        self.klass = kclass
+        self.module = modul
+
+    def __repr__(self):
+        return 'ProxyRef(actor=%s, class=%s mod=%s)' % \
+               (self.url, self.klass, self.module)
+
+
 class Proxy(object):
     '''
     Proxy is the class that supports to create a remote reference to an

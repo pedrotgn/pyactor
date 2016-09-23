@@ -40,7 +40,7 @@ class Future(object):
                        TO: callback[2]}
                 callback[1].send(msg)
             except Exception, e:
-                raise Exception('exception calling callback for %r: %r'
+                raise Exception('Exception calling callback for %r: %r'
                                 % (self, e))
 
     def running(self):

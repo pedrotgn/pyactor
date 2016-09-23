@@ -10,6 +10,7 @@ class Echo(object):
     _ref = ['echo', 'echo2', 'echo3']
 
     def echo(self, msg, sender):
+        # print sender
         print msg, 'from:', sender.get_name(), id(sender)
 
     def echo2(self, msg, sndrs):
@@ -50,9 +51,9 @@ if __name__ == "__main__":
     sleep(1)  # Give time to host to lookup the first one
     bot2.set_echo()
     bot.say_hi()
-    bot2.say_hi()
-    e1.echo2('hello there!!', [bot2])
-    e1.echo3('hello there!!', {'bot1': bot, 'bot2': bot2})
+    # bot2.say_hi()
+    # e1.echo2('hello there!!', [bot2])
+    # e1.echo3('hello there!!', {'bot1': bot, 'bot2': bot2})
 
     sleep(2)
     h.shutdown()

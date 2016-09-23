@@ -5,6 +5,7 @@ from gevent.queue import Queue
 
 from pyactor.util import ASK, FUTURE, TYPE, TO, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
+from pyactor.util import ref_l, ref_d
 
 
 class Channel(Queue):
@@ -64,6 +65,9 @@ class ActorRef(object):
             self.ask = copy(klass._ask)
 
         if hasattr(klass, '_ref'):
+            self.receive = ref_l(self.receive)
+            self.send_response = ref_d(self.send_response)
+
             self.tell_ref = list(set(self.tell) & set(klass._ref))
             self.ask_ref = list(set(self.ask) & set(klass._ref))
             for method in self.ask_ref:
@@ -75,6 +79,12 @@ class ActorRef(object):
             self.tell_ref = []
 
         self.klass = klass
+
+    def receive(self, msg):
+        raise NotImplementedError()
+
+    def send_response(self, result, msg):
+        raise NotImplementedError()
 
     def __repr__(self):
         return 'Actor(url=%s, class=%s)' % (self.url, self.klass)
@@ -115,8 +125,7 @@ class Actor(ActorRef):
         The message received from the queue specify a method of the
         class the actor represents. This invokes it. If the
         communication is an :class:`~.AskRequest`, sends the result back
-        to the channel included in the message as an
-        :class:`~.AskResponse`.
+        to the channel included in the message as an `AskResponse`.
 
         If it is a :class:`~.Future`, generates a :class:`~.FutureResponse`
         to send the result to the manager.
@@ -133,10 +142,8 @@ class Actor(ActorRef):
                 invoke = getattr(self._obj, msg[METHOD])
                 params = msg[PARAMS]
                 result = invoke(*params)
-
             except Exception, e:
                 result = e
-                # print result
             self.send_response(result, msg)
 
     def send_response(self, result, msg):
@@ -145,7 +152,7 @@ class Actor(ActorRef):
                         RPC_ID: msg[RPC_ID] if RPC_ID in msg.keys() else None}
             # response = AskResponse(result)
             msg[CHANNEL].send(response)
-        if msg[TYPE] == FUTURE:
+        elif msg[TYPE] == FUTURE:
             response = {TYPE: FUTURERESPONSE, RPC_ID: msg[RPC_ID],
                         RESULT: result}
             # response = FutureResponse(msg.future_id, result)

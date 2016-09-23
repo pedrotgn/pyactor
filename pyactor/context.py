@@ -1,8 +1,10 @@
 from signal import SIGINT
 import types
+import sys
+import os.path
 
 from urlparse import urlparse
-from proxy import Proxy, set_actor
+from proxy import Proxy, set_actor, ProxyRef
 from util import HostDownError, AlreadyExistsError, NotFoundError
 from rpcactor import *   # To redifine
 import util
@@ -278,27 +280,21 @@ class Host(object):
             else:
                 return Proxy(self.actors[url])
         else:
-            dispatcher = self.actors[aurl.scheme]
-            if module is not None:
-                module_ = __import__(module, globals(), locals(), [klass], -1)
-                # from module import klass as klass_
-                klass_ = getattr(module_, klass)
-            elif isinstance(klass, (types.TypeType, types.ClassType)):
-                klass_ = klass
-            else:
-                raise Exception("Error defining the class to lookup.")
-            remote_actor = actor.ActorRef(url, klass_, dispatcher.channel)
-            return Proxy(remote_actor)
-            # raise Exception("TCPthing")
-            # addrl = aurl.netloc.split(':')
-            # addr = addrl[0],addrl[1]
-            # if actors.has_key(addr):
-            #     dispatcher = actors[addr]
-            # else:
-            #     dispatcher = self.tcp.get_dispatcher(addr)
-            #     launch_actor(addr,dispatcher)
-            # remote_actor = ActorRef(url,klass,dispatcher.channel)
-            # return Proxy(remote_actor)
+            try:
+                dispatcher = self.actors[aurl.scheme]
+                if module is not None:
+                    module_ = __import__(module, globals(), locals(),
+                                         [klass], -1)
+                    klass_ = getattr(module_, klass)
+                elif isinstance(klass, (types.TypeType, types.ClassType)):
+                    klass_ = klass
+                else:
+                    raise Exception("Error defining the class to lookup.")
+                remote_actor = actor.ActorRef(url, klass_, dispatcher.channel)
+                return Proxy(remote_actor)
+            except Exception:
+                raise Exception("ERROR looking for the actor. Hosts must " +
+                                "be in http to work properly.")
 
     def is_local(self, aurl):
         # '''Private method.
@@ -379,7 +375,10 @@ class Host(object):
         query concurrences from shared proxies.
         '''
         if isinstance(param, Proxy):
-            return self.lookup_url(param.actor.url, param.actor._obj.__class__)
+            filename = sys.modules[param.actor.klass.__module__].__file__
+            module_name = os.path.splitext(os.path.basename(filename))[0]
+            return ProxyRef(param.actor.url, param.actor.klass.__name__,
+                            module_name)
         elif isinstance(param, list):
             return [self.dumps(elem) for elem in param]
         elif isinstance(param, dict):
@@ -395,8 +394,8 @@ class Host(object):
         Checks the return parameters generating new proxy instances to
         avoid query concurrences from shared proxies.
         '''
-        if isinstance(param, Proxy):
-            return self.lookup_url(param.actor.url, param.actor._obj.__class__)
+        if isinstance(param, ProxyRef):
+            return self.lookup_url(param.url, param.klass, param.module)
         elif isinstance(param, list):
             return [self.loads(elem) for elem in param]
         elif isinstance(param, dict):

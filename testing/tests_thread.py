@@ -234,10 +234,10 @@ class TestBasic(unittest.TestCase):
         h2 = create_host("local://local:7777/host")
         b2 = h2.spawn('bot1', Bot)
         self.assertEqual(h2, b2.get_real_host())
-        b2.set_echo(self.e1)
         # with self.assertRaises(Exception):
-        #     b1.set_echo(b2)  # This line raises TCPthing
-
+        #     b2.set_echo(self.e1)
+        #     b1.set_echo(b2)
+        # This lines raise Exception in actor's thread for not http hosts
         h2.shutdown()
 
     def test_2spawning(self):

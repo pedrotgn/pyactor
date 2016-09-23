@@ -1,7 +1,7 @@
 import uuid
 
 from gevent import spawn
-from pyactor.util import get_host, METHOD
+from pyactor.util import get_host, METHOD, PARAMS
 from actor import Actor
 
 
@@ -39,12 +39,11 @@ class ActorParallel(Actor):
         '''
         if msg[METHOD] == 'stop':
             self.running = False
-
         else:
             result = None
             try:
                 invoke = getattr(self._obj, msg[METHOD])
-                params = msg.params
+                params = msg[PARAMS]
 
                 if msg[METHOD] in self.ask_parallel:
                     rpc_id = str(uuid.uuid4())
@@ -55,13 +54,11 @@ class ActorParallel(Actor):
                     params.insert(0, rpc_id)
                     invoke(*params)
                     return
-
                 else:
                     result = invoke(*params)
             except Exception, e:
                 result = e
                 print result
-
             self.send_response(result, msg)
 
     def receive_from_ask(self, result, rpc_id):

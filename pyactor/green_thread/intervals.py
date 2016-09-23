@@ -1,7 +1,6 @@
 from gevent.event import Event
 from gevent import getcurrent, spawn
 from gevent import sleep as gsleep
-# import gevent
 
 
 def sleep(seconds):

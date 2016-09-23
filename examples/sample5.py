@@ -26,7 +26,7 @@ if __name__ == "__main__":
     e = h.lookup('echo1')
     print e.say_something()
 
-    ee = h.lookup_url('local://local:6666/echo1')
+    ee = h.lookup_url('local://local:6666/echo1', Echo)
     print ee.say_something()
 
     sleep(1)

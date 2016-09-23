@@ -4,6 +4,7 @@ from copy import copy
 
 from pyactor.util import ASK, FUTURE, TYPE, TO, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
+from pyactor.util import ref_l, ref_d
 
 
 class Channel(Queue):
@@ -63,6 +64,9 @@ class ActorRef(object):
             self.ask = copy(klass._ask)
 
         if hasattr(klass, '_ref'):
+            self.receive = ref_l(self.receive)
+            self.send_response = ref_d(self.send_response)
+
             self.tell_ref = list(set(self.tell) & set(klass._ref))
             self.ask_ref = list(set(self.ask) & set(klass._ref))
             for method in self.ask_ref:
@@ -74,6 +78,12 @@ class ActorRef(object):
             self.tell_ref = []
 
         self.klass = klass
+
+    def receive(self, msg):
+        raise NotImplementedError()
+
+    def send_response(self, result, msg):
+        raise NotImplementedError()
 
     def __repr__(self):
         return 'Actor(url=%s, class=%s)' % (self.url, self.klass)
@@ -144,7 +154,7 @@ class Actor(ActorRef):
                         RPC_ID: msg[RPC_ID] if RPC_ID in msg.keys() else None}
             # AskResponse(result)
             msg[CHANNEL].send(response)
-        if msg[TYPE] == FUTURE:
+        elif msg[TYPE] == FUTURE:
             response = {TYPE: FUTURERESPONSE, RPC_ID: msg[RPC_ID],
                         RESULT: result}
             msg[CHANNEL].send(response)

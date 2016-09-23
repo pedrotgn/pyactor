@@ -107,6 +107,22 @@ class HostDownError(Exception):
         return ("The host is down.")
 
 
+def ref_l(f):
+    def wrap_ref_l(*args):
+        new_args = list(args)
+        new_args[0][PARAMS] = get_host().loads(list(args[0][PARAMS]))
+        return f(*new_args)
+    return wrap_ref_l
+
+
+def ref_d(f):
+    def wrap_ref_d(*args):
+        new_args = list(args)
+        new_args[0] = get_host().dumps(args[0])
+        return f(*new_args)
+    return wrap_ref_d
+
+
 # TellRequest = collections.namedtuple('TellRequest',
 #                                      'type method params to_url')
 # # class TellRequest (collections.namedtuple('TellRequest',
