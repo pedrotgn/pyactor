@@ -1,9 +1,11 @@
 import uuid
+import cPickle
 
 from pyactor.thread.actor import Actor, Channel
-from util import *
+from util import TYPE, METHOD, TELL, ASK, CHANNEL, FROM, TO, RPC_ID, RESULT
+from util import FUTURE, ASKRESPONSE, FUTURERESPONSE, get_host
 from urlparse import urlparse
-from rpcserver import *
+from rpcserver import Source, Sink
 
 
 class RPCDispatcher(Actor):
@@ -49,7 +51,6 @@ class RPCDispatcher(Actor):
                     msg[FROM] = self.url
                     self.get_sink(msg[TO]).send(msg)
                 elif msg[TYPE] == ASKRESPONSE:
-                    # print msg
                     if msg[RPC_ID] in self.executing.keys():
                         msg[RESULT] = get_host().loads(msg[RESULT])
                         self.get_sink(self.executing[msg[RPC_ID]]).send(msg)
@@ -61,7 +62,6 @@ class RPCDispatcher(Actor):
                     msg[FROM] = self.url
                     self.get_sink(msg[TO]).send(msg)
                 elif msg[TYPE] == FUTURERESPONSE:
-                    # print msg
                     if msg[RPC_ID] in self.executing.keys():
                         self.get_sink(self.executing[msg[RPC_ID]]).send(msg)
                         del self.executing[msg[RPC_ID]]
@@ -70,15 +70,10 @@ class RPCDispatcher(Actor):
 
     def on_message(self, msg):
         msg = cPickle.loads(msg)
-        # print msg
         try:
             if msg[TYPE] == TELL:
-                # msg[PARAMS] = get_host().loads(list(msg[PARAMS]))
-                # print msg
                 get_host().actors[msg[TO]].channel.send(msg)
             elif msg[TYPE] == ASK:
-                # msg[PARAMS] = get_host().loads(list(msg[PARAMS]))
-                # print msg
                 # Save rpc id and actor channel
                 rpc_id = msg[RPC_ID]
                 self.executing[rpc_id] = msg[FROM]
@@ -86,7 +81,6 @@ class RPCDispatcher(Actor):
                 msg[CHANNEL] = self.channel
                 get_host().actors[msg[TO]].channel.send(msg)
             elif msg[TYPE] == ASKRESPONSE:
-                # print msg
                 if msg[RPC_ID] in self.pending.keys():
                     self.pending[msg[RPC_ID]].send(msg)
                     del self.pending[msg[RPC_ID]]
@@ -96,9 +90,8 @@ class RPCDispatcher(Actor):
                 msg[CHANNEL] = self.channel
                 get_host().actors[msg[TO]].channel.send(msg)
             elif msg[TYPE] == FUTURERESPONSE:
-                # print msg
                 if msg[RPC_ID] in self.pending.keys():
                     self.pending[msg[RPC_ID]].send(msg)
                     del self.pending[msg[RPC_ID]]
         except Exception, e:
-            print 'TCP ERROR:', e, 'does not exist?'
+            print 'TCP ERROR:', e

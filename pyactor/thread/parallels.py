@@ -43,7 +43,6 @@ class ActorParallel(Actor):
         '''
         if msg[METHOD] == 'stop':
             self.running = False
-
         else:
             result = None
             try:
@@ -59,7 +58,6 @@ class ActorParallel(Actor):
                     params.insert(0, rpc_id)
                     invoke(*params)
                     return
-
                 else:
                     with self.__lock:
                         sleep(0.01)

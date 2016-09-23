@@ -6,7 +6,7 @@ import os.path
 from urlparse import urlparse
 from proxy import Proxy, set_actor, ProxyRef
 from util import HostDownError, AlreadyExistsError, NotFoundError
-from rpcactor import *   # To redifine
+from rpcactor import RPCDispatcher
 import util
 
 CLEAN_INT = 4
@@ -133,7 +133,6 @@ class Host(object):
 
     def load_transport(self, url):
         '''
-        ### Not yet functional.
         For TCP communication. Sets the communication socket of the host
         at the address and port specified.
 
@@ -148,10 +147,6 @@ class Host(object):
 
         if aurl.scheme == 'http':
             self.launch_actor('http', RPCDispatcher(url))
-        # if aurl.scheme == 'tcp':
-        #     self.tcp = Server(self.addr)
-        #     dispatcher = self.tcp.get_dispatcher(self.addr)
-        #     launch_actor(self.addr,dispatcher)
 
     def spawn(self, aid, klass, param=None):
         '''
@@ -195,7 +190,6 @@ class Host(object):
                 new_actor = actor.Actor(url, klass, obj)
 
             obj.proxy = Proxy(new_actor)
-
             self.launch_actor(url, new_actor)
             return Proxy(new_actor)
 
@@ -230,7 +224,6 @@ class Host(object):
 
         This method can't be called remotely.
         '''
-        # print self.pthreads
         if self.alive:
             for interval_event in self.intervals.values():
                 interval_event.set()

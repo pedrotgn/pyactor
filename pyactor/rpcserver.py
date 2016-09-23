@@ -9,11 +9,6 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
     rpc_paths = ()
 
 
-# def receive(msg):
-#     print msg
-#     return True
-
-
 class Source(threading.Thread):
     def __init__(self, addr):
         threading.Thread.__init__(self)

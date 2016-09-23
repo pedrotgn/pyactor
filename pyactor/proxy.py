@@ -42,7 +42,6 @@ class Proxy(object):
         for method in actor.tell_ref:
             setattr(self, method, TellRefWrapper(self.__channel, method,
                                                  actor.url))
-
         for method in actor.tell:
             setattr(self, method, TellWrapper(self.__channel, method,
                                               actor.url))

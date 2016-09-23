@@ -242,7 +242,6 @@ class FutureManager(object):
         return future
 
     def stop(self):
-        # self.running = False
         self.channel.send('stop')
         if self.t is not None:
             self.t.join()

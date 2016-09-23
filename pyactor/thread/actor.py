@@ -16,8 +16,7 @@ class Channel(Queue):
         Queue.__init__(self)
 
     def send(self, msg):
-        """
-        It sends a message to the current channel.
+        """ It sends a message to the current channel.
 
         :param msg: The message sent to an actor. It is a tuple using
             the constants in util.py (:mod:`pyactor.util`).
@@ -25,8 +24,7 @@ class Channel(Queue):
         self.put(msg)
 
     def receive(self, timeout=None):
-        """
-        It receives a message from the channel, blocking the calling
+        """It receives a message from the channel, blocking the calling
         thread until the response is received, or the timeout is
         triggered.
 
@@ -54,6 +52,7 @@ class ActorRef(object):
         self.url = url
         self.tell = []
         self.ask = []
+        self.klass = klass
         if channel:
             self.channel = channel
         else:
@@ -76,8 +75,6 @@ class ActorRef(object):
         else:
             self.ask_ref = []
             self.tell_ref = []
-
-        self.klass = klass
 
     def receive(self, msg):
         raise NotImplementedError()
@@ -142,10 +139,8 @@ class Actor(ActorRef):
                 invoke = getattr(self._obj, msg[METHOD])
                 params = msg[PARAMS]
                 result = invoke(*params)
-
             except Exception, e:
                 result = e
-                # print result
             self.send_response(result, msg)
 
     def send_response(self, result, msg):
