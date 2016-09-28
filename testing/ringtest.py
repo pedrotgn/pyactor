@@ -1,3 +1,7 @@
+'''
+RING test. Messages per second. Number of nodes.
+@author: Daniel Barcelona Pons
+'''
 from pyactor.context import set_context, create_host, sleep
 
 from time import time

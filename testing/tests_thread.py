@@ -1,5 +1,6 @@
 '''
-unittest module
+Local queries unittest module: python threads core
+@author: Daniel Barcelona Pons
 '''
 import unittest
 import sys
@@ -222,8 +223,9 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(self.h.actor.tell, ['attach_interval',
                                              'detach_interval', 'hello',
                                              'stop'])
-        self.assertEqual(self.h.actor.ask, ['spawn', 'lookup', 'lookup_url',
-                                            'say_hello'])
+        self.assertEqual(self.h.actor.ask, ['say_hello'])
+        self.assertEqual(self.h.actor.ask_ref, ['spawn', 'lookup',
+                                                'lookup_url'])
         with self.assertRaises(Exception):
             h2 = create_host()
         self.assertEqual(self.hr, get_host())
@@ -347,7 +349,7 @@ class TestBasic(unittest.TestCase):
             self.hr.lookup('echo1')
         with self.assertRaises(HostDownError):
             self.hr.lookup_url('local://local:6666/echo1', Echo)
-        with self.assertRaises(TimeoutError):
+        with self.assertRaises(HostError):
             self.h.spawn('bot', Bot)
         # Now the actor is not running, invoking a method should raise Timeout.
         with self.assertRaises(TimeoutError):

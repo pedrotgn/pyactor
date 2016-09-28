@@ -1,5 +1,6 @@
 '''
-unittest module
+Local queries unittest module. General
+@author: Daniel Barcelona Pons
 '''
 import unittest
 import sys

@@ -1,5 +1,6 @@
 '''
-unittest module
+Local queries unittest module: green threads core (GEvent)
+@author: Daniel Barcelona Pons
 '''
 import unittest
 import sys
@@ -221,8 +222,9 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(self.h.actor.tell, ['attach_interval',
                                              'detach_interval',
                                              'hello', 'stop'])
-        self.assertEqual(self.h.actor.ask, ['spawn', 'lookup', 'lookup_url',
-                                            'say_hello'])
+        self.assertEqual(self.h.actor.ask, ['say_hello'])
+        self.assertEqual(self.h.actor.ask_ref, ['spawn', 'lookup',
+                                                'lookup_url'])
         with self.assertRaises(Exception):
             h2 = create_host()
         self.assertEqual(self.hr, get_host())
@@ -344,10 +346,10 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(HostDownError):
             self.hr.spawn('bot', Bot)
         with self.assertRaises(HostDownError):
-            self.hr.lookup('echo1').get()
+            self.hr.lookup('echo1')
         with self.assertRaises(HostDownError):
             self.hr.lookup_url('local://local:6666/echo1', Echo)
-        with self.assertRaises(TimeoutError):
+        with self.assertRaises(HostError):  # No local host to create the query
             self.h.spawn('bot', Bot)
         # Now the actor is not running, invoking a method should raise Timeout.
         with self.assertRaises(TimeoutError):

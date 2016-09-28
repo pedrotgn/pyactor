@@ -5,7 +5,7 @@ import os.path
 
 from urlparse import urlparse
 from proxy import Proxy, set_actor, ProxyRef
-from util import HostDownError, AlreadyExistsError, NotFoundError
+from util import HostDownError, AlreadyExistsError, NotFoundError, HostError
 from rpcactor import RPCDispatcher
 import util
 
@@ -77,7 +77,7 @@ def create_host(url="local://local:6666/host"):
     :raises: Exception if there is a host already created.
     '''
     if url in util.hosts.keys():
-        raise Exception('Host already created. Only one host can' +
+        raise HostError('Host already created. Only one host can' +
                         ' be ran with the same url.')
     else:
         if not util.hosts:
@@ -107,6 +107,7 @@ class Host(object):
     '''
     _tell = ['attach_interval', 'detach_interval', 'hello']
     _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello']
+    _ref = ['spawn', 'lookup', 'lookup_url']
 
     def __init__(self, url):
         self.actors = {}
@@ -129,6 +130,7 @@ class Host(object):
 
     def say_hello(self):
         print 'Sending hello.'
+        sleep(1)
         return 'Hello from HOST!!'
 
     def load_transport(self, url):
@@ -170,11 +172,18 @@ class Host(object):
             param = []
         if not self.alive:
             raise HostDownError()
+        if isinstance(klass, basestring):
+            module, klass = klass.split('/')
+            module_ = __import__(module, globals(), locals(),
+                                 [klass], -1)
+            klass_ = getattr(module_, klass)
+        elif isinstance(klass, (types.TypeType, types.ClassType)):
+            klass_ = klass
         url = '%s://%s/%s' % (self.transport, self.host_url.netloc, aid)
         if url in self.actors.keys():
             raise AlreadyExistsError(url)
         else:
-            obj = klass(*param)
+            obj = klass_(*param)
             obj.id = aid
             if self.running:
                 obj.host = self.proxy
@@ -182,12 +191,12 @@ class Host(object):
             #     obj.host = Exception("Host is not an active actor. \
             #                           Use 'init_host' to make it alive.")
 
-            if hasattr(klass, '_parallel') and klass._parallel:
-                new_actor = parallels.ActorParallel(url, klass, obj)
+            if hasattr(klass_, '_parallel') and klass_._parallel:
+                new_actor = parallels.ActorParallel(url, klass_, obj)
                 lock = new_actor.get_lock()
                 self.locks[url] = lock
             else:
-                new_actor = actor.Actor(url, klass, obj)
+                new_actor = actor.Actor(url, klass_, obj)
 
             obj.proxy = Proxy(new_actor)
             self.launch_actor(url, new_actor)
@@ -282,11 +291,13 @@ class Host(object):
                 elif isinstance(klass, (types.TypeType, types.ClassType)):
                     klass_ = klass
                 else:
-                    raise Exception("Error defining the class to lookup.")
+                    raise HostError("Tha class specified to look up is" +
+                                    " not a class.")
                 remote_actor = actor.ActorRef(url, klass_, dispatcher.channel)
                 return Proxy(remote_actor)
             except Exception:
-                raise Exception("ERROR looking for the actor. Hosts must " +
+                raise HostError("ERROR looking for the actor on another " +
+                                "server. Hosts must " +
                                 "be in http to work properly.")
 
     def is_local(self, aurl):

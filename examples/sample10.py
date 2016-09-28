@@ -1,5 +1,6 @@
 '''
 Intervals sample
+@author: Daniel Barcelona Pons
 '''
 from pyactor.context import (set_context, create_host, sleep,
                              interval_host, later)

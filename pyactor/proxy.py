@@ -1,7 +1,7 @@
 from Queue import Empty
 
 from util import ASK, TELL, TYPE, METHOD, PARAMS, CHANNEL, TO, RESULT
-from util import TimeoutError, NotFoundError
+from util import TimeoutError, NotFoundError, HostError
 from util import get_host, get_lock
 
 
@@ -135,7 +135,12 @@ class AskRefWrapper(AskWrapper):
     '''
     def __call__(self, *args, **kwargs):
         future = kwargs['future'] if 'future' in kwargs.keys() else False
-        new_args = get_host().dumps(list(args))
+        host = get_host()
+        if host is not None:
+            new_args = host.dumps(list(args))
+        else:
+            raise HostError('No such Host')
+
         if future:
             self.__lock = get_lock()
             future_ref = {METHOD: self._method, PARAMS: args,
@@ -150,5 +155,9 @@ class AskRefWrapper(AskWrapper):
 class TellRefWrapper(TellWrapper):
     '''Wrapper for Tell queries that have a proxy in parameters.'''
     def __call__(self, *args, **kwargs):
-        new_args = get_host().dumps(list(args))
+        host = get_host()
+        if host is not None:
+            new_args = host.dumps(list(args))
+        else:
+            raise HostError('No such Host')
         return super(TellRefWrapper, self).__call__(*new_args, **kwargs)

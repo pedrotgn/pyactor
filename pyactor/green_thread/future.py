@@ -4,7 +4,7 @@ from gevent.event import Event
 
 from pyactor.util import get_current, get_host, RPC_ID, RESULT
 from pyactor.util import TELL, FUTURE, ASK, TYPE, METHOD, PARAMS, CHANNEL, TO
-from pyactor.util import TimeoutError
+from pyactor.util import TimeoutError, FutureError
 
 from actor import Channel
 
@@ -40,8 +40,8 @@ class Future(object):
                        TO: callback[2]}
                 callback[1].send(msg)
             except Exception, e:
-                raise Exception('Exception calling callback for %r: %r'
-                                % (self, e))
+                raise FutureError('Exception calling callback for %r: %r'
+                                  % (self, e))
 
     def running(self):
         """Return True if the future is currently executing."""
@@ -148,7 +148,7 @@ class Future(object):
                    RPC_ID: self.__id}
             self.__actor_channel.send(msg)
         else:
-            raise Exception("Future already running.")
+            raise FutureError("Future already running.")
 
     def __set_running(self):
         # """This is only called internally from send_work().

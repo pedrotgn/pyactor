@@ -50,10 +50,16 @@ class RPCDispatcher(Actor):
                     del msg[CHANNEL]
                     msg[FROM] = self.url
                     self.get_sink(msg[TO]).send(msg)
-                elif msg[TYPE] == ASKRESPONSE:
-                    if msg[RPC_ID] in self.executing.keys():
-                        msg[RESULT] = get_host().loads(msg[RESULT])
-                        self.get_sink(self.executing[msg[RPC_ID]]).send(msg)
+                elif msg[TYPE] == ASKRESPONSE or msg[TYPE] == FUTURERESPONSE:
+                    try:
+                        if msg[RPC_ID] in self.executing.keys():
+                            sink = self.get_sink(self.executing[msg[RPC_ID]])
+                            sink.send(msg)
+                            del self.executing[msg[RPC_ID]]
+                    except Exception:
+                        print (('Error sending a response to %r.'
+                               % (self.executing[msg[RPC_ID]])) +
+                               ' Receiver is offline?')
                         del self.executing[msg[RPC_ID]]
                 elif msg[TYPE] == FUTURE:
                     rpc_id = msg[RPC_ID]
@@ -61,35 +67,22 @@ class RPCDispatcher(Actor):
                     del msg[CHANNEL]
                     msg[FROM] = self.url
                     self.get_sink(msg[TO]).send(msg)
-                elif msg[TYPE] == FUTURERESPONSE:
-                    if msg[RPC_ID] in self.executing.keys():
-                        self.get_sink(self.executing[msg[RPC_ID]]).send(msg)
-                        del self.executing[msg[RPC_ID]]
             except Exception as e:
                 print e
 
     def on_message(self, msg):
-        msg = cPickle.loads(msg)
         try:
+            msg = cPickle.loads(msg)
             if msg[TYPE] == TELL:
                 get_host().actors[msg[TO]].channel.send(msg)
-            elif msg[TYPE] == ASK:
+            elif msg[TYPE] == ASK or msg[TYPE] == FUTURE:
                 # Save rpc id and actor channel
                 rpc_id = msg[RPC_ID]
                 self.executing[rpc_id] = msg[FROM]
                 # Change msg callback channel, add id
                 msg[CHANNEL] = self.channel
                 get_host().actors[msg[TO]].channel.send(msg)
-            elif msg[TYPE] == ASKRESPONSE:
-                if msg[RPC_ID] in self.pending.keys():
-                    self.pending[msg[RPC_ID]].send(msg)
-                    del self.pending[msg[RPC_ID]]
-            elif msg[TYPE] == FUTURE:
-                rpc_id = msg[RPC_ID]
-                self.executing[rpc_id] = msg[FROM]
-                msg[CHANNEL] = self.channel
-                get_host().actors[msg[TO]].channel.send(msg)
-            elif msg[TYPE] == FUTURERESPONSE:
+            elif msg[TYPE] == ASKRESPONSE or msg[TYPE] == FUTURERESPONSE:
                 if msg[RPC_ID] in self.pending.keys():
                     self.pending[msg[RPC_ID]].send(msg)
                     del self.pending[msg[RPC_ID]]
