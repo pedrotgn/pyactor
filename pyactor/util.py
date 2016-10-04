@@ -6,7 +6,6 @@ Defined constants:
 """
 from gevent import getcurrent
 from threading import current_thread
-import collections
 
 
 FROM = 'FROM'

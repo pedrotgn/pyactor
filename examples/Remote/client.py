@@ -1,7 +1,7 @@
 from pyactor.context import set_context, create_host, Host, sleep
 
 
-class EchoC:
+class EchoC(object):
     _tell = ['echo', 'set_callback', 'echoc']
     _ask = []
 

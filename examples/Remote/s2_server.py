@@ -5,7 +5,7 @@ Basic remote example sending ask messages. SERVER
 from pyactor.context import set_context, create_host
 
 
-class Echo:
+class Echo(object):
     _tell = ['echo']
     _ask = ['get_msgs']
 

@@ -2,7 +2,7 @@ from Queue import Queue
 from threading import Thread
 from copy import copy
 
-from pyactor.util import ASK, FUTURE, TYPE, TO, ASKRESPONSE, FUTURERESPONSE
+from pyactor.util import ASK, FUTURE, TYPE, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
 from pyactor.util import ref_l, ref_d
 
@@ -18,7 +18,7 @@ class Channel(Queue):
     def send(self, msg):
         """ It sends a message to the current channel.
 
-        :param msg: The message sent to an actor. It is a tuple using
+        :param msg: The message sent to an actor. It is a dictionary using
             the constants in util.py (:mod:`pyactor.util`).
         """
         self.put(msg)
@@ -30,7 +30,7 @@ class Channel(Queue):
 
         :param int timeout: timeout to wait for messages. If none
             provided it will block until a message arrives.
-        :return: returns a message sent to the channel. It is a tuple
+        :return: returns a message sent to the channel. It is a dictionary
             using the constants in util.py (:mod:`pyactor.util`).
         """
         return self.get(timeout=timeout)
@@ -76,6 +76,8 @@ class ActorRef(object):
             self.ask_ref = []
             self.tell_ref = []
 
+        self.tell.append('stop')
+
     def receive(self, msg):
         raise NotImplementedError()
 
@@ -101,7 +103,6 @@ class Actor(ActorRef):
         super(Actor, self).__init__(url, klass)
         self._obj = obj
         self.id = obj.id
-        self.tell.append('stop')
         self.running = True
 
     def __processQueue(self):
@@ -127,9 +128,8 @@ class Actor(ActorRef):
         If it is a :class:`~.Future`, generates a :class:`~.FutureResponse`
         to send the result to the manager.
 
-        :param msg: The message is a namedtuple of the defined in
-            util.py (:class:`~.AskRequest`, :class:`~.TellRequest`,
-            :class:`~.FutureRequest`).
+        :param msg: The message is a dictionary using the constants
+            defined in util.py (:mod:`pyactor.util`).
         '''
         if msg[METHOD] == 'stop':
             self.running = False

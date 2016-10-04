@@ -37,9 +37,8 @@ class ActorParallel(Actor):
         Overwriting :meth:`Actor.receive`, adds the checks and
         functionalities requiered by parallel methods.
 
-        :param msg: The message is a namedtuple of the defined in
-            util.py (:class:`~.AskRequest`, :class:`~.TellRequest`,
-            :class:`~.FutureRequest`).
+        :param msg: The message is a dictionary using the constants
+            defined in util.py (:mod:`pyactor.util`).
         '''
         if msg[METHOD] == 'stop':
             self.running = False

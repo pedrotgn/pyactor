@@ -32,7 +32,7 @@ class Source(threading.Thread):
         self.server.server_close()
 
 
-class Sink:
+class Sink(object):
     def __init__(self, url):
         self.endpoint = xmlrpclib.ServerProxy(url)
 

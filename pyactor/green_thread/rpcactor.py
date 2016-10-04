@@ -1,17 +1,19 @@
 import uuid
 import cPickle
-
-from pyactor.thread.actor import Actor, Channel
-from util import TYPE, METHOD, TELL, ASK, CHANNEL, FROM, TO, RPC_ID, RESULT
-from util import FUTURE, ASKRESPONSE, FUTURERESPONSE, get_host
 from urlparse import urlparse
-from rpcserver import Source, Sink
+
+from pyactor.util import TYPE, METHOD, TELL, ASK, CHANNEL, FROM, TO, RPC_ID
+from pyactor.util import FUTURE, ASKRESPONSE, FUTURERESPONSE
+from pyactor.util import get_host, get_current
+from pyactor.rpcserver import Source, Sink
+from actor import Actor, Channel
 
 
 class RPCDispatcher(Actor):
 
-    def __init__(self, url):
+    def __init__(self, url, host):
         self.url = url
+        self.host = host
         aurl = urlparse(url)
         address = aurl.netloc.split(':')
         ip, port = address[0], address[1]
@@ -37,12 +39,12 @@ class RPCDispatcher(Actor):
 
     def receive(self, msg):
         if msg[TYPE] == TELL and msg[METHOD] == 'stop':
-                self.running = False
-                self.source.stop()
+            self.running = False
+            self.source.stop()
         else:
             try:
                 if msg[TYPE] == TELL:
-                    self.get_sink(msg[TO]).send(msg)
+                    sink = self.get_sink(msg[TO]).send(msg)
                 elif msg[TYPE] == ASK:
                     rpc_id = str(uuid.uuid4())
                     msg[RPC_ID] = rpc_id
@@ -74,14 +76,14 @@ class RPCDispatcher(Actor):
         try:
             msg = cPickle.loads(msg)
             if msg[TYPE] == TELL:
-                get_host().actors[msg[TO]].channel.send(msg)
+                self.host.actors[msg[TO]].channel.send(msg)
             elif msg[TYPE] == ASK or msg[TYPE] == FUTURE:
                 # Save rpc id and actor channel
                 rpc_id = msg[RPC_ID]
                 self.executing[rpc_id] = msg[FROM]
                 # Change msg callback channel, add id
                 msg[CHANNEL] = self.channel
-                get_host().actors[msg[TO]].channel.send(msg)
+                self.host.actors[msg[TO]].channel.send(msg)
             elif msg[TYPE] == ASKRESPONSE or msg[TYPE] == FUTURERESPONSE:
                 if msg[RPC_ID] in self.pending.keys():
                     self.pending[msg[RPC_ID]].send(msg)

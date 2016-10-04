@@ -6,7 +6,6 @@ import os.path
 from urlparse import urlparse
 from proxy import Proxy, set_actor, ProxyRef
 from util import HostDownError, AlreadyExistsError, NotFoundError, HostError
-from rpcactor import RPCDispatcher
 import util
 
 CLEAN_INT = 4
@@ -17,7 +16,7 @@ available_types = ['thread', 'green_thread']
 def set_context(module_name='thread'):
     '''
     This function initializes the context of execution deciding which
-    type of threads are being used, normal python threads or green
+    type of threads are being used: normal python threads or green
     threads, provided by Gevent.
 
     This should be called first of all in every execution, otherwise,
@@ -48,6 +47,10 @@ def set_context(module_name='thread'):
                             globals(), locals(),
                             ['FutureManager'], -1)
         set_actor(module_name)
+        global rpcactor
+        rpcactor = __import__('pyactor.' + module_name + '.rpcactor',
+                            globals(), locals(),
+                            ['RPCDispatcher'], -1)
         global signal
         if module_name == 'green_thread':
             signal = __import__('gevent', ['signal'])
@@ -61,14 +64,16 @@ def create_host(url="local://local:6666/host"):
     '''
     This is the main function to create a new Host to which you can
     spawn actors. It will be set by default at local address if no
-    parameter *url* is given. This function shuould be called once for
-    execution or after callig :meth:`~.shutdown` to the previous host.
+    parameter *url* is given, which would result in remote
+    incomunication between hosts. This function shuould be called once
+    for execution or after callig :meth:`~.shutdown` to the previous
+    host.
 
     It is possible to create locally more than one host and simulate a
     remote communication between them, but the first one created will
     be the main host, which is the one that will host the queries from
     the main function.
-    Of course, every host must be initialized with a diferent URL(port)
+    Of course, every host must be initialized with a diferent URL(port).
     Even so, more than one host should not be requiered for any real
     project.
 
@@ -130,13 +135,14 @@ class Host(object):
 
     def say_hello(self):
         print 'Sending hello.'
-        sleep(1)
         return 'Hello from HOST!!'
 
     def load_transport(self, url):
         '''
         For TCP communication. Sets the communication socket of the host
         at the address and port specified.
+
+        The scheme must be http if using a XMLRPC dispatcher.
 
         :param str. url: URL where to bind the host. Must be provided in
             the tipical form: 'scheme://address:port/hierarchical_path'
@@ -148,7 +154,7 @@ class Host(object):
         self.host_url = aurl
 
         if aurl.scheme == 'http':
-            self.launch_actor('http', RPCDispatcher(url))
+            self.launch_actor('http', rpcactor.RPCDispatcher(url, self))
 
     def spawn(self, aid, klass, param=None):
         '''
@@ -272,6 +278,8 @@ class Host(object):
         :raises: :class:`NotFoundError`, if the URL specified do not
             correspond to any actor in the host.
         :raises: :class:`HostDownError`  if the host is down.
+        :raises: :class:`HostError`  if there is an error looking for
+            the actor in another server.
         '''
         if not self.alive:
             raise HostDownError()
@@ -291,7 +299,7 @@ class Host(object):
                 elif isinstance(klass, (types.TypeType, types.ClassType)):
                     klass_ = klass
                 else:
-                    raise HostError("Tha class specified to look up is" +
+                    raise HostError("The class specified to look up is" +
                                     " not a class.")
                 remote_actor = actor.ActorRef(url, klass_, dispatcher.channel)
                 return Proxy(remote_actor)
@@ -376,7 +384,8 @@ class Host(object):
     def dumps(self, param):
         '''
         Checks the parameters generating new proxy instances to avoid
-        query concurrences from shared proxies.
+        query concurrences from shared proxies and creating proxies for
+        actors from another host.
         '''
         if isinstance(param, Proxy):
             filename = sys.modules[param.actor.klass.__module__].__file__
@@ -396,7 +405,8 @@ class Host(object):
     def loads(self, param):
         '''
         Checks the return parameters generating new proxy instances to
-        avoid query concurrences from shared proxies.
+        avoid query concurrences from shared proxies and creating
+        proxies for actors from another host.
         '''
         if isinstance(param, ProxyRef):
             return self.lookup_url(param.url, param.klass, param.module)

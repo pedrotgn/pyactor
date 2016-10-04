@@ -2,7 +2,7 @@
 Remote example with registry. CLIENT
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host, Host
+from pyactor.context import set_context, create_host
 
 
 if __name__ == "__main__":

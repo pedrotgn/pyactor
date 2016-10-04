@@ -2,7 +2,7 @@ import uuid
 from threading import Condition, Thread
 
 from pyactor.util import get_current, get_host, RPC_ID, RESULT
-from pyactor.util import ASK, TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
+from pyactor.util import TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
 from pyactor.util import TimeoutError, FutureError
 
 from actor import Channel
@@ -207,6 +207,9 @@ class FutureRef(Future):
 
 
 class FutureManager(object):
+    '''
+    Manager for the creation and execution of futures in a host.
+    '''
     def __init__(self):
         self.running = False
         self.channel = Channel()

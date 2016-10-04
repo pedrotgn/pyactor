@@ -9,7 +9,7 @@ class NotFound(Exception):
     pass
 
 
-class Registry:
+class Registry(object):
     _ask = ['get_all', 'bind', 'lookup', 'unbind']
     _async = []
     _ref = ['get_all', 'bind', 'lookup']

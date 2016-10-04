@@ -2,7 +2,7 @@
 Basic remote example sending tell messages. CLIENT, stress
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host, sleep
+from pyactor.context import set_context, create_host
 
 
 if __name__ == "__main__":

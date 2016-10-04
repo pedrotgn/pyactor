@@ -3,7 +3,7 @@ from gevent import spawn
 from gevent.event import Event
 
 from pyactor.util import get_current, get_host, RPC_ID, RESULT
-from pyactor.util import TELL, FUTURE, ASK, TYPE, METHOD, PARAMS, CHANNEL, TO
+from pyactor.util import TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
 from pyactor.util import TimeoutError, FutureError
 
 from actor import Channel
@@ -200,6 +200,9 @@ class FutureRef(Future):
 
 
 class FutureManager(object):
+    '''
+    A manager that controls the creation and execution of the futures.
+    '''
     def __init__(self):
         self.running = False
         self.channel = Channel()

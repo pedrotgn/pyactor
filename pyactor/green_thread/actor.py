@@ -3,7 +3,7 @@ from copy import copy
 from gevent import spawn
 from gevent.queue import Queue
 
-from pyactor.util import ASK, FUTURE, TYPE, TO, ASKRESPONSE, FUTURERESPONSE
+from pyactor.util import ASK, FUTURE, TYPE, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
 from pyactor.util import ref_l, ref_d
 
@@ -20,8 +20,8 @@ class Channel(Queue):
         """
         It sends a message to the current channel.
 
-        :param msg: The message sent to an actor. It is a tuple using
-            the constants in util.py (:mod:`pyactor.util`).
+        :param msg: The message sent to an actor. It is a dictionary
+            using the constants in util.py (:mod:`pyactor.util`).
         """
         self.put(msg)
 
@@ -33,8 +33,8 @@ class Channel(Queue):
 
         :param int timeout: timeout to wait for messages. If none
             provided it will block until a message arrives.
-        :return: returns a message sent to the channel. It is a tuple
-            using the constants in util.py (:mod:`pyactor.util`).
+        :return: returns a message sent to the channel. It is a
+            dictionary the constants in util.py (:mod:`pyactor.util`).
         """
         return self.get(timeout=timeout)
 
@@ -130,9 +130,8 @@ class Actor(ActorRef):
         If it is a :class:`~.Future`, generates a :class:`~.FutureResponse`
         to send the result to the manager.
 
-        :param msg: The message is a namedtuple of the defined in
-            util.py (:class:`~.AskRequest`, :class:`~.TellRequest`,
-            :class:`~.FutureRequest`).
+        :param msg: The message is a dictionary using the constants
+            defined in util.py (:mod:`pyactor.util`).
         '''
         if msg[METHOD] == 'stop':
             self.running = False
