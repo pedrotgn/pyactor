@@ -56,8 +56,8 @@ class Workload(object):
 
 
 if __name__ == "__main__":
-    # set_context('green_thread')
-    set_context()
+    set_context('green_thread')
+    # set_context()
 
     host = create_host()
 

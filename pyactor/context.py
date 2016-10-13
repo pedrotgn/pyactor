@@ -13,6 +13,20 @@ core_type = None
 available_types = ['thread', 'green_thread']
 
 
+def setRabbitCredentials(user, passw):
+    '''
+    If you use a RabbitMQ server an want to make remote queries, you might need
+    to specify new credentials for connection.
+
+    By default, PyActor uses the guest RabbitMQ user.
+
+    :param str. user: Name for the RabbitMQ user.
+    :param str. passw: Password for the RabbitMQ user.
+    '''
+    util.RABBITU = user
+    util.RABBITP = passw
+
+
 def set_context(module_name='thread'):
     '''
     This function initializes the context of execution deciding which
@@ -44,13 +58,11 @@ def set_context(module_name='thread'):
                                ['ActorParallel'], -1)
         global future
         future = __import__('pyactor.' + module_name + '.future',
-                            globals(), locals(),
-                            ['FutureManager'], -1)
+                            globals(), locals(), ['FutureManager'], -1)
         set_actor(module_name)
         global rpcactor
         rpcactor = __import__('pyactor.' + module_name + '.rpcactor',
-                            globals(), locals(),
-                            ['RPCDispatcher'], -1)
+                              globals(), locals(), ['RPCDispatcher'], -1)
         global signal
         if module_name == 'green_thread':
             signal = __import__('gevent', ['signal'])
@@ -108,7 +120,7 @@ class Host(object):
     itself so you can get its :class:`~.Proxy` (with ``host.proxy``) and
     pass it to another host to spawn remotely.
 
-    :param str. url: URL that identifies the host.
+    :param str. url: URL that identifies the host and where to find it.
     '''
     _tell = ['attach_interval', 'detach_interval', 'hello']
     _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello']
@@ -128,6 +140,7 @@ class Host(object):
 
         self.future_manager = future.FutureManager()
 
+        self.ppool = None
         # self.cleaner = interval_host(get_host(), CLEAN_INT, self.do_clean)
 
     def hello(self):
@@ -143,6 +156,7 @@ class Host(object):
         at the address and port specified.
 
         The scheme must be http if using a XMLRPC dispatcher.
+        amqp for RabbitMQ communications.
 
         :param str. url: URL where to bind the host. Must be provided in
             the tipical form: 'scheme://address:port/hierarchical_path'
@@ -154,7 +168,11 @@ class Host(object):
         self.host_url = aurl
 
         if aurl.scheme == 'http':
-            self.launch_actor('http', rpcactor.RPCDispatcher(url, self))
+            self.launch_actor('http', rpcactor.RPCDispatcher(url, self, 'rpc'))
+
+        elif aurl.scheme == 'amqp':
+            self.launch_actor('amqp', rpcactor.RPCDispatcher(url, self,
+                                                             'rabbit'))
 
     def spawn(self, aid, klass, param=None):
         '''
@@ -166,7 +184,11 @@ class Host(object):
 
         :param str. aid: identifier for the spawning actor. Unique within
             the host.
-        :param class klass: class type of the spawning actor.
+        :param class klass: class type of the spawning actor. If you are
+            spawning remotely and the class is not in the server module,
+            you must specigy here the path to that class in the form
+            'module.py/Class' so the server can import the class and create
+            the instance.
         :param list param: arguments for the init function of the
             spawning actor class.
         :return: :class:`~.Proxy` of the actor spawned.
@@ -211,7 +233,7 @@ class Host(object):
     def lookup(self, aid):
         '''
         Gets a new proxy that references to the actor of this host
-        identified by the given ID.
+        (only actor in this host) identified by the given ID.
 
         This method can be called remotely synchronously.
 
@@ -248,6 +270,11 @@ class Host(object):
             for actor in self.actors.values():
                 Proxy(actor).stop()
 
+            # stop the pool (close & join)
+            if self.ppool is not None:
+                if core_type == 'thread':
+                    self.ppool.close()
+                self.ppool.join()
             for parall in self.pthreads.keys():
                 parall.join()
 
@@ -269,11 +296,16 @@ class Host(object):
     def lookup_url(self, url, klass, module=None):
         '''
         Gets a proxy reference to the actor indicated by the URL in the
-        parameters. It can be a local reference or a TCP direction.
+        parameters. It can be a local reference or a TCP direction to
+        another host.
 
         This method can be called remotely synchronously.
 
         :param srt. url: address that identifies an actor.
+        :param class klass: the class of the actor.
+        :param srt. module: if the actor class is not in the calling module,
+            you need to specify the module where it is here. Alse, the *klass*
+            parameter change to be a string.
         :return: :class:`~.Proxy` of the actor requested.
         :raises: :class:`NotFoundError`, if the URL specified do not
             correspond to any actor in the host.
@@ -420,7 +452,7 @@ class Host(object):
         else:
             return param
 
-    def new_parallel(self, from_url, t):
+    def new_parallel(self, function, *params):
         '''
         Register a new thread executing a parallel method.
         '''
@@ -428,7 +460,17 @@ class Host(object):
         #     if self.pthreads[t] == from_url:
         #         if not t.ready():
         #             del self.pthreads[t]
-        self.pthreads[t] = from_url
+        # self.pthreads[t] = from_url
+        # Create a pool if not created (processes or Gevent...)
+        if self.ppool is None:
+            if core_type == 'thread':
+                from multiprocessing.pool import ThreadPool
+                self.ppool = ThreadPool(50)
+            else:
+                from gevent.pool import Pool
+                self.ppool = Pool(50)
+        # Add the new task to the pool
+        self.ppool.apply_async(function, *params)
 
     # def do_clean(self):
     #     '''

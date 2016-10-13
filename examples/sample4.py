@@ -1,5 +1,5 @@
 '''
-Timeout smaple.
+Timeout sample.
 '''
 from pyactor.context import set_context, create_host, sleep
 from pyactor.util import TimeoutError
@@ -30,6 +30,6 @@ if __name__ == "__main__":
     try:
         x = e1.say_something(timeout=1)
     except TimeoutError:
-        print 'timeout catched'
+        print 'timeout caught'
     sleep(1)
     h.shutdown()

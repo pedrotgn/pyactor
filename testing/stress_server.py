@@ -4,18 +4,28 @@ Stress test. SERVER
 '''
 from pyactor.context import set_context, create_host
 
+
 class Counter(object):
-    _tell = ['add', 'see']
+    _tell = ['work']
+    _ask = ['see']
 
     def __init__(self):
-        self.count = 0
+        self.count = 1
 
-    def add(self, num):
-        self.count += num
+    def work(self, num):
+        chars = list(num)
+        line = ''
+        summ = 1
+        for char in chars:
+            line += char
+            summ = summ * ord(char) / self.count
+        print line, summ
+        self.count = self.count + 1
+        # print self.count
 
     def see(self):
-        print self.count
-        
+        return self.count
+
 
 if __name__ == "__main__":
     set_context()

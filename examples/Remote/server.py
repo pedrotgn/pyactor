@@ -12,7 +12,7 @@ class Echo(object):
     def set_c(self, future):
         print 'sending to another'
         # print future
-        future.echoc('lalap')
+        future.echoc('something')
         # print future.result(2)
         # future.add_callback('echoc')
 

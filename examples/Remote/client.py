@@ -27,7 +27,7 @@ if __name__ == "__main__":
     h = host.lookup_url('http://127.0.0.1:1277/', Host)
     # print h
 
-    e1.echo('Daniel es grande!')    # TELL message
+    e1.echo('HEY!')    # TELL message
 
     h.hello()
     print h.say_hello(timeout=1), 'ASK message!'      # ASK Message

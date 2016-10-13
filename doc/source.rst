@@ -19,6 +19,23 @@ Proxy
 .. literalinclude:: ../pyactor/proxy.py
     :linenos:
 
+.. _xmlrpc_source:
+
+XMLRPC Server
+=============
+
+.. literalinclude:: ../pyactor/rcpserver.py
+    :linenos:
+
+.. _rabbit_source:
+
+RabbitMQ Server
+===============
+
+.. literalinclude:: ../pyactor/rabbitserver.py
+    :linenos:
+
+
 .. _tactor_source:
 
 Thread Actor
@@ -52,6 +69,17 @@ Thread Future
 .. literalinclude:: ../pyactor/thread/future.py
     :linenos:
 
+
+.. _tractor_source:
+
+Thread Dispatcher
+=================
+
+.. literalinclude:: ../pyactor/thread/rpcactor.py
+    :linenos:
+
+
+
 .. _gactor_source:
 
 Green Thread Actor
@@ -83,4 +111,13 @@ Green Thread Future
 =====================
 
 .. literalinclude:: ../pyactor/green_thread/future.py
+    :linenos:
+
+
+.. _gractor_source:
+
+Green Thread Dispatcher
+=======================
+
+.. literalinclude:: ../pyactor/green_thread/rpcactor.py
     :linenos:

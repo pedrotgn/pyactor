@@ -20,7 +20,9 @@ class Connecter(object):
         self.interval1 = interval_host(self.host, 0.1, self.send_message)
 
     def send_message(self):
-        self.server.add(1)
+        self.server.work('abcdefghijklmnopqrstuvwxyz' +
+                         'abcdefghijklmnopqrstuvwxyz')
+        # self.server.work(1)
 
 
 class Show(object):
@@ -34,7 +36,7 @@ class Show(object):
         self.interval1 = interval_host(self.host, 1, self.send_message)
 
     def send_message(self):
-        self.server.see()
+        print self.server.see()
 
 
 if __name__ == "__main__":

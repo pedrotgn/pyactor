@@ -13,6 +13,9 @@ It supports two versions:
 
 <!-- +grafic tests -->
 
+It also includes communication between machines using XMLRPC and a second version
+that uses RabbitMQ message system in a just transparent way.
+
 ### Installation
 Install using:
 
@@ -38,7 +41,7 @@ See code coverage at [codecov.io](https://codecov.io/gh/pedrotgn/pyactor) or [co
 <!-- [![Coverage Status](https://coveralls.io/repos/github/pedrotgn/pyactor/badge.svg?branch=master)](https://coveralls.io/github/pedrotgn/pyactor?branch=master) -->
 
 The code is also checked for its health at every push by [landscape.io](https://landscape.io/github/pedrotgn/pyactor)
-(PEP8, common bad smells, etc):
+(PEP8, common bad smells, etc.):
 
 [![Code Health](https://landscape.io/github/pedrotgn/pyactor/master/landscape.svg?style=flat)](https://landscape.io/github/pedrotgn/pyactor/master)
 
@@ -77,13 +80,31 @@ async method *tell_me()*:
         def ask_me(self):
             return 'hello back'
 
-As you can see, the async method recieves a message and simply prints it while
+As you can see, the async method receives a message and simply prints it while
 the sync method returns a result. You can now call this methods from your main
 code:
 
     actor1.tell_me('Hello')
     print actor1.ask_me()
 
-More detailed examples with much more functionalities can be found in the
+## Remote connections
+
+Unlike other library solutions, PyActor supports remote communication between
+various machines by only giving an IP to the host. For example:
+
+    host = create_host('http://127.0.0.1:1277/')
+
+An this host is online, so the other machine only needs to lookup for it:
+
+    host = create_host('http://127.0.0.1:1679')
+    remote_host = host.lookup_url('http://127.0.0.1:1277/', Host)
+
+Or directly get one of its actors:
+
+    c = host.lookup_url('http://127.0.0.1:1277/id1', 'MyClass', 'module')
+
+## Tutorial
+PyActor has many examples and a tutorial explaining all its functionalities.
+This examples can be found in the
 'pyactor/examples' directory of the project. They are also explained in the
 documentation as a tutorial, hosted at readthedocs.org which you can find above.

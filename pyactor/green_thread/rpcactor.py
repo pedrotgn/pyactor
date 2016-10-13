@@ -11,7 +11,11 @@ from actor import Actor, Channel
 
 class RPCDispatcher(Actor):
 
-    def __init__(self, url, host):
+    def __init__(self, url, host, mode):
+        global server
+        server = __import__('pyactor.' + mode + 'server',
+                            globals(), locals(),
+                            ['Source', 'Sink'], -1)
         self.url = url
         self.host = host
         aurl = urlparse(url)

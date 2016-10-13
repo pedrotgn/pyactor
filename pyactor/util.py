@@ -7,6 +7,9 @@ Defined constants:
 from gevent import getcurrent
 from threading import current_thread
 
+RABBITU = "guest"
+RABBITP = "guest"
+
 
 FROM = 'FROM'
 TO = 'TO'

@@ -1,5 +1,5 @@
 import uuid
-from threading import Lock, Thread
+from threading import Lock, Thread, current_thread
 from time import sleep
 
 from actor import Actor
@@ -91,13 +91,15 @@ class ParallelAskWraper(object):
         rpc_id = args[0]
         del args[0]
         args = tuple(args)
-
+        self.host = get_host()
         param = (self.__method, rpc_id, args, kwargs)
-        t = Thread(target=self.invoke, args=param)
-        t.start()
-        get_host().new_parallel(self.__actor.url, t)
+        # t = Thread(target=self.invoke, args=param)
+        # t.start()
+        self.host.new_parallel(self.invoke, param)
 
     def invoke(self, func, rpc_id, args, kwargs):
+        # put the process in the host list pthreads
+        self.host.pthreads[current_thread()] = self.__actor.url
         with self.__lock:
             sleep(0.01)
             try:
@@ -105,6 +107,8 @@ class ParallelAskWraper(object):
             except Exception, e:
                 result = e
         self.__actor.receive_from_ask(result, rpc_id)
+        # remove the process from pthreads
+        del self.host.pthreads[current_thread()]
 
 
 class ParallelTellWraper(object):
@@ -118,11 +122,14 @@ class ParallelTellWraper(object):
 
     def __call__(self, *args, **kwargs):
         param = (self.__method, args, kwargs)
-        t = Thread(target=self.invoke, args=param)
-        t.start()
-        get_host().new_parallel(self.__actor.url, t)
+        self.host = get_host()
+        # t = Thread(target=self.invoke, args=param)
+        # t.start()
+        self.host.new_parallel(self.invoke, param)
 
     def invoke(self, func, args, kwargs):
+        self.host.pthreads[current_thread()] = self.__actor.url
         with self.__lock:
             sleep(0.01)
             func(*args, **kwargs)
+        del self.host.pthreads[current_thread()]

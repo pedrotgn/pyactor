@@ -10,6 +10,8 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 
 
 class Source(threading.Thread):
+    ''' Facade for simle remote communication using XMLRPCServer.
+    '''
     def __init__(self, addr):
         threading.Thread.__init__(self)
         ip, port = addr
@@ -33,6 +35,8 @@ class Source(threading.Thread):
 
 
 class Sink(object):
+    ''' Facade for XMLRPC proxies.
+    '''
     def __init__(self, url):
         self.endpoint = xmlrpclib.ServerProxy(url)
 

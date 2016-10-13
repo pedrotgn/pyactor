@@ -1,0 +1,41 @@
+
+PyActor Fast tutorial
+---------------------------------------
+
+
+1. Simple Echo Actor with asynchronous methods
+    sample1.py
+
+2. Simple Echo Actor with synchronous methods
+    sample2.py, sample4.py
+
+3. Looking for other actors
+    sample5.py
+
+4. Remote communication using XMLRPC servers.
+    remote/s1_client.py, remote/s1_clientb.py, remote/s1_server.py,
+    remote/s2_client.py, remote/s2_server.py
+
+5. Communication between actors. Passing references
+    sample7.py
+
+6. Simple usage of futures and callbacks
+    sample3.py, sample11.py
+
+7. Non-blocking synchronous call with parallel methods (Advanced)
+    sample8.py
+
+8. Non-blocking synchronous call with parallel methods using futures (Advanced)
+    actor8b.py
+
+9. Creation of multiple hosts (Advanced)
+    sample9.py
+
+10. Intervals and periodic events
+    sample10.py
+
+11. Spawning actors in a remote host
+    remote/s3_client.py, remote/s3_host.py
+
+12. Remote Naming service
+    remote/s4_client.py, remote/s4_registry.py, s4_clientb.py

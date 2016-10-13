@@ -3,7 +3,7 @@
 Tutorial
 *********
 
-A quik guide on how to use the PyActor library through examples.
+A quick guide on how to use the PyActor library through examples.
 
 
 .. _install:
@@ -13,7 +13,7 @@ Installation
 
 This library allows the creation and management of actors in a distributed system
 using Python. It follows the classic actor model and tries to be a simple way to
-get two remote objects to quickly commnicate.
+get two remote objects to quickly communicate.
 
 To install the library use::
 
@@ -30,7 +30,7 @@ Global indications
 
 This library is implemented using two types of concurrence: threads and green
 threads (Gevent). To define which one you want, always use the function
-:func:`~.set_context` at the begining of your script. The default value uses
+:func:`~.set_context` at the beginning of your script. The default value uses
 threads but you can specify the mode with one of the following strings:
 
 * ``'thread'``
@@ -60,7 +60,7 @@ async method *tell_me()*::
         def ask_me(self):
             return 'hello back'
 
-As you can see, the async method recieves a message and simply prints it while
+As you can see, the async method receives a message and simply prints it while
 the sync method returns a result. More detailed examples can be found in the
 'pyactor/examples' directory of the project. They are also explained below as a
 tutorial for this library.
@@ -83,11 +83,11 @@ explain it more carefully.
 
 In this case, we need to import the :func:`~.create_host` function from the
 project in order to use it. We also import the *sleep* function, to give time to
-the actor to work, and the setting function for the type :func:`~.set_context`.
+the actor to work, and the setting function for the type, :func:`~.set_context`.
 
 The actor to create in this example will be an :class:`Echo`. This class only
 has one method which prints the message *msg*, given by parameter. As you can
-see, the classes destinated to be actors must have the atributes ``_tell=[]``
+see, the classes destined to be actors must have the attributes ``_tell=[]``
 and ``_ask=[]`` that include the names of the methods that can be remotely
 invoked in an asynchronous or synchronous way, respectively. In this sample we
 have the echo method, which is async, as no response from it is needed.
@@ -103,7 +103,7 @@ that, we create a new variable by using the function we imported before. ::
 
     h = create_host()
 
-Now we have a :class:`~.Host` in the 'h' variable. It can create actors atached
+Now we have a :class:`~.Host` in the 'h' variable. It can create actors attached
 to itself. To do that, we use the :meth:`~.Host.spawn` method. The first
 parameter is a string with the id of the actor that will identify it among the
 host so no repeated values are allowed. The second is the class the actor will
@@ -116,33 +116,34 @@ and with the id 'echo1'::
 it).
 
 As we have the actor, we can invoke his methods as we would do normally since
-the proxy will redirect the queries to the actual ubication of it. If we didn't
+the proxy will redirect the queries to the actual placement of it. If we didn't
 have specified the methods in the statements appointed before (_tell and _ask),
-we would't be able to do this now.The execution shold work properly and print
+we wouldn't be able to do this now. The execution should work properly and print
 on screen::
 
     hello there !!
 
-The host is also a living actor so it could recieve queries remotely in the
+The host is also a living actor so it could receive queries remotely in the
 future. To get its proxy, we use::
 
     hr = h.proxy
 
 And now we have a proxy managing the host in *hr* that we could use to send
 references remotely. This allows to spawn remotely, although in this example we
-are doing it all locally:
+are doing it all locally (remote spawns require a bit more info, see the remote
+tutorial):
 
-    e2 = hr.spawn('echo2',Echo)
+    e2 = hr.spawn('echo2', Echo)
 
 
 Then, the sleep gives time to the actor for doing the work and finally, we close
 the host, which will stop all its actors. This function (:meth:`~.shutdown`)
-should be allways called at the end::
+should be always called at the end::
 
     h.shutdown()
 
 .. note:: As the host is an actor itself, it has sync and async methods and can
-    recieve remote queries if we use its proxy.
+    receive remote queries if we use its proxy.
 
 .. note:: Now you can try and see how it works with green threads by just
     specifying 'green_thread' in the setting function.
@@ -186,12 +187,12 @@ queries. This is the full code of this sample, which you can find and test in
 .. literalinclude:: ../examples/sample3.py
     :linenos:
 
-This time we keep having the same initialitzation as before, but now threre is
+This time we keep having the same initialization as before, but now there is
 a new class. :class:`Bot` has three async methods that will allow to prove the
 callback functionality. :meth:`set_echo` registers an
 :class:`Echo` to the Bot so it can call it. :math:`ping` creates the query for
 the :meth:`say_something` method and sets the callback for this to his other
-method :meth:`pong`. This second will recieve the result of the execution of the
+method :meth:`pong`. This second will receive the result of the execution of the
 :meth:`say_something` method.
 
 In order to add a callback, the sync call must be defined as a Future. We do
@@ -210,13 +211,13 @@ It is also possible to add a callback to a method from another actor by passing
 also its proxy. See :ref:`sample11` for more deep detail in Futures.
 
 .. note:: :meth:`~.add_callback` needs to be called from an actor to another
-    actor, specifing a method of an actor (also the actor if it is different
+    actor, specifying a method of an actor (also the actor if it is different
     from the one that makes the addition).
 
 .. note:: The method treated as a callback must have one unique parameter, which
     is the future. Inside the method you can use :meth:`~.result` to get the
     result of the call (exceptions can be raised) or :meth:`~.exception` to get
-    the instance of a possible raised exeption. You can also check the state of
+    the instance of a possible raised exception. You can also check the state of
     the future with one of its methods: :meth:`~.done` or :meth:`~.running`.
 
 The correct output for this sample is the following::
@@ -240,9 +241,9 @@ sample, which you can find and test in ``pyactor\examples\sample4.py``:
 
 
 Now we have the same :class:`Echo` class but in the sync method we added a sleep
-of 2 seconds. Also, we sorrounded the call of the method by a try structure
+of 2 seconds. Also, we surrounded the call of the method by a try structure
 catching a :class:`~.TimeoutError` exception. Since we are giving to the invocation
-a expire time of 1 second, the timeout will be reached and the exception rised.
+a expire time of 1 second, the timeout will be reached and the exception raised.
 
 
 You can set a timeout for the query if you like. For that, add the parameter with
@@ -256,7 +257,7 @@ The correct output for this sample is the following::
 
     hello there !!
     bye
-    timeout catched
+    timeout caught
 
 
 .. _sample5:
@@ -277,7 +278,7 @@ giving by parameter only the id of the actor you wish::
 
     e = h.lookup('echo1')
 
-If you are working remotly, you could need :meth:`~.lookup_url` to get the
+If you are working remotely, you could need :meth:`~.lookup_url` to get the
 reference. In this example, it is used also to get a local reference giving the
 standard local url at which the host is initialized by default::
 
@@ -308,7 +309,7 @@ which the actor is so you can :meth:`~.lookup` other actors from there.
 In the example, we use these three calls to send various salutations from a
 :class:`Bot` to an :class:`Echo` giving by parameter also a proxy from the Bot
 so the Echo can call one of Bot's methods in order to get its id. Also, the
-:meth:`set_echo` method, in this case, does not recieve the Echo by parameter.
+:meth:`set_echo` method, in this case, does not receive the Echo by parameter.
 It uses the inside reference it already has to call a :meth:`~.lookup` to the
 host and get the wanted reference.
 
@@ -321,9 +322,9 @@ The correct output for this sample is the following::
     Press Ctrl+C to kill the execution
 
 In this sample, we also see the usage of the :func:`~.serve_forever` function
-wich is very useful in remote communication in order to keep a host alive as
+which is very useful in remote communication in order to keep a host alive as
 another one sends queries to his actors. The usage is very simple, instead of
-shuting the host down at the end, we call::
+shutting the host down at the end, we call::
 
     serve_forever()
 
@@ -345,8 +346,8 @@ decorator. This is the full code of this sample, which you can find and test in
 
 The previous examples pass proxy references by parameter in its methods, but
 them are sharing the same instance of a proxy. This could cause various problems
-of concurrency so we might want diferent proxies in different spots. To achive
-that, you have to indicate that a method recieves or returns a proxy by adding
+of concurrency so we might want different proxies in different spots. To achieve
+that, you have to indicate that a method receives or returns a proxy by adding
 it to the _ref list of the class (it yet must be in _ask or _tell).
 
 As seen in the example, this checks for proxies in the parameters, even inside
@@ -368,17 +369,17 @@ Parallels are a way of letting one actor to process many queries at a time.
 This will allow the actor to keep receiving calls when another call has been
 blocked with another job (an I/O call or a synchronous call to another actor).
 
-To make one method execute parallely, you need to specify it in the class attribute
+To make one method execute parallel, you need to specify it in the class attribute
 _parallel, which is a list. The method must also be in one of the lists _tell or
 _ask. The methods with this tag will be executed in new threads so their execution
 do not interfere with other queries.
 
 In this example we have three classes: File, Web and Workload. File represents a
-server that seve the download of files. Simulates the work with a sleep.
+server that serve the download of files. Simulates the work with a sleep.
 Web represents a web server which contains a list of files. It has to have a file
 server that provide the files and can list its files (list_files) and return one
 of them (get_file). Workload is the class that will do the work. It asks the web
-to list ist files ten times, or request to download one of the files.
+to list its files ten times, or request to download one of the files.
 
 The execution is simple, we create one file server, one web server and attach the
 file server to the web::
@@ -401,7 +402,7 @@ will download a file::
 
 As the method get_file is marked as parallel, its execution will be done in another
 thread, so when the method blocks downloading (in the sleep), it will free the actor
-so it con keep serving answers to the first load.
+so it can keep serving answers to the first load.
 
 If we do not use parallels in this example (which you can try by commenting the
 right line as indicated) some of the calls to the list_files method will raise
@@ -426,14 +427,14 @@ host locally, since they are meant for remote communication. This is for testing
 purposes.
 
 To create more hosts, you only need to call again the function :func:`~.create_host`.
-But you will need to specify diferent locations for each host, since those are their
+But you will need to specify different locations for each host, since those are their
 identifiers. In the example we create two hosts in the same location, but attending
 different ports::
 
     h = create_host()
     h2 = create_host("local://local:7777/host")
 
-.. note: Remember that the default adress for a host is ``local://local:6666/host``
+.. note: Remember that the default address for a host is ``local://local:6666/host``
 
 Now, each host will manage its own actors and threads, so they will need to
 communicate through TCP connections.
@@ -443,9 +444,13 @@ One thing important to know about this is that only one host can be used to mana
 the main execution of your program, so there always will be a main host and the
 other ones will be created as secondary hosts.
 
-This main host will auutomatically assigned to the first one created. If that
+This main host will be automatically assigned to the first one created. If that
 one is closed and there still are other hosts operative, the oldest of them will
-asume the paper of main host.
+assume the role of main host.
+
+In this example, remote communication between the hosts is not possible since local
+URLs does not have a dispatcher. See the remote tutorial for examples on actual
+remote connections (:ref:`remote_tuto`).
 
 
 
@@ -454,7 +459,7 @@ asume the paper of main host.
 Sample 10 - Intervals
 ================================================================================
 
-This example tests the usage of intervals that allow an actor to periadically do
+This example tests the usage of intervals that allow an actor to periodically do
 an action. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample10.py``:
 
@@ -495,5 +500,5 @@ Change between this lines::
 
 to check the raising of exceptions.
 
-Finaly, note that the only argument for :meth:`~.result` (also for
-:meth:`~.exception`) is the timeout, the time, in seconds, to wait for a result.
+Finally, note that the only argument for :meth:`~.result` (also for
+:meth:`~.exception`) is the timeout: the time, in seconds, to wait for a result.

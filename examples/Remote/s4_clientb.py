@@ -30,7 +30,7 @@ if __name__ == "__main__":
                                's4_registry')
     remote_host = registry.lookup('host1')
 
-    server = remote_host.spawn('server', 's3_client/Server')
+    server = remote_host.spawn('server', 's4_clientb/Server')
     z = server.add(6, 7)
     print z
     server.substract(6, 5)

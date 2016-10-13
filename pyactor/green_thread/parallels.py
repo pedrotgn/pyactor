@@ -1,6 +1,7 @@
 import uuid
 
-from gevent import spawn
+from gevent import spawn, getcurrent
+from threading import current_thread
 from pyactor.util import get_host, METHOD, PARAMS
 from actor import Actor
 
@@ -81,17 +82,25 @@ class ParallelAskWraper(object):
         rpc_id = args[0]
         del args[0]
         args = tuple(args)
+        self.host = get_host()
 
+        # USE A POOL !!!!!!
         param = (self.__method, rpc_id, args, kwargs)
-        t = spawn(self.invoke, *param)  # New thread
-        get_host().new_parallel(self.__actor.url, t)
+        # t = spawn(self.invoke, *param)  # New thread
+
+        # get_host().new_parallel(self.__actor.url, t)
+        self.host.new_parallel(self.invoke, param)
 
     def invoke(self, func, rpc_id, args, kwargs):
+        # put the process in the host list pthreads
+        self.host.pthreads[getcurrent()] = self.__actor.url
         try:
             result = func(*args, **kwargs)
         except Exception, e:
             result = e
         self.__actor.receive_from_ask(result, rpc_id)
+        # remove the process from pthreads
+        del self.host.pthreads[getcurrent()]
 
 
 class ParallelTellWraper(object):
@@ -103,9 +112,15 @@ class ParallelTellWraper(object):
         self.__actor = actor
 
     def __call__(self, *args, **kwargs):
+        self.host = get_host()
         param = (self.__method, args, kwargs)
-        t = spawn(self.invoke, *param)
-        get_host().new_parallel(self.__actor.url, t)
+        # t = spawn(self.invoke, *param)
+        # get_host().new_parallel(self.__actor.url, t)
+        self.host.new_parallel(self.invoke, param)
 
     def invoke(self, func, args, kwargs):
+        # put the process in the host list pthreads
+        self.host.pthreads[getcurrent()] = self.__actor.url
         func(*args, **kwargs)
+        # remove the process from pthreads
+        del self.host.pthreads[getcurrent()]
