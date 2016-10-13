@@ -14,10 +14,10 @@ class Source(threading.Thread):
     def __init__(self, addr):
         threading.Thread.__init__(self)
         ip, port = addr
-        self.url = ip+'/'+str(port)
-
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(
-                host=ip, credentials=pika.PlainCredentials(RABBITU, RABBITP)))
+        self.url = ip + '/' + str(port)
+        creden = pika.PlainCredentials(RABBITU, RABBITP)
+        params = pika.ConnectionParameters(host=ip, credentials=creden)
+        self.connection = pika.BlockingConnection(params)
 
         self.channel = self.connection.channel()
 
@@ -49,9 +49,10 @@ class Sink(object):
         aurl = urlparse(url)
         address = aurl.netloc.split(':')
         ip, port = address[0], int(address[1])
-        self.url = ip+'/'+str(port)
-        self.connection = pika.BlockingConnection(pika.ConnectionParameters(
-                host=ip, credentials=pika.PlainCredentials(RABBITU, RABBITP)))
+        self.url = ip + '/' + str(port)
+        creden = pika.PlainCredentials(RABBITU, RABBITP)
+        params = pika.ConnectionParameters(host=ip, credentials=credent)
+        self.connection = pika.BlockingConnection(params)
         self.channel = self.connection.channel()
 
     def send(self, msg):
