@@ -3,12 +3,13 @@ import types
 import sys
 import os.path
 
+from threading import current_thread
+
 from urlparse import urlparse
 from proxy import Proxy, set_actor, ProxyRef
 from util import HostDownError, AlreadyExistsError, NotFoundError, HostError
 import util
 
-CLEAN_INT = 4
 core_type = None
 available_types = ['thread', 'green_thread']
 
@@ -102,7 +103,7 @@ def create_host(url="local://local:6666/host"):
             util.hosts[url] = util.main_host
         else:
             util.hosts[url] = Host(url)
-        return util.hosts[url]
+        return util.hosts[url].proxy
 
 
 class Host(object):
@@ -122,7 +123,7 @@ class Host(object):
 
     :param str. url: URL that identifies the host and where to find it.
     '''
-    _tell = ['attach_interval', 'detach_interval', 'hello']
+    _tell = ['attach_interval', 'detach_interval', 'hello', 'stop_actor']
     _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello']
     _ref = ['spawn', 'lookup', 'lookup_url']
 
@@ -275,11 +276,16 @@ class Host(object):
                 if core_type == 'thread':
                     self.ppool.close()
                 self.ppool.join()
+
+            # By now all pthreads should be gone
             for parall in self.pthreads.keys():
                 parall.join()
 
             for thread in self.threads.keys():
-                thread.join()
+                try:
+                    thread.join()
+                except Exception, e:
+                    print e
 
             self.locks.clear()
             self.actors.clear()
@@ -292,6 +298,15 @@ class Host(object):
             if util.main_host.url == self.url:
                 util.main_host = (util.hosts.values()[0] if util.hosts.values()
                                   else None)
+
+    def stop_actor(self, aid):
+        url = '%s://%s/%s' % (self.transport, self.host_url.netloc, aid)
+        if url! = self.url:
+            actor = self.actors[url]
+            Proxy(actor).stop()
+            actor.thread.join()
+            del self.actors[url]
+            del self.threads[actor.thread]
 
     def lookup_url(self, url, klass, module=None):
         '''
@@ -370,40 +385,11 @@ class Host(object):
             self.id = self.url
             host = actor.Actor(self.url, Host, self)
             self.proxy = Proxy(host)
+            # self.actors[self.url] = host
             self.launch_actor(self.url, host)
+            # host.run()
+            # self.threads[host.thread] = self.url
             self.running = True
-
-    def signal_handler(self, signal=None, frame=None):
-        # '''
-        # This gets the signal of Ctrl+C and stops the host. It also ends
-        # the execution. Needs the invocation of :meth:`serve_forever`.
-        #
-        # :param signal: SIGINT signal interruption sent with a Ctrl+C.
-        # :param frame: the current stack frame. (not used)
-        # '''
-        print 'You pressed Ctrl+C!'
-        self.shutdown()
-        self.serving = False
-
-    def serve_forever(self):
-        '''
-        This allows the host to keep alive indefinitely so its actors
-        can receive queries at any time.
-        To kill the execution, press Ctrl+C.
-
-        See usage example in :ref:`sample6`.
-        '''
-        if not self.alive:
-            raise Exception("This host is already shutted down.")
-        self.serving = True
-        signal.signal(SIGINT, self.signal_handler)
-        print 'Press Ctrl+C to kill the execution'
-        while self.serving:
-            try:
-                sleep(1)
-            except Exception:
-                pass
-        print 'BYE!'
 
     def attach_interval(self, interval_id, interval_event):
         '''Registers an interval event to the host.'''
@@ -456,11 +442,6 @@ class Host(object):
         '''
         Register a new thread executing a parallel method.
         '''
-        # for t in self.pthreads.keys():
-        #     if self.pthreads[t] == from_url:
-        #         if not t.ready():
-        #             del self.pthreads[t]
-        # self.pthreads[t] = from_url
         # Create a pool if not created (processes or Gevent...)
         if self.ppool is None:
             if core_type == 'thread':
@@ -472,14 +453,48 @@ class Host(object):
         # Add the new task to the pool
         self.ppool.apply_async(function, *params)
 
-    # def do_clean(self):
-    #     '''
-    #     This function is called at intervals to delete the threads
-    #     created for parallel methods that have already stopped.
-    #     '''
-    #     for t in self.pthreads.values():
-    #         if not t.isAlive():
-    #             del self.pthreads[t]
+
+def shutdown(url=None):
+    if url is None:
+        for host in util.hosts.values():
+            host.shutdown()
+    else:
+        host = util.hosts[url]
+        host.shutdown()
+
+
+def signal_handler(signal=None, frame=None):
+    # '''
+    # This gets the signal of Ctrl+C and stops the host. It also ends
+    # the execution. Needs the invocation of :meth:`serve_forever`.
+    #
+    # :param signal: SIGINT signal interruption sent with a Ctrl+C.
+    # :param frame: the current stack frame. (not used)
+    # '''
+    print 'You pressed Ctrl+C!'
+    util.main_host.serving = False
+    shutdown(util.main_host.url)
+
+
+def serve_forever():
+    '''
+    This allows the host (main host) to keep alive indefinitely so its actors
+    can receive queries at any time.
+    To kill the execution, press Ctrl+C.
+
+    See usage example in :ref:`sample6`.
+    '''
+    if not util.main_host.alive:
+        raise Exception("This host is already shutted down.")
+    util.main_host.serving = True
+    signal.signal(SIGINT, signal_handler)
+    print 'Press Ctrl+C to kill the execution'
+    while util.main_host is not None and util.main_host.serving:
+        try:
+            sleep(1)
+        except Exception:
+            pass
+    print 'BYE!'
 
 
 def sleep(seconds):

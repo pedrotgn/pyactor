@@ -1,14 +1,26 @@
-from setuptools import setup
-
+from setuptools import setup, find_packages
 
 setup(
     name='pyactor',
-    version='0.9',
+    version='0.9.2',
     author='Pedro Garcia Lopez & Daniel Barcelona Pons',
     author_email='pedro.garcia@urv.cat, daniel.barcelona@urv.cat',
-    packages=['pyactor', 'pyactor.green_thread', 'pyactor.thread'],
+    packages=find_packages(),
     url='https://github.com/pedrotgn/pyactor',
-    license='LICENSE.txt',
-    description='Python Actor Middleware',
-    long_description=open('README.md').read(),
+    license='GNU',
+    description='The minimalistic Python Actor middleware',
+    long_description=open('README.rst').read(),
+    install_requires=['gevent'],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+
+        'Intended Audience :: Developers',
+        'Topic :: Software Development :: Libraries',
+
+        'License :: OSI Approved :: GNU Lesser General Public\
+         License v3 (LGPLv3)',
+
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+    ],
 )

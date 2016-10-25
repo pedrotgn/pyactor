@@ -10,7 +10,7 @@ import signal
 from pyactor.context import *
 from pyactor.proxy import *
 from pyactor.util import *
-from pyactor.thread.rpcactor import RPCDispatcher
+from pyactor.green_thread.rpcactor import RPCDispatcher
 import pyactor.context
 
 
@@ -98,7 +98,7 @@ class TestBasic(unittest.TestCase):
         self.bu = sys.stdout
         sys.stdout = open(os.devnull, 'w')
         # self.out = ""
-        set_context()
+        set_context('green_thread')
         self.h = create_host('http://127.0.0.1:1277')
         self.e1 = self.h.spawn('echo1', Echo)
 
@@ -149,6 +149,6 @@ class TestBasic(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print ('## Remote WITH THREADS')
+    print ('## Remote WITH GEVENT')
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBasic)
     unittest.TextTestRunner(verbosity=2).run(suite)

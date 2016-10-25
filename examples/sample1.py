@@ -1,7 +1,7 @@
 '''
 Basic host creation sample.
 '''
-from pyactor.context import set_context, create_host, sleep
+from pyactor.context import set_context, create_host, sleep, shutdown
 
 
 class Echo(object):
@@ -18,9 +18,11 @@ if __name__ == "__main__":
     e1 = h.spawn('echo1', Echo)
     e1.echo('hello there !!')
 
-    hr = h.proxy
-    e2 = hr.spawn('echo2', Echo)
-    e2.echo('remote hello!!')
+    sleep(1)
+    h.stop_actor('echo1')
+
+    e1 = h.spawn('echo1', Echo)
+    e1.echo('hello there !!')
 
     sleep(1)
-    h.shutdown()
+    shutdown()

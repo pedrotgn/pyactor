@@ -2,9 +2,9 @@ from Queue import Queue
 from threading import Thread
 from copy import copy
 
-from pyactor.util import ASK, FUTURE, TYPE, ASKRESPONSE, FUTURERESPONSE
+from pyactor.util import ASK, TELL, FUTURE, TYPE, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
-from pyactor.util import ref_l, ref_d
+from pyactor.util import ref_l, ref_d, get_host
 
 
 class Channel(Queue):
@@ -133,6 +133,7 @@ class Actor(ActorRef):
         '''
         if msg[METHOD] == 'stop':
             self.running = False
+            # get_host().proxy.stop_actor(self.url)
         else:
             result = None
             try:
@@ -140,6 +141,9 @@ class Actor(ActorRef):
                 params = msg[PARAMS]
                 result = invoke(*params)
             except Exception, e:
+                if msg[TYPE] == TELL:
+                    print e
+                    return
                 result = e
             self.send_response(result, msg)
 

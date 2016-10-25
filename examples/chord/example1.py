@@ -1,4 +1,5 @@
-from pyactor.context import set_context, create_host, sleep, interval_host
+from pyactor.context import set_context, create_host, sleep
+from pyactor.context import interval_host, shutdown
 
 from chord import show, update, Node
 
@@ -6,7 +7,7 @@ from chord import show, update, Node
 nodes = [1, 8, 14, 21, 32, 38, 42, 48, 51, 56, 128, 233]
 nodes_h = {}
 
-set_context('green_thread')
+set_context()
 host = create_host()
 
 # Create and initialize nodes
@@ -32,4 +33,6 @@ interval_host(host, 30, show, nodes_h[5])
 sleep(1)
 interval_host(host, 30, show, nodes_h[9])
 
-host.serve_forever()
+# host.serve_forever()
+sleep(40)
+shutdown()

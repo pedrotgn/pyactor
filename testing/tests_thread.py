@@ -206,41 +206,40 @@ class TestBasic(unittest.TestCase):
         sys.stdout = open(os.devnull, 'w')
         # self.out = ""
         set_context()
-        self.hr = create_host()
-        self.h = self.hr.proxy
+        self.h = create_host()
         self.e1 = self.h.spawn('echo1', Echo)
 
     def tearDown(self):
-        self.hr.shutdown()
+        shutdown()
         pyactor.context.core_type = None
         # sleep(1)
         sys.stdout = self.bu
 
     def test_1hostcreation(self):
-        self.assertEqual(self.hr.__class__.__name__, 'Host')
         self.assertEqual(self.h.__class__.__name__, 'Proxy')
         self.assertEqual(self.h.actor.klass.__name__, 'Host')
         self.assertEqual(self.h.actor.tell, ['attach_interval',
                                              'detach_interval', 'hello',
-                                             'stop'])
+                                             'stop_actor', 'stop'])
         self.assertEqual(self.h.actor.ask, ['say_hello'])
         self.assertEqual(self.h.actor.ask_ref, ['spawn', 'lookup',
                                                 'lookup_url'])
         with self.assertRaises(Exception):
             h2 = create_host()
-        self.assertEqual(self.hr, get_host())
+        self.assertEqual(self.h.actor._obj, get_host())
 
-        b1 = self.hr.spawn('bot1', Bot)
-        self.assertEqual(self.hr, b1.get_real_host())
+        b1 = self.h.spawn('bot1', Bot)
+        self.assertEqual(self.h.actor._obj, b1.get_real_host())
 
         h2 = create_host("local://local:7777/host")
-        b2 = h2.spawn('bot1', Bot)
-        self.assertEqual(h2, b2.get_real_host())
+        with self.assertRaises(HostError):
+            # This line raise Exception in actor's thread for not http hosts
+            b2 = h2.spawn('bot1', Bot)
+        # self.assertEqual(h2, b2.get_real_host())
         # with self.assertRaises(Exception):
         #     b2.set_echo(self.e1)
         #     b1.set_echo(b2)
         # This lines raise Exception in actor's thread for not http hosts
-        h2.shutdown()
 
     def test_2spawning(self):
         # global out
@@ -340,15 +339,13 @@ class TestBasic(unittest.TestCase):
             e = self.h.lookup_url('local://local:6666/echo2', Echo)
 
     def test_5shutdown(self):
-        self.hr.shutdown()
+        shutdown()
         # sleep(0.1)
         self.assertEqual(get_host(), None)
-        with self.assertRaises(HostDownError):
-            self.hr.spawn('bot', Bot)
-        with self.assertRaises(HostDownError):
-            self.hr.lookup('echo1')
-        with self.assertRaises(HostDownError):
-            self.hr.lookup_url('local://local:6666/echo1', Echo)
+        with self.assertRaises(HostError):
+            self.h.lookup('echo1')
+        with self.assertRaises(HostError):
+            self.h.lookup_url('local://local:6666/echo1', Echo)
         with self.assertRaises(HostError):
             self.h.spawn('bot', Bot)
         # Now the actor is not running, invoking a method should raise Timeout.
@@ -360,7 +357,7 @@ class TestBasic(unittest.TestCase):
     def test_6intervals(self):
         global cnt
         cnt = 0
-        c = self.hr.spawn('count', Counter)
+        c = self.h.spawn('count', Counter)
         c.init_start()
         sleep(6)
         self.assertEqual(cnt, 4)
@@ -368,13 +365,13 @@ class TestBasic(unittest.TestCase):
     def test_7parallels(self):
         global cnt
         cnt = 0
-        f1 = self.hr.spawn('file1', File)
-        web = self.hr.spawn('web1', Web)
+        f1 = self.h.spawn('file1', File)
+        web = self.h.spawn('web1', Web)
         web.remote_server(f1)
-        load = self.hr.spawn('wl1', Workload)
+        load = self.h.spawn('wl1', Workload)
         self.assertEqual(web.actor.__class__.__name__, 'ActorParallel')
         load.remote_server(web)
-        load2 = self.hr.spawn('wl2', Workload)
+        load2 = self.h.spawn('wl2', Workload)
         load2.remote_server(web)
         load.launch()
         load2.download()
@@ -384,7 +381,7 @@ class TestBasic(unittest.TestCase):
 
         sleep(1)
 
-        web2 = self.hr.spawn('web2', WebNP)
+        web2 = self.h.spawn('web2', WebNP)
         web2.remote_server(f1)
         self.assertNotEqual(web2.actor.__class__.__name__, 'ActorParallel')
         load.remote_server(web2)
@@ -398,7 +395,7 @@ class TestBasic(unittest.TestCase):
 
         sleep(1)
         cnt = 0
-        web3 = self.hr.spawn('web3', WebF)
+        web3 = self.h.spawn('web3', WebF)
         web3.remote_server(f1)
         load.remote_server(web3)
         load2.remote_server(web3)
@@ -409,10 +406,14 @@ class TestBasic(unittest.TestCase):
         self.assertNotEqual(cnt, 1000)
 
     def test_checklist(self):
-        w = self.hr.spawn('web', Web)
+        w = self.h.spawn('web', Web)
         self.assertEqual(w.actor.tell, ['stop'])
         self.assertEqual(w.actor.ask, ['list_files', 'get_file'])
         self.assertEqual(w.actor.tell_ref, ['remote_server'])
         self.assertEqual(w.actor.ask_ref, [])
         self.assertEqual(w.actor.tell_parallel, ['remote_server'])
         self.assertEqual(w.actor.ask_parallel, ['list_files', 'get_file'])
+
+if __name__ == '__main__':
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestBasic)
+    unittest.TextTestRunner(verbosity=2).run(suite)

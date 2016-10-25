@@ -4,7 +4,7 @@
 -------------------------------------
 
 PyActor is a python actor middleware for an object oriented architecture
-constructed with the idea of getting two remote objects
+constructed with the idea of getting two remote actors
 to quickly communicate in a very simple, lightweight and minimalistic way.
 
 It supports two versions:
@@ -14,7 +14,7 @@ It supports two versions:
 <!-- +grafic tests -->
 
 It also includes communication between machines using XMLRPC and a second version
-that uses RabbitMQ message system in a just transparent way.
+that uses RabbitMQ message system in a transparent way.
 
 ### Installation
 Install using:

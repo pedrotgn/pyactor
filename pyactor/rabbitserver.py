@@ -51,7 +51,7 @@ class Sink(object):
         ip, port = address[0], int(address[1])
         self.url = ip + '/' + str(port)
         creden = pika.PlainCredentials(RABBITU, RABBITP)
-        params = pika.ConnectionParameters(host=ip, credentials=credent)
+        params = pika.ConnectionParameters(host=ip, credentials=creden)
         self.connection = pika.BlockingConnection(params)
         self.channel = self.connection.channel()
 
