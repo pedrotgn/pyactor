@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyactor',
-    version='0.9.2',
+    version='0.9.3',
     author='Pedro Garcia Lopez & Daniel Barcelona Pons',
     author_email='pedro.garcia@urv.cat, daniel.barcelona@urv.cat',
     packages=find_packages(),
@@ -17,8 +17,8 @@ setup(
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Libraries',
 
-        'License :: OSI Approved :: GNU Lesser General Public\
-         License v3 (LGPLv3)',
+        'License :: OSI Approved :: GNU Lesser General Public' +
+        ' License v3 (LGPLv3)',
 
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',

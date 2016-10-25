@@ -28,7 +28,7 @@ or::
 
     pip install pyactor
 
-Check that works executing the examples that you can find by cloning `the repository <http://www.gevent.org/intro.html#installation-and-requirements>`_::
+Check that works executing the examples that you can find by cloning `the repository <https://github.com/pedrotgn/pyactor>`_::
 
     cd examples
     python sample1.py
@@ -124,6 +124,6 @@ Tutorial
 ========
 PyActor has many examples and a tutorial explaining all its functionalities.
 This examples can be found in the ``'pyactor/examples'`` directory of the project
-(`github <http://www.gevent.org/intro.html#installation-and-requirements>`_).
+(`github <https://github.com/pedrotgn/pyactor`_).
 They are also explained in the documentation as a tutorial, hosted at
 readthedocs.org which you can find above.

@@ -301,7 +301,7 @@ class Host(object):
 
     def stop_actor(self, aid):
         url = '%s://%s/%s' % (self.transport, self.host_url.netloc, aid)
-        if url! = self.url:
+        if url != self.url:
             actor = self.actors[url]
             Proxy(actor).stop()
             actor.thread.join()
