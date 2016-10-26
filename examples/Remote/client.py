@@ -1,4 +1,4 @@
-from pyactor.context import set_context, create_host, Host, sleep
+from pyactor.context import set_context, create_host, Host, sleep, shutdown
 
 
 class EchoC(object):
@@ -41,4 +41,4 @@ if __name__ == "__main__":
     # spk.set_callback(f)
 
     sleep(4)
-    host.shutdown()
+    shutdown()

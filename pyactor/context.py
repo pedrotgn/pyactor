@@ -3,8 +3,6 @@ import types
 import sys
 import os.path
 
-from threading import current_thread
-
 from urlparse import urlparse
 from proxy import Proxy, set_actor, ProxyRef
 from util import HostDownError, AlreadyExistsError, NotFoundError, HostError

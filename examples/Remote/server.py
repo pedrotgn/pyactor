@@ -1,4 +1,4 @@
-from pyactor.context import set_context, create_host
+from pyactor.context import set_context, create_host, serve_forever
 
 
 class Echo(object):
@@ -25,4 +25,4 @@ if __name__ == "__main__":
     host = create_host('http://127.0.0.1:1277/')
 
     e1 = host.spawn('echo1', Echo)
-    host.serve_forever()
+    serve_forever()

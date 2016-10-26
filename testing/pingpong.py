@@ -3,7 +3,7 @@ PING-PONG test. Messages per second.
 @author: Daniel Barcelona Pons
 '''
 
-from pyactor.context import set_context, create_host, sleep
+from pyactor.context import set_context, create_host, sleep, shutdown
 
 from time import time
 
@@ -103,4 +103,4 @@ end = time()
 
 print ((end - init)), ' s.'
 
-host.shutdown()
+shutdown()

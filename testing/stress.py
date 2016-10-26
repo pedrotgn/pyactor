@@ -2,7 +2,8 @@
 Stress test. CLIENTs
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host, interval_host
+from pyactor.context import set_context, create_host, interval_host, \
+        serve_forever
 from pyactor.util import TimeoutError
 
 
@@ -54,4 +55,4 @@ if __name__ == "__main__":
         c.set_server(counter)
         c.init_start()
 
-    host.serve_forever()
+    serve_forever()

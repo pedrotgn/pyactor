@@ -1,5 +1,5 @@
 from pyactor.context import set_context, create_host, sleep
-from pyactor.context import interval_host, shutdown
+from pyactor.context import interval_host, serve_forever
 
 from chord import show, update, Node
 
@@ -33,6 +33,4 @@ interval_host(host, 30, show, nodes_h[5])
 sleep(1)
 interval_host(host, 30, show, nodes_h[9])
 
-# host.serve_forever()
-sleep(40)
-shutdown()
+serve_forever()

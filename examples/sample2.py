@@ -1,7 +1,7 @@
 '''
 Sync/async queries sample.
 '''
-from pyactor.context import set_context, create_host, sleep
+from pyactor.context import set_context, create_host, sleep, shutdown
 
 
 class Echo(object):
@@ -28,4 +28,4 @@ if __name__ == "__main__":
     print e1.say_something()
 
     sleep(1)
-    h.shutdown()
+    shutdown()

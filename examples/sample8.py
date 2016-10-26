@@ -1,7 +1,7 @@
 '''
 Parallel methods sample.
 '''
-from pyactor.context import set_context, create_host, sleep
+from pyactor.context import set_context, create_host, sleep, shutdown
 from pyactor.util import TimeoutError
 
 
@@ -74,6 +74,4 @@ if __name__ == "__main__":
     load2.download()
 
     sleep(7)
-    print host.pthreads
-    # print host.threads
-    host.shutdown()
+    shutdown()

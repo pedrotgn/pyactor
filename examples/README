@@ -28,14 +28,14 @@ PyActor Fast tutorial
 8. Non-blocking synchronous call with parallel methods using futures (Advanced)
     actor8b.py
 
-9. Creation of multiple hosts (Advanced)
-    sample9.py
-
-10. Intervals and periodic events
+9. Intervals and periodic events
     sample10.py
 
-11. Spawning actors in a remote host
+10. Spawning actors in a remote host
     remote/s3_client.py, remote/s3_host.py
 
-12. Remote Naming service
+11. Remote Naming service
     remote/s4_client.py, remote/s4_registry.py, s4_clientb.py
+
+12. Various hosts on the same file (Advanced)
+    remote/sample9.py

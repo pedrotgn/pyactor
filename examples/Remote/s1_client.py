@@ -2,7 +2,7 @@
 Basic remote example sending tell messages. CLIENT
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host
+from pyactor.context import set_context, create_host, shutdown
 
 
 if __name__ == "__main__":
@@ -14,4 +14,4 @@ if __name__ == "__main__":
     e1.echo('Hi there!')    # TELL message
     e1.echo('See ya!')
 
-    host.shutdown()
+    shutdown()

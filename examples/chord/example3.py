@@ -1,4 +1,5 @@
-from pyactor.context import set_context, create_host, sleep, interval_host
+from pyactor.context import set_context, create_host, sleep, interval_host, \
+            serve_forever
 
 from chord import update, Node
 
@@ -33,4 +34,4 @@ found = nodes_h[0].find_successor(40)
 print 'found', found.get_id()
 
 
-host.serve_forever()
+serve_forever()

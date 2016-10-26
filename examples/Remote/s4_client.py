@@ -2,7 +2,7 @@
 Remote example with registry. CLIENT
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host
+from pyactor.context import set_context, create_host, serve_forever
 
 
 if __name__ == "__main__":
@@ -14,4 +14,4 @@ if __name__ == "__main__":
 
     registry.bind('host1', host.proxy)
 
-    host.serve_forever()
+    serve_forever()

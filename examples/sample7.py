@@ -1,7 +1,7 @@
 '''
 Proxy references by parameter sample.
 '''
-from pyactor.context import set_context, create_host, sleep
+from pyactor.context import set_context, create_host, sleep, shutdown
 
 
 class Echo(object):
@@ -56,4 +56,4 @@ if __name__ == "__main__":
     # e1.echo3('hello there!!', {'bot1': bot, 'bot2': bot2})
 
     sleep(2)
-    h.shutdown()
+    shutdown()

@@ -2,7 +2,7 @@
 Remote example spawning on a remote server. CLIENT
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host, Host, sleep
+from pyactor.context import set_context, create_host, Host, sleep, shutdown
 from pyactor.util import TimeoutError
 
 
@@ -40,4 +40,4 @@ if __name__ == "__main__":
         print e
 
     sleep(3)
-    host.shutdown()
+    shutdown()

@@ -3,7 +3,7 @@ Intervals sample
 @author: Daniel Barcelona Pons
 '''
 from pyactor.context import (set_context, create_host, sleep,
-                             interval_host, later)
+                             interval_host, later, shutdown)
 
 
 class Registry(object):
@@ -26,6 +26,6 @@ if __name__ == "__main__":
     host = create_host()
     registry = host.spawn('1', Registry)
     registry.init_start()
-    # host.serve_forever()
+
     sleep(11)
-    host.shutdown()
+    shutdown()

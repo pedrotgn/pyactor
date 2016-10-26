@@ -1,7 +1,7 @@
 '''
 Self references sample. Actor id/proxy. + serve_forever
 '''
-from pyactor.context import set_context, create_host, sleep
+from pyactor.context import set_context, create_host, sleep, serve_forever
 
 
 class Echo(object):
@@ -39,4 +39,4 @@ if __name__ == "__main__":
     bot.say_hi()
 
     sleep(1)
-    h.serve_forever()
+    serve_forever()

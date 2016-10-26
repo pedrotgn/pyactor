@@ -2,7 +2,7 @@
 Basic remote example sending tell messages. CLIENT, stress
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host
+from pyactor.context import set_context, create_host, shutdown
 
 
 if __name__ == "__main__":
@@ -18,4 +18,4 @@ if __name__ == "__main__":
         # sleep(1)
         i += 1
 
-    host.shutdown()
+    shutdown()

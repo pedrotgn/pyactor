@@ -2,7 +2,7 @@
 Stress test. SERVER
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host
+from pyactor.context import set_context, create_host, serve_forever
 
 
 class Counter(object):
@@ -33,4 +33,4 @@ if __name__ == "__main__":
     c = host.spawn('worker', Counter)
     print 'host listening at port 1277'
 
-    host.serve_forever()
+    serve_forever()
