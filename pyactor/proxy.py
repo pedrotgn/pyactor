@@ -28,7 +28,10 @@ class ProxyRef(object):
 class Proxy(object):
     '''
     Proxy is the class that supports to create a remote reference to an
-    actor and invoke its methods.
+    actor and invoke its methods. All the references to actors will be
+    proxies, even the host.
+    To get aproxy to an Actor, you should use one of the host functions
+    that provide one, like :meth:`~.spawn` or :meth:`~.lookup_url`.
 
     :param Actor actor: the actor the proxy will manage.
     '''
@@ -64,7 +67,7 @@ class TellWrapper(object):
     sends it through the channel.
 
     :param Channel channel: communication way for the query.
-    :param str. method: name of the method this query is gonna invoke.
+    :param str. method: name of the method this query is going to invoke.
     :param str. actor_url: URL address where the actor is set.
     '''
     def __init__(self, channel, method, actor_url):
@@ -82,8 +85,12 @@ class TellWrapper(object):
 
 class AskWrapper(object):
     '''
-    Wrapper for Ask type queries to the proxy. Creates a :class:`Future`
-    to manage the result reply.
+    Wrapper for Ask type queries to the proxy. Calling it blocks the
+    execution until the result is returned or timeout is reached. You
+    can add the tagged parameter "timeout" to change the time limit to
+    wait. It is also possible to specify "future=True" to get an instant
+    response with a :class:`Future` object with which one you can
+    manage the result reply.
 
     :param Channel channel: communication way for the query.
     :param str. method: name of the method this query is gonna invoke.

@@ -10,7 +10,7 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 
 
 class Source(threading.Thread):
-    ''' Facade for simle remote communication using XMLRPCServer.
+    ''' Facade for simple remote communication using XMLRPCServer.
     '''
     def __init__(self, addr):
         threading.Thread.__init__(self)

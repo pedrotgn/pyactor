@@ -14,8 +14,8 @@ available_types = ['thread', 'green_thread']
 
 def setRabbitCredentials(user, passw):
     '''
-    If you use a RabbitMQ server an want to make remote queries, you might need
-    to specify new credentials for connection.
+    If you use a RabbitMQ server an want to make remote queries, you might
+    need to specify new credentials for connection.
 
     By default, PyActor uses the guest RabbitMQ user.
 
@@ -29,7 +29,7 @@ def setRabbitCredentials(user, passw):
 def set_context(module_name='thread'):
     '''
     This function initializes the context of execution deciding which
-    type of threads are being used: normal python threads or green
+    type of threads are being used: classic python threads or green
     threads, provided by Gevent.
 
     This should be called first of all in every execution, otherwise,
@@ -80,17 +80,18 @@ def create_host(url="local://local:6666/host"):
     for execution or after callig :meth:`~.shutdown` to the previous
     host.
 
-    It is possible to create locally more than one host and simulate a
-    remote communication between them, but the first one created will
+    Nevertheless, it is possible to create locally more than one host
+    and simulate a remote communication between them if they are of some
+    remote type (`http` or `amqp`), but the first one created will
     be the main host, which is the one that will host the queries from
     the main function.
     Of course, every host must be initialized with a diferent URL(port).
-    Even so, more than one host should not be requiered for any real
+    Althoug that, more than one host should not be requiered for any real
     project.
 
     :param str. url: URL where to start and bind the host.
-    :return: :class:`~.Host` created.
-    :raises: Exception if there is a host already created.
+    :return: :class:`~.Proxy` to the new host created.
+    :raises: Exception if there is a host already created with that URL.
     '''
     if url in util.hosts.keys():
         raise HostError('Host already created. Only one host can' +
@@ -111,13 +112,13 @@ class Host(object):
 
     Host is the container of the actors. It manages the spawn and
     elimination of actors and their communication through channels. Also
-    configures the TCP socket where the actors will be able to receive
-    queries remotely. Additionaly, controls the correct management of
+    configures the remote points where the actors will be able to receive
+    and send queries remotely. Additionaly, controls the correct management of
     the threads and intervals of its actors.
 
-    The host can be managed as a simple object, but it also is an actor
-    itself so you can get its :class:`~.Proxy` (with ``host.proxy``) and
-    pass it to another host to spawn remotely.
+    The host is managed as an actor itself so you interact with it through
+    its :class:`~.Proxy`. This allows you to pass it to another host to
+    spawn remotely.
 
     :param str. url: URL that identifies the host and where to find it.
     '''
@@ -151,11 +152,13 @@ class Host(object):
 
     def load_transport(self, url):
         '''
-        For TCP communication. Sets the communication socket of the host
+        For remote communication. Sets the communication dispatcher of the host
         at the address and port specified.
 
         The scheme must be http if using a XMLRPC dispatcher.
         amqp for RabbitMQ communications.
+
+        This methos is internal. Automatically called when creating the host.
 
         :param str. url: URL where to bind the host. Must be provided in
             the tipical form: 'scheme://address:port/hierarchical_path'
@@ -185,7 +188,7 @@ class Host(object):
             the host.
         :param class klass: class type of the spawning actor. If you are
             spawning remotely and the class is not in the server module,
-            you must specigy here the path to that class in the form
+            you must specify here the path to that class in the form
             'module.py/Class' so the server can import the class and create
             the instance.
         :param list param: arguments for the init function of the
@@ -193,7 +196,7 @@ class Host(object):
         :return: :class:`~.Proxy` of the actor spawned.
         :raises: :class:`AlreadyExistsError`, if the ID specified is
             already in use.
-        :raises: :class:`HostDownError` if there is no host initiated.
+        :raises: :class:`HostDownError` if the host is not initiated.
         '''
         if param is None:
             param = []
@@ -232,7 +235,7 @@ class Host(object):
     def lookup(self, aid):
         '''
         Gets a new proxy that references to the actor of this host
-        (only actor in this host) identified by the given ID.
+        (only actors in this host) identified by the given ID.
 
         This method can be called remotely synchronously.
 
@@ -250,16 +253,9 @@ class Host(object):
             raise NotFoundError(url)
 
     def shutdown(self):
-        '''
-        Stops the Host, stopping at the same time all its actors.
-        Should be called at the end of its usage, to finish correctly
-        all the connections and threads.
-        When the actors stop running, they can't be started again and
-        the host can't process new spawns. You might need to create a
-        new host (:func:`create_host`).
-
-        This method can't be called remotely.
-        '''
+        # '''
+        # For internal calls.
+        # '''
         if self.alive:
             for interval_event in self.intervals.values():
                 interval_event.set()
@@ -298,6 +294,12 @@ class Host(object):
                                   else None)
 
     def stop_actor(self, aid):
+        '''
+        This method removes one actor from the Host, stoping it and deleting
+        all its references.
+
+        :param str. aid: identifier of the actor you want to stop.
+        '''
         url = '%s://%s/%s' % (self.transport, self.host_url.netloc, aid)
         if url != self.url:
             actor = self.actors[url]
@@ -309,7 +311,7 @@ class Host(object):
     def lookup_url(self, url, klass, module=None):
         '''
         Gets a proxy reference to the actor indicated by the URL in the
-        parameters. It can be a local reference or a TCP direction to
+        parameters. It can be a local reference or a remote direction to
         another host.
 
         This method can be called remotely synchronously.
@@ -317,7 +319,7 @@ class Host(object):
         :param srt. url: address that identifies an actor.
         :param class klass: the class of the actor.
         :param srt. module: if the actor class is not in the calling module,
-            you need to specify the module where it is here. Alse, the *klass*
+            you need to specify the module where it is here. Also, the *klass*
             parameter change to be a string.
         :return: :class:`~.Proxy` of the actor requested.
         :raises: :class:`NotFoundError`, if the URL specified do not
@@ -374,11 +376,11 @@ class Host(object):
         self.threads[actor.thread] = url
 
     def init_host(self):
-        '''
-        This method creates an actor for the Host so it can spawn actors
-        remotely. Called always from the init function of the host, so
-        no need for calling this directly.
-        '''
+        # '''
+        # This method creates an actor for the Host so it can spawn actors
+        # remotely. Called always from the init function of the host, so
+        # no need for calling this directly.
+        # '''
         if not self.running and self.alive:
             self.id = self.url
             host = actor.Actor(self.url, Host, self)
@@ -453,6 +455,12 @@ class Host(object):
 
 
 def shutdown(url=None):
+    '''
+    Stops the Host passed by parameter or all af them is none is
+    specified, stopping at the same time all its actors.
+    Should be called at the end of its usage, to finish correctly
+    all the connections and threads.
+    '''
     if url is None:
         for host in util.hosts.values():
             host.shutdown()
@@ -478,6 +486,7 @@ def serve_forever():
     '''
     This allows the host (main host) to keep alive indefinitely so its actors
     can receive queries at any time.
+    The main thread stays blocked forever.
     To kill the execution, press Ctrl+C.
 
     See usage example in :ref:`sample6`.

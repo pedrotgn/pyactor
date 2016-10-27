@@ -7,8 +7,8 @@ from pyactor.util import RABBITU, RABBITP
 
 
 class Source(threading.Thread):
-    ''' Facade for simle remote communication using RabbitMQ.
-    This connection uses by default guest RabbitMQ user. To channge
+    ''' Facade for simple remote communication using RabbitMQ.
+    This connection uses by default the guest RabbitMQ user. To channge
     credentials see :func:`~.setRabbitCredentials`.
     '''
     def __init__(self, addr):
@@ -44,6 +44,7 @@ class Source(threading.Thread):
 
 class Sink(object):
     ''' Facade for RabbitMQ concrete connexions to remote actors.
+        This manages the publish to queues.
     '''
     def __init__(self, url):
         aurl = urlparse(url)
