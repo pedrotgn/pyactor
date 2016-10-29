@@ -39,3 +39,6 @@ PyActor Fast tutorial
 
 12. Various hosts on the same file (Advanced)
     remote/sample9.py
+
+13. Stopping an actor (Advanced)
+    sample1b.py

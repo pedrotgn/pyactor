@@ -11,6 +11,9 @@ Actor
 .. automodule:: pyactor.green_thread.actor
     :members:
 
+.. automodule:: pyactor.green_thread.rpcactor
+    :members:
+
 Intervals
 ==========
 

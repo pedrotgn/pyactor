@@ -10,7 +10,11 @@ from actor import Actor, Channel
 
 
 class RPCDispatcher(Actor):
-
+    '''
+    This is the actor that will manage the sends and recieves of remote
+    queries with other hosts. Each host has one, configured depending on
+    the scheme specified when created.
+    '''
     def __init__(self, url, host, mode):
         global server
         server = __import__('pyactor.' + mode + 'server',

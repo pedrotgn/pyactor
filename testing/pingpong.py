@@ -85,22 +85,23 @@ class PongActor(object):
             raise Exception("Unsupported message: " + msg)
 
 
-set_context('green_thread')
-host = create_host()
+if __name__ == "__main__":
+    set_context('green_thread')
+    host = create_host()
 
-pong = host.spawn('pong', PongActor)
-ping = host.spawn('ping', PingActor, [N, pong])
+    pong = host.spawn('pong', PongActor)
+    ping = host.spawn('ping', PingActor, [N, pong])
 
-init = time()
+    init = time()
 
-msg = StartMessage()
-ping.send(msg)
+    msg = StartMessage()
+    ping.send(msg)
 
-while pong.actor.is_alive():
-    sleep(0.1)
+    while pong.actor.is_alive():
+        sleep(0.1)
 
-end = time()
+    end = time()
 
-print ((end - init)), ' s.'
+    print ((end - init)), ' s.'
 
-shutdown()
+    shutdown()

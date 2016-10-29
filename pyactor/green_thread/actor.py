@@ -125,10 +125,10 @@ class Actor(ActorRef):
         '''
         The message received from the queue specify a method of the
         class the actor represents. This invokes it. If the
-        communication is an :class:`~.AskRequest`, sends the result back
-        to the channel included in the message as an `AskResponse`.
+        communication is an ASK, sends the result back
+        to the channel included in the message as an ASKRESPONSE.
 
-        If it is a :class:`~.Future`, generates a :class:`~.FutureResponse`
+        If it is a FUTURE, generates a FUTURERESPONSE
         to send the result to the manager.
 
         :param msg: The message is a dictionary using the constants

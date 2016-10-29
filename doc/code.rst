@@ -29,3 +29,12 @@ Util
 
 .. automodule:: pyactor.util
     :members:
+
+Remote Solutions
+================
+
+.. automodule:: pyactor.rpcserver
+    :members:
+
+.. automodule:: pyactor.rabbitserver
+    :members:

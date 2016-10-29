@@ -38,32 +38,33 @@ class Node(object):
             self.next.take_token()
 
 
-set_context('green_thread')
-# set_context('thread')
+if __name__ == "__main__":
+    set_context('green_thread')
+    # set_context('thread')
 
-print 'TEST ', NUM_NODES, ' nodes and', NUM_MSGS, "messages."
+    print 'TEST ', NUM_NODES, ' nodes and', NUM_MSGS, "messages."
 
-host = create_host()
+    host = create_host()
 
-nf = host.spawn('ini', Node)
+    nf = host.spawn('ini', Node)
 
-ni = nf
-for i in range(NUM_NODES - 2):
-    ni = host.spawn(str(i), Node, [ni])
+    ni = nf
+    for i in range(NUM_NODES - 2):
+        ni = host.spawn(str(i), Node, [ni])
 
-n1 = host.spawn('end', Node, [ni])
+    n1 = host.spawn('end', Node, [ni])
 
-nf.set_next(n1)
-print 'start time!!'
-init = time()
+    nf.set_next(n1)
+    print 'start time!!'
+    init = time()
 
-nf.init_token()
+    nf.init_token()
 
-while (not n1.is_finished()):
-    sleep(0.01)
+    while (not n1.is_finished()):
+        sleep(0.01)
 
-end = time()
+    end = time()
 
-print ((end - init) * 1000), ' ms.'
+    print ((end - init) * 1000), ' ms.'
 
-shutdown()
+    shutdown()

@@ -116,6 +116,48 @@ registry and waits for queries. The second one, uses the registry to find the
 first one and send work to its server.
 
 
+
+.. _sample9:
+
+Sample 9 - Multiple Hosts
+================================================================================
+
+This example tests the creation of multiple host at the same time on one unique
+execution. This is the full code of this sample, which you can find and test in
+``pyactor\examples\Remote\sample9.py``:
+
+.. literalinclude:: ../examples/Remote/sample9.py
+    :linenos:
+
+The first thing to make clear is that you should never need to create more than
+host locally, since they are meant for remote communication. This is for testing
+purposes.
+
+To create more hosts, you only need to call again the function :func:`~.create_host`.
+But you will need to specify different locations for each host, since those are their
+identifiers. In the example we create two hosts in the same location, but attending
+different ports::
+
+    h = create_host("http://127.0.0.1:6666/host")
+    h2 = create_host("http://127.0.0.1:7777/host")
+
+.. note:: Remember that the default address for a host is ``local://local:6666/host``
+
+.. note:: To communicate two hosts, both of them must have a remote dispatcher,
+    so they must have one of the schemes required.
+
+Now, each host will manage its own actors and threads, so they will need to
+communicate through TCP connections.
+
+One thing important to know about this is that only one host can be used to manage
+the main execution of your program, so there always will be a main host and the
+other ones will be created as secondary hosts.
+
+This main host will be automatically assigned to the first one created. If that
+one is closed and there still are other hosts operative, the oldest of them will
+assume the role of main host.
+
+
 .. _rsrbb:
 
 Using RabbitMQ
@@ -136,7 +178,7 @@ and ``pyactor\examples\Remote\s1_serverrbb.py``:
 .. literalinclude:: ../examples/Remote/s1_serverrbb.py
     :linenos:
 
-You can configure your rabbit credentials with:
+You can configure your rabbit credentials with::
 
     setRabbitCredentials('user', 'password')
 

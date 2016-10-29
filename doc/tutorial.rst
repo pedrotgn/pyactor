@@ -13,7 +13,7 @@ Installation
 
 This library allows the creation and management of actors in a distributed system
 using Python. It follows the classic actor model and tries to be a simple way to
-get two remote objects to quickly communicate.
+get two remote actors to quickly communicate.
 
 To install the library use::
 
@@ -21,6 +21,15 @@ To install the library use::
 
 You can check that works with the examples explained in this page, that you can
 find in the ./examples directory of this project. Tested with Python 2.7.
+
+The library requires Gevent, so you may need to install it for using the green
+thread version of this library.
+
+It is also available at PYPI, so the most easy way of installing PyActor is by::
+
+    pip install pyactor
+
+Then you can check the examples from `the repository <https://github.com/pedrotgn/pyactor>`_.
 
 
 .. _global:
@@ -38,10 +47,13 @@ threads but you can specify the mode with one of the following strings:
 
 Then, first of all, a :class:`~.context.Host` is needed in order to create some
 actors. To create a host, use the function :func:`~.create_host` which returns
-the instance of a :class:`~.Host`. Then, use it to spawn actors by giving the
+a proxy (:class:`~.proxy.Proxy`) to the instance of a :class:`~.Host`.
+You should never work with the
+instance itself, but always with proxies to maintain the actor model.
+When you have the proxy, use it to spawn actors by giving the
 class type of the actor to create and one string that will identify it among the
 host. The :meth:`~.context.Host.spawn` method will return the proxy
-(:class:`~.proxy.Proxy`) that manages that actor. See example::
+that manages that actor. See example::
 
     h = create_host()
     actor1 = h.spawn('id1', MyClass)
@@ -84,6 +96,8 @@ explain it more carefully.
 In this case, we need to import the :func:`~.create_host` function from the
 project in order to use it. We also import the *sleep* function, to give time to
 the actor to work, and the setting function for the type, :func:`~.set_context`.
+Finally, we also need the :func:`~.shutdown` function to stop and clean the host
+before finishing.
 
 The actor to create in this example will be an :class:`Echo`. This class only
 has one method which prints the message *msg*, given by parameter. As you can
@@ -91,6 +105,9 @@ see, the classes destined to be actors must have the attributes ``_tell=[]``
 and ``_ask=[]`` that include the names of the methods that can be remotely
 invoked in an asynchronous or synchronous way, respectively. In this sample we
 have the echo method, which is async, as no response from it is needed.
+
+.. note:: In this sample we have the _ask list also defined as a learning purpose,
+    but you could just not write that list if none method goes there.
 
 The first thing to do is define which model are we going to use. For the moment
 we are using the classic threads, so we'll call the function without parameters
@@ -103,9 +120,11 @@ that, we create a new variable by using the function we imported before. ::
 
     h = create_host()
 
-Now we have a :class:`~.Host` in the 'h' variable. It can create actors attached
+Now we have a :class:`~.Host` in the 'h' variable. Actually, as Host objects are
+also actors, this call returns  a :class:`Proxy` that will manage that actor.
+It can create actors attached
 to itself. To do that, we use the :meth:`~.Host.spawn` method. The first
-parameter is a string with the id of the actor that will identify it among the
+parameter is a string with the ID of the actor that will identify it among the
 host so no repeated values are allowed. The second is the class the actor will
 be instance of. In this case we create an actor which will be an :class:`Echo`
 and with the id 'echo1'::
@@ -118,36 +137,29 @@ it).
 As we have the actor, we can invoke his methods as we would do normally since
 the proxy will redirect the queries to the actual placement of it. If we didn't
 have specified the methods in the statements appointed before (_tell and _ask),
-we wouldn't be able to do this now. The execution should work properly and print
-on screen::
+we wouldn't be able to do this now, giving a 'no such attribute error'.
+The execution should work properly and print on screen::
 
     hello there !!
 
-The host is also a living actor so it could receive queries remotely in the
-future. To get its proxy, we use::
-
-    hr = h.proxy
-
-And now we have a proxy managing the host in *hr* that we could use to send
-references remotely. This allows to spawn remotely, although in this example we
-are doing it all locally (remote spawns require a bit more info, see the remote
-tutorial):
-
-    e2 = hr.spawn('echo2', Echo)
-
-
 Then, the sleep gives time to the actor for doing the work and finally, we close
-the host, which will stop all its actors. This function (:meth:`~.shutdown`)
+the host, which will stop all its actors. This function (:func:`~.shutdown`)
 should be always called at the end::
 
-    h.shutdown()
+    shutdown()
 
 .. note:: As the host is an actor itself, it has sync and async methods and can
     receive remote queries if we use its proxy.
 
+..note:: As said, he host is also a living actor so it could receive queries remotely in the
+    future. This means you can send its reference to another host, which allows to
+    spawn remotely (remote spawns require a bit more info, see the remote
+    tutorial).
+
 .. note:: Now you can try and see how it works with green threads by just
     specifying 'green_thread' in the setting function.
     ``set_context('green_thread')``
+
 
 .. _sample2:
 
@@ -211,7 +223,7 @@ It is also possible to add a callback to a method from another actor by passing
 also its proxy. See :ref:`sample11` for more deep detail in Futures.
 
 .. note:: :meth:`~.add_callback` needs to be called from an actor to another
-    actor, specifying a method of an actor (also the actor if it is different
+    actor, specifying a method of an actor (also the actor, if it is different
     from the one that makes the addition).
 
 .. note:: The method treated as a callback must have one unique parameter, which
@@ -345,7 +357,7 @@ decorator. This is the full code of this sample, which you can find and test in
     :linenos:
 
 The previous examples pass proxy references by parameter in its methods, but
-them are sharing the same instance of a proxy. This could cause various problems
+they are sharing the same instance of a proxy. This could cause various problems
 of concurrency so we might want different proxies in different spots. To achieve
 that, you have to indicate that a method receives or returns a proxy by adding
 it to the _ref list of the class (it yet must be in _ask or _tell).
@@ -410,48 +422,7 @@ TimeoutError as the thread of that actor is blocked with the download.
 
 .. note:: `sample8b` combines this example with the use of Futures.
 
-.. _sample9:
-
-Sample 9 - Multiple Hosts
-================================================================================
-
-This example tests the creation of multiple host at the same time on one unique
-execution. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample9.py``:
-
-.. literalinclude:: ../examples/sample9.py
-    :linenos:
-
-The first thing to make clear is that you should never need to create more than
-host locally, since they are meant for remote communication. This is for testing
-purposes.
-
-To create more hosts, you only need to call again the function :func:`~.create_host`.
-But you will need to specify different locations for each host, since those are their
-identifiers. In the example we create two hosts in the same location, but attending
-different ports::
-
-    h = create_host()
-    h2 = create_host("local://local:7777/host")
-
-.. note: Remember that the default address for a host is ``local://local:6666/host``
-
-Now, each host will manage its own actors and threads, so they will need to
-communicate through TCP connections.
-
-
-One thing important to know about this is that only one host can be used to manage
-the main execution of your program, so there always will be a main host and the
-other ones will be created as secondary hosts.
-
-This main host will be automatically assigned to the first one created. If that
-one is closed and there still are other hosts operative, the oldest of them will
-assume the role of main host.
-
-In this example, remote communication between the hosts is not possible since local
-URLs does not have a dispatcher. See the remote tutorial for examples on actual
-remote connections (:ref:`remote_tuto`).
-
+.. note:: You can test another parallel example with `parall.py`.
 
 
 .. _sample_inter:
@@ -502,3 +473,26 @@ to check the raising of exceptions.
 
 Finally, note that the only argument for :meth:`~.result` (also for
 :meth:`~.exception`) is the timeout: the time, in seconds, to wait for a result.
+
+
+.. _sample1b:
+
+Sample 1b - Stopping an Actor (Advanced)
+================================================================================
+
+This example is like the first one, but extended with a new functionality for
+the hosts. This shows how to stop an actor and delete all its references from
+one host. This is the full code of this sample, which you can find and test in
+``pyactor\examples\sample1b.py``:
+
+.. literalinclude:: ../examples/sample1b.py
+    :linenos:
+
+You can always delete an actor by calling the method :meth:`~.stop_actor` of its
+host. This function will stop the thread of that actor and all its references
+from the host. This means the actor cannot be looked up anymore, it will not
+receive any more work and you can create a future actor with its same id.
+
+.. note:: Parallel queries already submitted will end as usual.
+
+.. note:: Intervals involving that actor's methods might result in errors.
