@@ -5,7 +5,6 @@ from urlparse import urlparse
 from pyactor.util import TYPE, METHOD, TELL, ASK, CHANNEL, FROM, TO, RPC_ID
 from pyactor.util import FUTURE, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import get_host, get_current
-from pyactor.rpcserver import Source, Sink
 from actor import Actor, Channel
 
 
@@ -25,7 +24,7 @@ class RPCDispatcher(Actor):
         aurl = urlparse(url)
         address = aurl.netloc.split(':')
         ip, port = address[0], address[1]
-        self.source = Source((ip, int(port)))
+        self.source = server.Source((ip, int(port)))
         self.source.register_function(self.on_message)
         self.source.start()
         self.running = True
@@ -42,7 +41,7 @@ class RPCDispatcher(Actor):
         if url in self.sinks.keys():
             return self.sinks[url]
         else:
-            self.sinks[url] = Sink(url)
+            self.sinks[url] = server.Sink(url)
             return self.sinks[url]
 
     def receive(self, msg):

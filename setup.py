@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyactor',
-    version='0.9.3',
+    version='1.0.0',
     author='Pedro Garcia Lopez & Daniel Barcelona Pons',
     author_email='pedro.garcia@urv.cat, daniel.barcelona@urv.cat',
     packages=find_packages(),
@@ -12,7 +12,7 @@ setup(
     long_description=open('README.rst').read(),
     install_requires=['gevent'],
     classifiers=[
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
 
         'Intended Audience :: Developers',
         'Topic :: Software Development :: Libraries',
