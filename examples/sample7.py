@@ -11,27 +11,27 @@ class Echo(object):
 
     def echo(self, msg, sender):
         # print sender
-        print msg, 'from:', sender.get_name(), id(sender)
+        print msg, 'from:', sender.get_name()
 
     def echo2(self, msg, sndrs):
         for sender in sndrs:
-            print msg, 'from:', sender.get_name(), id(sender)
+            print msg, 'from:', sender.get_name()
 
     def echo3(self, msg, sndrs):
         for sender in sndrs.values():
-            print msg, 'from:', sender.get_name(), id(sender)
+            print msg, 'from:', sender.get_name()
 
 
 class Bot(object):
     _tell = ['set_echo', 'say_hi']
     _ask = ['get_name']
-    _ref = ['get_name']
+    _ref = ['set_echo']
 
     def __init__(self):
         self.greetings = ['hello', 'hi', 'hey', 'what`s up?']
 
-    def set_echo(self):
-        self.echo = self.host.lookup('echo1')
+    def set_echo(self, echo):
+        self.echo = echo
 
     def get_name(self):
         return self.id
@@ -47,13 +47,13 @@ if __name__ == "__main__":
     e1 = h.spawn('echo1', Echo)
     bot = h.spawn('bot1', Bot)
     bot2 = h.spawn('bot2', Bot)
-    bot.set_echo()
-    sleep(1)  # Give time to host to lookup the first one
-    bot2.set_echo()
+    bot.set_echo(e1)    # Passing a proxy to a method marked as _ref
+    sleep(1)            # Give time to host to lookup the first one
+    bot2.set_echo(e1)
     bot.say_hi()
-    # bot2.say_hi()
-    # e1.echo2('hello there!!', [bot2])
-    # e1.echo3('hello there!!', {'bot1': bot, 'bot2': bot2})
+    sleep(1)
+    e1.echo2('hello there!', [bot2])
+    e1.echo3('hello there!!', {'bot1': bot, 'bot2': bot2})
 
-    sleep(2)
+    sleep(1)
     shutdown()

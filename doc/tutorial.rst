@@ -349,21 +349,35 @@ in this host.
 Sample 7 - references
 ================================================================================
 
-This example tests the sending of proxy references by parameter using the ref
-decorator. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample7.py``:
+This example tests the sending of proxy references by parameter using the
+definition of the _ref list. This is the full code of this sample, which you can
+find and test in ``pyactor\examples\sample7.py``:
 
 .. literalinclude:: ../examples/sample7.py
     :linenos:
 
-The previous examples pass proxy references by parameter in its methods, but
+The previous examples may pass proxy references by parameter in its methods, but
 they are sharing the same instance of a proxy. This could cause various problems
 of concurrency so we might want different proxies in different spots. To achieve
 that, you have to indicate that a method receives or returns a proxy by adding
 it to the _ref list of the class (it yet must be in _ask or _tell).
 
-As seen in the example, this checks for proxies in the parameters, even inside
-lists or dictionaries, to create new ones adapted to where they are.
+With this indication, pyActor will search for proxies in the parameters and make
+a new proxy for the actor in the context that the method will be executed (the
+actor's).
+
+Bot has a method ``set_echo`` that gets the echo it will use by parameter. As
+this echo has to be a proxy, Bot includes the next definition::
+
+    _ref = ['set_echo']
+
+So then, at the main code, we can make this call without any future concurrency
+problems, as the proxies are not shared::
+
+    bot.set_echo(e1)
+
+Also seen in the example, Echo has methods that receive a proxy, in this methods
+you can see examples of passing proxies even inside lists or dictionaries.
 
 .. _sample8:
 
