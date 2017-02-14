@@ -29,7 +29,7 @@ Check that works executing the examples:
 
 Check also the docs for a tutorial:
 
-[![Documentation Status](https://readthedocs.org/projects/pyactor/badge/?version=latest)](http://pyactor.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/pyactor/badge/?version=master)](http://pyactor.readthedocs.io/en/master/?badge=master)
 
 Commits are build and tested automatically at [Travis-CI](https://travis-ci.org/pedrotgn/pyactor).
 
