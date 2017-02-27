@@ -1,7 +1,7 @@
 from Queue import Empty
 
 from util import ASK, TELL, TYPE, METHOD, PARAMS, CHANNEL, TO, RESULT
-from util import TimeoutError, NotFoundError, HostError
+from exceptions import TimeoutError, NotFoundError, HostError
 from util import get_host, get_lock
 
 
@@ -146,7 +146,7 @@ class AskRefWrapper(AskWrapper):
         if host is not None:
             new_args = host.dumps(list(args))
         else:
-            raise HostError('No such Host')
+            raise HostError('No such Host on the context of the call.')
 
         if future:
             self.__lock = get_lock()
@@ -166,5 +166,5 @@ class TellRefWrapper(TellWrapper):
         if host is not None:
             new_args = host.dumps(list(args))
         else:
-            raise HostError('No such Host')
+            raise HostError('No such Host on the context of the call.')
         return super(TellRefWrapper, self).__call__(*new_args, **kwargs)

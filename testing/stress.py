@@ -2,9 +2,8 @@
 Stress test. CLIENTs
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host, interval_host, \
-        serve_forever
-from pyactor.util import TimeoutError
+from pyactor.context import set_context, create_host, serve_forever
+from pyactor.exceptions import TimeoutError
 
 
 CLIENTS = 100
@@ -18,7 +17,7 @@ class Connecter(object):
         self.server = srvr
 
     def init_start(self):
-        self.interval1 = interval_host(self.host, 0.1, self.send_message)
+        self.interval1 = self.host.interval(0.1, self.proxy, "send_message")
 
     def send_message(self):
         self.server.work('abcdefghijklmnopqrstuvwxyz' +
@@ -34,7 +33,7 @@ class Show(object):
         self.server = srvr
 
     def init_start(self):
-        self.interval1 = interval_host(self.host, 1, self.send_message)
+        self.interval1 = self.host.interval(1, self.proxy, "send_message")
 
     def send_message(self):
         print self.server.see()

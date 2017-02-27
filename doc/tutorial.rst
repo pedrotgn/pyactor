@@ -451,13 +451,30 @@ an action. This is the full code of this sample, which you can find and test in
 .. literalinclude:: ../examples/sample10.py
     :linenos:
 
-To generate intervals, we need to import :func:`~.interval_host` and
-:func:`~.later` from intervals module. The class will call the first one giving
-the interval time and the function to execute, along with the host proxy that
-can be obtained with ``self.proxy``. This function returns an interval instance
-that we have to keep in order to stop it after by calling *.set()*.
-In this example we use :func:`~.later` to set a timer that will stop the
-interval after a certain time.
+To generate intervals, we use the methods :meth:`Host.interval` and
+:meth:`Host.later` that can be accessed from an actor with the `self.host`. The
+class (actor) will call the first one giving
+the interval time and the proxy to the actor to which make the periodic call
+(that can be itself with `self.proxy` or another actor) as
+well as the name of the method in that actor that will be called.
+The method to be executed must be a tell method (with ref or without it), otherwise,
+it will raise and exception.
+
+This function returns an interval instance
+that we have to keep in order to stop it later by calling *.set()*.
+In this example we use :meth:`Host.later` to set a timer that will stop the
+interval after a certain time. This method works similar to the other. You
+specify by parameter the actor and the method to be executed after that time,
+and only accepts methods of the tell type.
+
+If the method requires arguments, those have to be after the tree base. In the
+example, hello needs one argument and it is passed as::
+
+    self.host.interval(1, self.proxy, "hello", "you")
+
+If the method needed two of them, it will be like follows::
+
+    self.host.interval(1, self.proxy, "hello", "you", "too")
 
 
 .. _sample11:

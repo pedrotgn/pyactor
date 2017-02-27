@@ -6,7 +6,6 @@ PING-PONG test. Messages per second. REMOTE PONG
 from pyactor.context import set_context, create_host, sleep, serve_forever
 
 
-
 class Message(object):
     pass
 

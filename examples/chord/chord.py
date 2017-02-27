@@ -1,4 +1,4 @@
-from pyactor.util import TimeoutError
+from pyactor.exceptions import TimeoutError
 
 
 k = 7
@@ -39,17 +39,8 @@ def betweenE(value, init, end):
 # -------END_BETWEEN-------
 
 
-def update(ref):
-    ref.stabilize()
-    ref.fix_finger()
-
-
 def exit1(ref):
     ref.leave()
-
-
-def show(ref):
-    ref.show_finger_node()
 
 
 class SuccessorError(Exception):
@@ -62,7 +53,7 @@ class Node(object):
             'closest_preceding_finger', 'join', 'is_alive', 'find_predecessor',
             'get_finger']
     _tell = ['leave', 'set_predecessor', 'set_successor', 'show_finger_node',
-             'stabilize', 'notify', 'fix_finger']
+             'stabilize', 'notify', 'fix_finger', 'update', 'show']
     _ref = ['set_predecessor', 'get_predecessor', 'successor',
             'find_successor', 'closest_preceding_finger', 'join',
             'set_successor', 'notify', 'get_finger', 'find_predecessor']
@@ -79,6 +70,13 @@ class Node(object):
         for i in range(k):
             self.start[i] = (long(self.id) + (2 ** i)) % (2 ** k)
         return True
+
+    def show(self):
+        self.proxy.show_finger_node()
+
+    def update(self):
+        self.proxy.stabilize()
+        self.proxy.fix_finger()
 
     def successor(self):
         return self.finger[0]

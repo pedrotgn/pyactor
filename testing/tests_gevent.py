@@ -93,11 +93,11 @@ class Bot:
 
 class Counter:
     _ask = []
-    _tell = ['count', 'init_start']
+    _tell = ['count', 'init_start', 'stop_interval']
 
     def init_start(self):
-        self.interval1 = interval_host(self.host, 1, self.count)
-        later(4, self.stop_interval)
+        self.interval1 = self.host.interval(1, self. proxy, "count")
+        self.host.later(4, self.proxy, "stop_interval")
 
     def stop_interval(self):
         self.interval1.set()
@@ -221,8 +221,8 @@ class TestBasic(unittest.TestCase):
                                              'detach_interval',
                                              'hello', 'stop_actor', 'stop'])
         self.assertEqual(self.h.actor.ask, ['say_hello'])
-        self.assertEqual(self.h.actor.ask_ref, ['spawn', 'lookup',
-                                                'lookup_url'])
+        self.assertEqual(self.h.actor.ask_ref, ['spawn', 'interval', 'lookup',
+                                                'lookup_url', 'later'])
         with self.assertRaises(Exception):
             h2 = create_host()
         self.assertEqual(self.h.actor._obj, get_host())

@@ -1,7 +1,6 @@
-from pyactor.context import set_context, create_host, sleep, interval_host, \
-    serve_forever
+from pyactor.context import set_context, create_host, sleep, serve_forever
 
-from chord import update, Node
+from chord import Node
 
 
 nodes = [1, 8, 14, 21, 32, 38, 42, 48, 51, 56]
@@ -25,7 +24,7 @@ for i in range(len(nodes_h)):
     except Exception:
         raise
     else:
-        interval_host(host, 0.5, update, nodes_h[i])
+        host.interval(0.5, nodes_h[i], "update")
 
 # Wait to give time to chord to fix its tables.
 sleep(5)

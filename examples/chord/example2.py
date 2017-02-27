@@ -1,8 +1,7 @@
-from pyactor.context import set_context, create_host, sleep, interval_host,\
-    serve_forever
-from pyactor.util import AlreadyExistsError
+from pyactor.context import set_context, create_host, sleep, serve_forever
+from pyactor.exceptions import AlreadyExistsError
 
-from chord import show, update, Node, k
+from chord import Node, k
 
 from time import time
 import random
@@ -44,17 +43,17 @@ for i in range(len(nodes_h)):
             print 'Node %s fails' % str(i)
     except Exception:
         continue
-    interval_host(host, 0.5, update, nodes_h[i])
+    host.interval(0.5, nodes_h[i], "update")
 
 t2 = time()
 print 'Time to create 100 nodes'
 print t2 - t1
 
-interval_host(host, 30, show, nodes_h[0])
+host.interval(30, nodes_h[0], "show")
 sleep(1)
-interval_host(host, 30, show, nodes_h[5])
+host.interval(30, nodes_h[5], "show")
 sleep(1)
-interval_host(host, 30, show, nodes_h[9])
+host.interval(30, nodes_h[9], "show")
 
 # Wait to give time to chord to fix its tables.
 sleep(60)
@@ -62,7 +61,7 @@ sleep(60)
 key = mhash('hello')
 print key
 print key % 2**k
-show(nodes_h[0])
+nodes_h[0].show()
 found = nodes_h[0].find_predecessor(key % 2**k, timeout=30)
 print found.get_id()
 
