@@ -12,6 +12,6 @@ if __name__ == "__main__":
     registry = host.lookup_url('http://127.0.0.1:1277/regis', 'Registry',
                                's4_registry')
 
-    registry.bind('host1', host.proxy)
+    registry.bind('host1', host)
 
     serve_forever()
