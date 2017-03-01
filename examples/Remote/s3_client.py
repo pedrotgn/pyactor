@@ -3,7 +3,7 @@ Remote example spawning on a remote server. CLIENT
 @author: Daniel Barcelona Pons
 '''
 from pyactor.context import set_context, create_host, Host, sleep, shutdown
-from pyactor.util import TimeoutError
+from pyactor.exceptions import TimeoutError
 
 
 class Server(object):

@@ -11,6 +11,7 @@ import signal
 from pyactor.context import *
 from pyactor.proxy import *
 from pyactor.util import *
+from pyactor.exceptions import *
 import pyactor.context
 
 
