@@ -24,18 +24,21 @@ class Server(object):
 
 if __name__ == "__main__":
     set_context()
-    host = create_host('http://127.0.0.1:1777')
+    host = create_host('http://127.0.0.1:6002')
 
-    registry = host.lookup_url('http://127.0.0.1:1277/regis', 'Registry',
+    registry = host.lookup_url('http://127.0.0.1:6000/regis', 'Registry',
                                's4_registry')
     remote_host = registry.lookup('host1')
-
-    server = remote_host.spawn('server', 's4_clientb/Server')
-    z = server.add(6, 7)
-    print z
-    server.substract(6, 5)
-    t = server.add(8, 7)
-    print t
+    if remote_host is not None:
+        if not remote_host.has_actor('server'):
+            server = remote_host.spawn('server', 's4_clientb/Server')
+        else:
+            server = remote_host.lookup('server')
+        z = server.add(6, 7)
+        print z
+        server.substract(6, 5)
+        t = server.add(8, 7)
+        print t
 
     try:
         registry.unbind('None')

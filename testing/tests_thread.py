@@ -222,7 +222,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(self.h.actor.tell, ['attach_interval',
                                              'detach_interval', 'hello',
                                              'stop_actor', 'stop'])
-        self.assertEqual(self.h.actor.ask, ['say_hello'])
+        self.assertEqual(self.h.actor.ask, ['say_hello', 'has_actor'])
         self.assertEqual(self.h.actor.ask_ref, ['spawn', 'interval', 'lookup',
                                                 'lookup_url', 'later'])
         with self.assertRaises(Exception):

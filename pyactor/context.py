@@ -124,7 +124,8 @@ class Host(object):
     :param str. url: URL that identifies the host and where to find it.
     '''
     _tell = ['attach_interval', 'detach_interval', 'hello', 'stop_actor']
-    _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello', 'interval', 'later']
+    _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello', 'interval', 'later',
+            'has_actor']
     _ref = ['spawn', 'lookup', 'lookup_url', 'interval', 'later']
 
     def __init__(self, url):
@@ -232,6 +233,16 @@ class Host(object):
             obj.proxy = Proxy(new_actor)
             self.launch_actor(url, new_actor)
             return Proxy(new_actor)
+
+    def has_actor(self, aid):
+        '''
+        Checks if the given id is used in the host by some actor.
+
+        :param str. aid: identifier of the actor to check.
+        :return: True if the id is used within the host.
+        '''
+        url = '%s://%s/%s' % (self.transport, self.host_url.netloc, aid)
+        return url in self.actors.keys()
 
     def lookup(self, aid):
         '''
@@ -487,7 +498,12 @@ class Host(object):
         proxies for actors from another host.
         '''
         if isinstance(param, ProxyRef):
-            return self.lookup_url(param.url, param.klass, param.module)
+            try:
+                return self.lookup_url(param.url, param.klass, param.module)
+            except HostError:
+                print "Can't lookup for the actor received with the call. \
+                    It does not exist or the url is unreachable.", param
+                raise HostError
         elif isinstance(param, list):
             return [self.loads(elem) for elem in param]
         elif isinstance(param, dict):

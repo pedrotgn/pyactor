@@ -110,10 +110,17 @@ And ``pyactor\examples\Remote\s4_clientb.py``:
 .. literalinclude:: ../examples/Remote/s4_clientb.py
     :linenos:
 
-Here we have a registry where Servers can be bind. The registry module starts an
-actor which is the registry itself. The first client, binds a server to the
-registry and waits for queries. The second one, uses the registry to find the
-first one and send work to its server.
+In this example we have a registry where Servers can be bind. The registry
+module starts an actor which is the registry itself to which servers can be
+bind and clients look for servers. The first client, binds a server to the
+registry and waits for queries to that server. The second one, uses the registry
+to find the first one and spawn a server instance on it to afterwards send work
+to it.
+
+In order to execute the second client repeatedly without having to restart
+all the processes, before spawning the server remotely, it checks if the first
+client has already the server by using the method ``has_actor`` on the
+remote_host.
 
 
 

@@ -27,7 +27,10 @@ class Registry(object):
             raise NotFound()
 
     def lookup(self, name):
-        return self.actors[name]
+        if name in self.actors:
+            return self.actors[name]
+        else:
+            return None
 
     def get_all(self):
         return self.actors.values()
@@ -35,10 +38,10 @@ class Registry(object):
 
 if __name__ == "__main__":
     set_context()
-    host = create_host('http://127.0.0.1:1277/')
+    host = create_host('http://127.0.0.1:6000/')
 
     registry = host.spawn('regis', Registry)
 
-    print 'host listening at port 1277'
+    print 'host listening at port 6000'
 
     serve_forever()

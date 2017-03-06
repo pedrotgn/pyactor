@@ -10,7 +10,7 @@ from actor import Actor, Channel
 
 class RPCDispatcher(Actor):
     '''
-    This is the actor that will manage the sends and recieves of remote
+    This is the actor that will manage the sends and receives of remote
     queries with other hosts. Each host has one, configured depending on
     the scheme specified when created.
     '''
@@ -29,7 +29,7 @@ class RPCDispatcher(Actor):
         self.source.start()
         self.running = True
         self.channel = Channel()
-        self.pending = {}   # Sended to another host
+        self.pending = {}   # Sent to another host
         self.executing = {}  # Waiting for the response in this server
         self.tell = ['stop']
         self.ask = []
@@ -68,7 +68,7 @@ class RPCDispatcher(Actor):
                     except Exception:
                         print (('Error sending a response to %r.'
                                % (self.executing[msg[RPC_ID]])) +
-                               ' Receiver is offline?')
+                               ' Is the receiver offline?')
                         del self.executing[msg[RPC_ID]]
                 elif msg[TYPE] == FUTURE:
                     rpc_id = msg[RPC_ID]

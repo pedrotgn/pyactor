@@ -8,6 +8,9 @@ from gevent import getcurrent
 from threading import current_thread
 
 
+from pyactor.exceptions import HostError
+
+
 RABBITU = "guest"
 RABBITP = "guest"
 
@@ -76,8 +79,13 @@ def get_lock():
 def ref_l(f):
     def wrap_ref_l(*args):
         new_args = list(args)
-        new_args[0][PARAMS] = get_host().loads(list(args[0][PARAMS]))
-        return f(*new_args)
+        try:
+            new_args[0][PARAMS] = get_host().loads(list(args[0][PARAMS]))
+            return f(*new_args)
+        except HostError:
+            pass
+            # If there is a problem deserializing the params, the method is not
+            # executed.
     return wrap_ref_l
 
 

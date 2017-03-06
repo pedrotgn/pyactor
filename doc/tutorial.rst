@@ -398,7 +398,17 @@ blocked with another job (an I/O call or a synchronous call to another actor).
 To make one method execute parallel, you need to specify it in the class attribute
 _parallel, which is a list. The method must also be in one of the lists _tell or
 _ask. The methods with this tag will be executed in new threads so their execution
-do not interfere with other queries.
+do not interfere with other queries. That is, the actor can attend other queries
+while executing the parallel method.
+
+As you could think, executing methods of the same actor at the same time can compromise
+the integrity of data. PyActor ensures that only one thread is executing on an
+actor at the same time, allowing other threads to execute when the one executing
+is blocked with some call. This prevents two threads from accessing the same data
+at a time, but is up to the programmer to prevent the data to change during the
+execution of a method if that is not intended, as a method could modify a property
+of the actor while a parallel, that operates with that data, is blocked, leading
+to an inconsistency.
 
 In this example we have three classes: File, Web and Workload. File represents a
 server that serve the download of files. Simulates the work with a sleep.
