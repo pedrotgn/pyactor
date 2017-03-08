@@ -212,7 +212,6 @@ class TestBasic(unittest.TestCase):
 
     def tearDown(self):
         shutdown()
-        pyactor.context.core_type = None
         # sleep(1)
         sys.stdout = self.bu
 

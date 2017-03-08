@@ -532,7 +532,7 @@ class Host(object):
 
 def shutdown(url=None):
     '''
-    Stops the Host passed by parameter or all af them if none is
+    Stops the Host passed by parameter or all of them if none is
     specified, stopping at the same time all its actors.
     Should be called at the end of its usage, to finish correctly
     all the connections and threads.
@@ -540,6 +540,8 @@ def shutdown(url=None):
     if url is None:
         for host in util.hosts.values():
             host.shutdown()
+        global core_type
+        core_type = None
     else:
         host = util.hosts[url]
         host.shutdown()
