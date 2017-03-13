@@ -539,7 +539,7 @@ def interval(host, time, actor, method, *args, **kwargs):
     call = getattr(actor, method, None)
     if not callable(call):
         raise IntervalError("The actor %s does not have the method %s."
-            % (actor.get_id(), method))
+                            % (actor.get_id(), method))
     if call.__class__.__name__ in ["TellWrapper", "TellRefWrapper"]:
         # If the method is a normal tell, the interval thread can send
         # the calls normally.

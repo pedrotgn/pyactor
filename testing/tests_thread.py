@@ -257,8 +257,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(str(b1.get_host()), str(self.h))
         self.assertNotEqual(id(b1.get_host()), id(self.h))
 
-        self.assertEqual(b1.check_ref([{'e': self.e1}])[0]['e'],
-                            self.e1)
+        self.assertEqual(b1.check_ref([{'e': self.e1}])[0]['e'], self.e1)
         future = b1.check_ref(self.e1, future=True)
         self.assertEqual(future.result(), self.e1)
 
