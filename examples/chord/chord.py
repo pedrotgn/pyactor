@@ -141,11 +141,12 @@ class Node(object):
 
     def init_finger_table(self, n1):
         try:
-            self.finger[0] = n1.find_successor(self.start[0], timeout=5)
-            self.predecessor = self.finger[0].get_predecessor(timeout=2)
+            self.finger[0] = n1.find_successor(self.start[0], timeout=10)
+            self.predecessor = self.finger[0].get_predecessor(timeout=10)
         except SuccessorError, e:
             raise e
         except TimeoutError, e:
+            print e
             raise e
         else:
             # neighbor_finger = self.finger[0].get_finger(timeout=2)
@@ -191,7 +192,7 @@ class Node(object):
             if(self.currentFinger <= 0 or self.currentFinger >= k):
                 self.currentFinger = 1
             self.finger[self.currentFinger] = self.proxy.find_successor(
-                self.start[self.currentFinger], timeout=5)
+                self.start[self.currentFinger], timeout=10)
         except Exception:
             pass
         else:

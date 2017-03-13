@@ -141,7 +141,7 @@ class TestBasic(unittest.TestCase):
         b1 = host2.spawn('bot1', Bot)
         self.assertEqual(b1.get_name(), 'bot1')
         self.assertEqual(str(b1.get_proxy("h")), str(b1))
-        self.assertNotEqual(b1.get_proxy("y"), b1)
+        self.assertEqual(b1.get_proxy("y"), b1)
         self.assertEqual(str(b1.get_host()), str(host2))
         self.assertNotEqual(id(b1.get_host()), id(host2))
 

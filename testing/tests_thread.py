@@ -97,8 +97,8 @@ class Counter:
     _tell = ['count', 'init_start', 'stop_interval']
 
     def init_start(self):
-        self.interval1 = self.host.interval(1, self.proxy, "count")
-        self.host.later(4, self.proxy, "stop_interval")
+        self.interval1 = interval(self.host, 1, self.proxy, "count")
+        later(4, self.proxy, "stop_interval")
 
     def stop_interval(self):
         self.interval1.set()
@@ -222,8 +222,8 @@ class TestBasic(unittest.TestCase):
                                              'detach_interval', 'hello',
                                              'stop_actor', 'stop'])
         self.assertEqual(self.h.actor.ask, ['say_hello', 'has_actor'])
-        self.assertEqual(self.h.actor.ask_ref, ['spawn', 'interval', 'lookup',
-                                                'lookup_url', 'later'])
+        self.assertEqual(self.h.actor.ask_ref, ['spawn', 'lookup',
+                                                'lookup_url'])
         with self.assertRaises(Exception):
             h2 = create_host()
         self.assertEqual(self.h.actor._obj, get_host())
@@ -253,14 +253,14 @@ class TestBasic(unittest.TestCase):
         b1 = self.h.spawn('bot1', Bot)
         self.assertEqual(b1.get_name(), 'bot1')
         self.assertEqual(str(b1.get_proxy("h")), str(b1))
-        self.assertNotEqual(b1.get_proxy("y"), b1)
+        self.assertEqual(b1.get_proxy("y"), b1)
         self.assertEqual(str(b1.get_host()), str(self.h))
         self.assertNotEqual(id(b1.get_host()), id(self.h))
 
-        self.assertNotEqual(b1.check_ref([{'e': self.e1}])[0]['e'],
+        self.assertEqual(b1.check_ref([{'e': self.e1}])[0]['e'],
                             self.e1)
         future = b1.check_ref(self.e1, future=True)
-        self.assertNotEqual(future.result(), self.e1)
+        self.assertEqual(future.result(), self.e1)
 
     def test_3queries(self):
         global out
@@ -320,7 +320,7 @@ class TestBasic(unittest.TestCase):
         e = self.h.lookup('echo1')
         self.assertEqual(e.actor.klass.__name__, 'Echo')
         self.assertEqual(e.actor, self.e1.actor)  # !!!!!
-        self.assertNotEqual(e, self.e1)
+        self.assertEqual(e, self.e1)
         e.echo('hello')
         sleep(2)
         self.assertEqual(out, 'hello')
@@ -331,7 +331,7 @@ class TestBasic(unittest.TestCase):
         ee = self.h.lookup_url('local://local:6666/echo1', Echo)
         self.assertEqual(ee.actor.klass.__name__, 'Echo')
         self.assertEqual(ee.actor, self.e1.actor)
-        self.assertNotEqual(ee, self.e1)
+        self.assertEqual(ee, self.e1)
         ee.echo('hello')
         sleep(1)
         self.assertEqual(out, 'hello')

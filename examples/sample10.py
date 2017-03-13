@@ -2,7 +2,8 @@
 Intervals sample
 @author: Daniel Barcelona Pons
 '''
-from pyactor.context import set_context, create_host, sleep, shutdown
+from pyactor.context import set_context, create_host, sleep, shutdown, \
+    interval, later
 
 
 class Registry(object):
@@ -11,22 +12,28 @@ class Registry(object):
     # _ref = ['hello']
 
     def init_start(self):
-        self.interval1 = self.host.interval(1, self.proxy, "hello", "you")
-        self.host.later(10, self.proxy, "stop_interval")
+        self.interval1 = interval(self.host, 1, self.proxy, "hello", "you")
+        later(5, self.proxy, "stop_interval")
 
     def stop_interval(self):
         print "stopping interval"
         self.interval1.set()
 
     def hello(self, msg):
-        print 'Hello', msg
+        print self.id, 'Hello', msg
 
 
 if __name__ == "__main__":
+    N = 10   # 10000
+
     set_context()
     host = create_host()
-    registry = host.spawn('1', Registry)
-    registry.init_start()
+    registry = list()
+    for i in xrange(0, N):
+        registry.append(host.spawn(str(i), Registry))
 
-    sleep(11)
+    for i in xrange(0, N):
+        registry[i].init_start()
+
+    sleep(8)
     shutdown()

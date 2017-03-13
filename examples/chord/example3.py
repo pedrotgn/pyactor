@@ -1,4 +1,5 @@
-from pyactor.context import set_context, create_host, sleep, serve_forever
+from pyactor.context import set_context, create_host, sleep, shutdown, \
+    interval
 
 from chord import Node
 
@@ -24,7 +25,7 @@ for i in range(len(nodes_h)):
     except Exception:
         raise
     else:
-        host.interval(0.5, nodes_h[i], "update")
+        interval(host, 0.5, nodes_h[i], "update")
 
 # Wait to give time to chord to fix its tables.
 sleep(5)
@@ -33,4 +34,4 @@ found = nodes_h[0].find_successor(40)
 print 'found', found.get_id()
 
 
-serve_forever()
+shutdown()

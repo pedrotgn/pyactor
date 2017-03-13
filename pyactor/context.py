@@ -87,7 +87,7 @@ def create_host(url="local://local:6666/host"):
     be the main host, which is the one that will host the queries from
     the main function.
     Of course, every host must be initialized with a diferent URL(port).
-    Althoug that, more than one host should not be requiered for any real
+    Although that, more than one host should not be requiered for any real
     project.
 
     :param str. url: URL where to start and bind the host.
@@ -124,9 +124,8 @@ class Host(object):
     :param str. url: URL that identifies the host and where to find it.
     '''
     _tell = ['attach_interval', 'detach_interval', 'hello', 'stop_actor']
-    _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello', 'interval', 'later',
-            'has_actor']
-    _ref = ['spawn', 'lookup', 'lookup_url', 'interval', 'later']
+    _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello', 'has_actor']
+    _ref = ['spawn', 'lookup', 'lookup_url']
 
     def __init__(self, url):
         self.actors = {}
@@ -411,65 +410,6 @@ class Host(object):
         '''Deletes an interval event from the host registry.'''
         del self.intervals[interval_id]
 
-    def interval(self, time, actor, method, *args, **kwargs):
-        '''Creates an Event attached to the host for management that will
-        execute the *method* of the *actor* every *time* seconds.
-
-        See example in :ref:`sample_inter`
-
-        :param int time: seconds for the intervals.
-        :param Proxy actor: actor to which make the call every *time* seconds.
-        :param Str. method: method of the *actor* to be called.
-        :param list args: arguments for *method*.
-        :return: :class:`Event` instance of the interval.
-        '''
-        call = getattr(actor, method, None)
-        if not callable(call):
-            raise IntervalError("The actor %s does not have the method %s."
-                                % (actor.get_id(), method))
-        if call.__class__.__name__ in ["TellWrapper", "TellRefWrapper"]:
-            # If the method is a normal tell, the interval thread can send
-            # the calls normally.
-            # It it is a Ref Tell, the proxies in the args would be parsed
-            # during the call to this very method. So the call can be made
-            # as a normall Tell. The actor will do the loads normally on the
-            # receive as it has its methods marked as ref.
-            if call.__class__.__name__ is "TellRefWrapper":
-                call.__call__ = TellWrapper.__call__
-
-            return intervals.interval_host(self.proxy, time,
-                                           call, *args, **kwargs)
-        else:
-            raise IntervalError("The callable for the interval must be a tell \
-                                 method of the actor.")
-
-    def later(self, timeout, actor, method, *args, **kwargs):
-        '''
-        Sets a timer that will call the *method* of the *actor* past *timeout*
-        seconds.
-
-        See example in :ref:`sample_inter`
-
-        :param int timeout: seconds until the method is called.
-        :param Proxy actor: actor to which make the call after *time* seconds.
-        :param Str. method: method of the *actor* to be called.
-        :param list args: arguments for *method*.
-        :return: manager of the later (Timer in thread,
-            Greenlet in green_thread)
-        '''
-        call = getattr(actor, method, None)
-        if not callable(call):
-            raise IntervalError("later: The actor %s does not have the method \
-                                 %s." % (actor.get_id(), method))
-        if call.__class__.__name__ in ["TellWrapper", "TellRefWrapper"]:
-            # As with the interval, args have already been dumped.
-            if call.__class__.__name__ is "TellRefWrapper":
-                call.__call__ = TellWrapper.__call__
-            return intervals.later(timeout, call, *args, **kwargs)
-        else:
-            raise IntervalError("The callable for the later must be a tell \
-                                 method of the actor.")
-
     def dumps(self, param):
         '''
         Checks the parameters generating new proxy instances to avoid
@@ -580,6 +520,68 @@ def serve_forever():
         except Exception:
             pass
     print 'BYE!'
+
+
+def interval(host, time, actor, method, *args, **kwargs):
+    '''Creates an Event attached to the host for management that will
+    execute the *method* of the *actor* every *time* seconds.
+
+    See example in :ref:`sample_inter`
+
+    :param Proxy host: host that will manage the interval, commonly the
+        host of the actor.
+    :param int time: seconds for the intervals.
+    :param Proxy actor: actor to which make the call every *time* seconds.
+    :param Str. method: method of the *actor* to be called.
+    :param list args: arguments for *method*.
+    :return: :class:`Event` instance of the interval.
+    '''
+    call = getattr(actor, method, None)
+    if not callable(call):
+        raise IntervalError("The actor %s does not have the method %s."
+            % (actor.get_id(), method))
+    if call.__class__.__name__ in ["TellWrapper", "TellRefWrapper"]:
+        # If the method is a normal tell, the interval thread can send
+        # the calls normally.
+        # It it is a Ref Tell, the proxies in the args would be parsed
+        # during the call to this very method. So the call can be made
+        # as a normall Tell. The actor will do the loads normally on the
+        # receive as it has its methods marked as ref.
+        if call.__class__.__name__ is "TellRefWrapper":
+            call.__call__ = TellWrapper.__call__
+
+        return intervals.interval_host(host, time, call, *args, **kwargs)
+    else:
+        raise IntervalError("The callable for the interval must be a tell \
+            method of the actor.")
+
+
+def later(timeout, actor, method, *args, **kwargs):
+    '''
+    Sets a timer that will call the *method* of the *actor* past *timeout*
+    seconds.
+
+    See example in :ref:`sample_inter`
+
+    :param int timeout: seconds until the method is called.
+    :param Proxy actor: actor to which make the call after *time* seconds.
+    :param Str. method: method of the *actor* to be called.
+    :param list args: arguments for *method*.
+    :return: manager of the later (Timer in thread,
+        Greenlet in green_thread)
+    '''
+    call = getattr(actor, method, None)
+    if not callable(call):
+        raise IntervalError("later: The actor %s does not have the method \
+                             %s." % (actor.get_id(), method))
+    if call.__class__.__name__ in ["TellWrapper", "TellRefWrapper"]:
+        # As with the interval, args have already been dumped.
+        if call.__class__.__name__ is "TellRefWrapper":
+            call.__call__ = TellWrapper.__call__
+        return intervals.later(timeout, call, *args, **kwargs)
+    else:
+        raise IntervalError("The callable for the later must be a tell \
+                             method of the actor.")
 
 
 def sleep(seconds):

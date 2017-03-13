@@ -88,6 +88,9 @@ class ActorRef(object):
     def send_response(self, result, msg):
         raise NotImplementedError()
 
+    def __str__(self):
+        return 'Actor %s (%s)' % (self.url, self.klass.__name__)
+
     def __repr__(self):
         return 'Actor(url=%s, class=%s)' % (self.url, self.klass)
 

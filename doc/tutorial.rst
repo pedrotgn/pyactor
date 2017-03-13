@@ -379,6 +379,12 @@ problems, as the proxies are not shared::
 Also seen in the example, Echo has methods that receive a proxy, in this methods
 you can see examples of passing proxies even inside lists or dictionaries.
 
+Although the proxies are different, you may yet compare them directly so when
+using ``p1 == p2`` on two proxies, the comparison will be done on the actors
+that they represent and not on the proxy instance itself.
+See the basic examples on ``proxies_test.py``.
+
+
 .. _sample8:
 
 Sample 8 - Parallel
@@ -461,9 +467,10 @@ an action. This is the full code of this sample, which you can find and test in
 .. literalinclude:: ../examples/sample10.py
     :linenos:
 
-To generate intervals, we use the methods :meth:`Host.interval` and
-:meth:`Host.later` that can be accessed from an actor with the `self.host`. The
-class (actor) will call the first one giving
+To generate intervals, we use the functions :func:`context.interval` and
+:func:`context.later` that can be imported if needed. The
+class (actor) will call the first one giving firstly the proxy of the host that
+will manage the interval, accessible from within the actor by `self.host`; next,
 the interval time and the proxy to the actor to which make the periodic call
 (that can be itself with `self.proxy` or another actor) as
 well as the name of the method in that actor that will be called.
@@ -472,12 +479,13 @@ it will raise and exception.
 
 This function returns an interval instance
 that we have to keep in order to stop it later by calling *.set()*.
-In this example we use :meth:`Host.later` to set a timer that will stop the
+
+In this example we use :func:`context.later` to set a timer that will stop the
 interval after a certain time. This method works similar to the other. You
 specify by parameter the actor and the method to be executed after that time,
 and only accepts methods of the tell type.
 
-If the method requires arguments, those have to be after the tree base. In the
+If the method requires arguments, those have to be after the three base. In the
 example, hello needs one argument and it is passed as::
 
     self.host.interval(1, self.proxy, "hello", "you")

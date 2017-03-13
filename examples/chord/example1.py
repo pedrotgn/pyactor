@@ -1,5 +1,5 @@
 from pyactor.context import set_context, create_host, sleep
-from pyactor.context import serve_forever
+from pyactor.context import serve_forever, interval
 
 from chord import Node
 
@@ -25,12 +25,12 @@ for i in range(len(nodes)):
             print 'Node %s fails' % str(i)
     except Exception:
         continue
-    host.interval(1, nodes_h[i], "update")
+    interval(host, 1, nodes_h[i], "update")
 
-host.interval(30, nodes_h[0], "show")
+interval(host, 30, nodes_h[0], "show")
 sleep(1)
-host.interval(30, nodes_h[5], "show")
+interval(host, 30, nodes_h[5], "show")
 sleep(1)
-host.interval(30, nodes_h[9], "show")
+interval(host, 30, nodes_h[9], "show")
 
 serve_forever()

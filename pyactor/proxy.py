@@ -57,6 +57,22 @@ class Proxy(object):
                (self.actor, self.actor.tell, self.actor.tell_ref,
                 self.actor.ask, self.actor.ask_ref)
 
+    def __str__(self):
+        return '%s\'s proxy' % (self.actor,)
+
+    def __eq__(self, other):
+        if isinstance(other, self.__class__):
+            return self.actor.url == other.actor.url
+        return NotImplemented
+
+    def __ne__(self, other):
+        if isinstance(other, self.__class__):
+            return not self == other
+        return NotImplemented
+
+    def __hash__(self):
+        return hash(self.actor)
+
     def get_id(self):
         return self.actor.id
 
