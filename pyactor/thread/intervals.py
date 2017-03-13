@@ -41,7 +41,6 @@ def interval_host(host, time, f, *args, **kwargs):
     '''
     def wrap(*args, **kwargs):
         thread = currentThread()
-        #thread.getName()
         args = list(args)
         stop_event = args[0]
         del args[0]
