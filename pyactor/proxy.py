@@ -74,9 +74,20 @@ class Proxy(object):
         return hash(self.actor)
 
     def get_id(self):
-        return self.actor.id
+        '''
+        :return: the id of the actor that this proxy holds.
+        :raises: Exception if the proxy holds a remote actor. Use URL.
+        '''
+        try:
+            return self.actor.id
+        except AttributeError:
+            raise Exception("This proxy holds a remote actor." +
+                            " Use the url instead of the id.")
 
     def get_url(self):
+        '''
+        :return: the URL of the actor that this proxy holds.
+        '''
         return self.actor.url
 
 

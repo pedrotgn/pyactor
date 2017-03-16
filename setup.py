@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pyactor',
-    version='1.2.0',
+    version='1.2.2',
     author='Pedro Garcia Lopez & Daniel Barcelona Pons',
     author_email='pedro.garcia@urv.cat, daniel.barcelona@urv.cat',
     packages=find_packages(),
