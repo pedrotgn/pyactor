@@ -311,7 +311,8 @@ code of this sample, which you can find and test in
 
 This sample demonstrates how to get references to an actor from the actor
 itself. With ``self.id`` we obtain the string that identifies the actor in the
-host it is located. Then, with ``self.proxy`` you can get a reference to a proxy
+host it is located, ``self.url`` contains its network location. Then, with
+``self.proxy`` you can get a reference to a proxy
 managing the actor so you can give it to another function, class or module in a
 safe and easy way.
 
@@ -324,6 +325,9 @@ so the Echo can call one of Bot's methods in order to get its id. Also, the
 :meth:`set_echo` method, in this case, does not receive the Echo by parameter.
 It uses the inside reference it already has to call a :meth:`~.lookup` to the
 host and get the wanted reference.
+
+Also notice that every proxy has the methods ``get_id`` and ``get_url`` already
+defined, so you can get the actor's information directly from the proxy.
 
 The correct output for this sample is the following::
 

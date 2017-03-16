@@ -76,6 +76,9 @@ class Proxy(object):
     def get_id(self):
         return self.actor.id
 
+    def get_url(self):
+        return self.actor.url
+
 
 class TellWrapper(object):
     '''

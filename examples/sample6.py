@@ -9,12 +9,13 @@ class Echo(object):
     _ask = []
 
     def echo(self, msg, sender):
-        print msg, 'from:', sender.get_name()
+        print msg, 'from:', sender.get_name(), 'at', sender.get_net()
+        # print sender.get_id(), sender.get_url()
 
 
 class Bot(object):
     _tell = ['set_echo', 'say_hi']
-    _ask = ['get_name']
+    _ask = ['get_name', 'get_net']
 
     def __init__(self):
         self.greetings = ['hello', 'hi', 'hey', 'what`s up?']
@@ -24,6 +25,9 @@ class Bot(object):
 
     def get_name(self):
         return self.id
+
+    def get_net(self):
+        return self.url
 
     def say_hi(self):
         for salute in self.greetings:

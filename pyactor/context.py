@@ -216,6 +216,7 @@ class Host(object):
         else:
             obj = klass_(*param)
             obj.id = aid
+            obj.url = url
             if self.running:
                 obj.host = self.proxy
             # else:
