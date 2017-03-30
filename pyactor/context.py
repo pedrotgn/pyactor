@@ -463,10 +463,10 @@ class Host(object):
         if self.ppool is None:
             if core_type == 'thread':
                 from multiprocessing.pool import ThreadPool
-                self.ppool = ThreadPool(50)
+                self.ppool = ThreadPool(500)
             else:
                 from gevent.pool import Pool
-                self.ppool = Pool(50)
+                self.ppool = Pool(500)
         # Add the new task to the pool
         self.ppool.apply_async(function, *params)
 

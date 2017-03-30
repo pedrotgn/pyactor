@@ -187,7 +187,7 @@ class Workload(object):
         global cnt
         for i in range(10):
             try:
-                print self.server.list_files()
+                print self.server.list_files(timeout=0)
             except TimeoutError as e:
                 cnt = 1000
                 raise TimeoutError
@@ -309,7 +309,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(cnt, 5)
 
         with self.assertRaises(TimeoutError):
-            self.e1.say_something_slow()
+            self.e1.say_something_slow(timeout=1)
 
         with self.assertRaises(Exception):
             ask.uppercase()

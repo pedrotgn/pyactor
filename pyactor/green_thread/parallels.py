@@ -84,7 +84,6 @@ class ParallelAskWraper(object):
         args = tuple(args)
         self.host = get_host()
 
-        # USE A POOL !!!!!!
         param = (self.__method, rpc_id, args, kwargs)
         # t = spawn(self.invoke, *param)  # New thread
 

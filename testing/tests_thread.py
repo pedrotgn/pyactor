@@ -309,7 +309,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(cnt, 5)
 
         with self.assertRaises(TimeoutError):
-            self.e1.say_something_slow()
+            self.e1.say_something_slow(timeout=1)
 
         with self.assertRaises(Exception):
             ask.uppercase()
@@ -349,7 +349,7 @@ class TestBasic(unittest.TestCase):
             self.h.spawn('bot', Bot)
         # Now the actor is not running, invoking a method should raise Timeout.
         with self.assertRaises(TimeoutError):
-            self.e1.say_something()
+            self.e1.say_something(timeout=1)
         # The actor should not be alive.
         self.assertFalse(self.e1.actor.is_alive())
 

@@ -118,9 +118,9 @@ class AskWrapper(object):
     Wrapper for Ask type queries to the proxy. Calling it blocks the
     execution until the result is returned or timeout is reached. You
     can add the tagged parameter "timeout" to change the time limit to
-    wait. It is also possible to specify "future=True" to get an instant
-    response with a :class:`Future` object with which one you can
-    manage the result reply.
+    wait. Default timeout is set to 10s. It is also possible to specify
+    "future=True" to get an instant response with a :class:`Future`
+    object with which one you can manage the result reply.
 
     :param Channel channel: communication way for the query.
     :param str. method: name of the method this query is gonna invoke.
@@ -137,7 +137,7 @@ class AskWrapper(object):
         self.__lock = get_lock()
         if not future:
             self.__channel = actorm.Channel()
-            timeout = kwargs['timeout'] if 'timeout' in kwargs.keys() else 1
+            timeout = kwargs['timeout'] if 'timeout' in kwargs.keys() else 10
             #  SENDING MESSAGE ASK
             # msg = AskRequest(ASK, self._method, args, self.__channel,
             #                  self.target)

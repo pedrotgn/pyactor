@@ -263,7 +263,7 @@ the tag `timeout=X` in the call, in seconds. ::
 
     x = e1.say_something(timeout=3)
 
-The default timeout is 1 second. To wait indefinitely, just set it to `None`.
+The default timeout is 10 seconds. To wait indefinitely, just set it to `None`.
 
 The correct output for this sample is the following::
 
