@@ -1,7 +1,7 @@
 import uuid
 from threading import Condition, Thread
 
-from pyactor.util import get_current, get_host, RPC_ID, RESULT
+from pyactor.util import get_current, get_host, get_lock, RPC_ID, RESULT
 from pyactor.util import TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
 from pyactor.exceptions import TimeoutError, FutureError
 
@@ -29,7 +29,6 @@ class Future(object):
         self.__actor_channel = future_ref[CHANNEL]
         self.__target = future_ref[TO]
         self.__channel = manager_channel
-        self.__lock = future_ref['LOCK']
         self.__id = fid
 
     def _invoke_callbacks(self):
@@ -103,11 +102,12 @@ class Future(object):
             if self.__state == FINISHED:
                 return self.__get__result()
 
-            if self.__lock is not None:
-                self.__lock.release()
+            lock = get_lock()
+            if lock is not None:
+                lock.release()
             self.__condition.wait(timeout)
-            if self.__lock is not None:
-                self.__lock.acquire()
+            if lock is not None:
+                lock.acquire()
 
             if self.__state == FINISHED:
                 return self.__get__result()
@@ -129,11 +129,12 @@ class Future(object):
             if self.__state == FINISHED:
                 return self.__exception
 
-            if self.__lock is not None:
-                self.__lock.release()
+            lock = get_lock()
+            if lock is not None:
+                lock.release()
             self.__condition.wait(timeout)
-            if self.__lock is not None:
-                self.__lock.acquire()
+            if lock is not None:
+                lock.acquire()
 
             if self.__state == FINISHED:
                 return self.__exception

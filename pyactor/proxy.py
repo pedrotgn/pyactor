@@ -71,7 +71,7 @@ class Proxy(object):
         return NotImplemented
 
     def __hash__(self):
-        return hash(self.actor)
+        return hash(self.actor.url)
 
     def get_id(self):
         '''

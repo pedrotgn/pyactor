@@ -22,6 +22,7 @@ class Echo(object):
 class Bot(object):
     _tell = ['set_echo', 'ping', 'pong']
     _ask = []
+    _ref = ['ping']
 
     def set_echo(self):
         self.echo = self.host.lookup('echo1')

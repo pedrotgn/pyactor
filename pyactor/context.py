@@ -362,6 +362,8 @@ class Host(object):
                                     " not a class.")
                 remote_actor = actor.ActorRef(url, klass_, dispatcher.channel)
                 return Proxy(remote_actor)
+            except HostError:
+                raise
             except Exception:
                 raise HostError("ERROR looking for the actor on another " +
                                 "server. Hosts must " +
