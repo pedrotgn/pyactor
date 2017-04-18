@@ -431,6 +431,8 @@ class Host(object):
             for key in new_dict.keys():
                 new_dict[key] = self.dumps(new_dict[key])
             return new_dict
+        elif isinstance(param, tuple):
+            return tuple([self.dumps(elem) for elem in param])
         else:
             return param
 
@@ -449,6 +451,8 @@ class Host(object):
                 raise HostError
         elif isinstance(param, list):
             return [self.loads(elem) for elem in param]
+        elif isinstance(param, tuple):
+            return tuple([self.loads(elem) for elem in param])
         elif isinstance(param, dict):
             new_dict = param
             for key in new_dict.keys():

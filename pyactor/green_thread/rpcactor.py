@@ -65,10 +65,9 @@ class RPCDispatcher(Actor):
                             sink = self.get_sink(self.executing[msg[RPC_ID]])
                             sink.send(msg)
                             del self.executing[msg[RPC_ID]]
-                    except Exception:
+                    except Exception, e:
                         print (('Error sending a response to %r.'
-                               % (self.executing[msg[RPC_ID]])) +
-                               ' Is the receiver offline?')
+                               % (self.executing[msg[RPC_ID]])) + str(e))
                         del self.executing[msg[RPC_ID]]
                 elif msg[TYPE] == FUTURE:
                     rpc_id = msg[RPC_ID]
