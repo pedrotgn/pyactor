@@ -71,9 +71,6 @@ class Bot:
     def multiping(self, bot=None):
         future = self.echo.say_something(future=True)
         # print 'pinging..'
-        if bot is not None:
-            future.add_callback('pong', bot)
-            future.add_callback('pong', bot)
         future.add_callback('pong')
         sleep(1)
         # print 'late callback:'
@@ -306,7 +303,7 @@ class TestBasic(unittest.TestCase):
         bot.multiping(bot2)
         sleep(2)
         self.assertEqual(out, 'something')
-        self.assertEqual(cnt, 5)
+        self.assertEqual(cnt, 3)
 
         with self.assertRaises(TimeoutError):
             self.e1.say_something_slow(timeout=1)

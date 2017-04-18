@@ -58,7 +58,7 @@ class Future(object):
         else:
             return self.__result
 
-    def add_callback(self, method, actor=None):
+    def add_callback(self, method):
         """
         Attaches a mehtod that will be called when the future finishes.
 
@@ -68,24 +68,25 @@ class Future(object):
             result though `future.:meth:`result()``. If the future has
             already completed, then the callable will be called
             immediately.
-        :param actor: The actor (its proxy) that has the method to call.
-            If none specified, it will be the same that calls this
-            method.
+
+        .. note:: This functionallity only works when called from an actor,
+            specifying a method from the same actor.
         """
-        if actor is not None:
-            from_actor = actor.actor
+        from_actor = get_current()
+        if from_actor is not None:
+            callback = (method, from_actor.channel, from_actor.url)
+            with self.__condition:
+                if self.__state is not FINISHED:
+                    self.__callbacks.append(callback)
+                    return
+            # Invoke the callback directly
+            # msg = TellRequest(TELL, method, [self], from_actor.url)
+            msg = {TYPE: TELL, METHOD: method, PARAMS: [self],
+                   TO: from_actor.url}
+            from_actor.channel.send(msg)
         else:
-            from_actor = get_current()
-        callback = (method, from_actor.channel, from_actor.url)
-        with self.__condition:
-            if self.__state is not FINISHED:
-                self.__callbacks.append(callback)
-                return
-        # Invoke the callback directly
-        # msg = TellRequest(TELL, method, [self], from_actor.url)
-        msg = {TYPE: TELL, METHOD: method, PARAMS: [self],
-               TO: from_actor.url}
-        from_actor.channel.send(msg)
+            raise FutureError("add_callback only works when called " +
+                              "from inside an actor")
 
     def result(self, timeout=None):
         """Returns the result of the call that the future represents.

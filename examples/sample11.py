@@ -27,12 +27,9 @@ class Bot(object):
     def set_echo(self):
         self.echo = self.host.lookup('echo1')
 
-    def ping(self, bot=None):
+    def ping(self):
         future = self.echo.say_something(future=True)
         print 'pinging..'
-        if bot is not None:
-            future.add_callback('pong', bot)
-            future.add_callback('pong', bot)
         future.add_callback('pong')
         sleep(1)
         print 'late callback:'
@@ -51,7 +48,7 @@ if __name__ == "__main__":
     bot = h.spawn('bot', Bot)
     bot2 = h.spawn('bot2', Bot)
     bot.set_echo()
-    bot.ping(bot2)
+    bot.ping()
 
     sleep(3)
 

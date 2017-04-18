@@ -72,9 +72,6 @@ class Bot(object):
     def multiping(self, bot=None):
         future = self.echo.say_something(future=True)
         # print 'pinging..'
-        if bot is not None:
-            future.add_callback('pong', bot)
-            future.add_callback('pong', bot)
         future.add_callback('pong')
         sleep(1)
         # print 'late callback:'

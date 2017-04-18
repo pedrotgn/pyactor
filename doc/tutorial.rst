@@ -219,12 +219,10 @@ calls it. You can add various callbacks to one future, and them will be called
 in order when the work is finished. Also, if you add a callback to a finished
 future, it will be directly invoked.
 
-It is also possible to add a callback to a method from another actor by passing
-also its proxy. See :ref:`sample11` for more deep detail in Futures.
+See :ref:`sample11` for a more complex sample on Futures.
 
-.. note:: :meth:`~.add_callback` needs to be called from an actor to another
-    actor, specifying a method of an actor (also the actor, if it is different
-    from the one that makes the addition).
+.. note:: :meth:`~.add_callback` needs to be called from inside an actor,
+    specifying a method of that same actor.
 
 .. note:: The method treated as a callback must have one unique parameter, which
     is the future. Inside the method you can use :meth:`~.result` to get the
@@ -512,7 +510,7 @@ code of this sample, which you can find and test in
     :linenos:
 
 Not much to explain here, just see it by yourself. The example is like Sample 3,
-but here we set various callbacks and some to another actor.
+but here we set various callbacks and use more of the methods futures provide.
 
 Also shows the usage of the consulting methods of futures: :meth:`~.done`,
 :meth:`~.result`, :meth:`~.exception`.
@@ -525,7 +523,8 @@ Change between this lines::
 to check the raising of exceptions.
 
 Finally, note that the only argument for :meth:`~.result` (also for
-:meth:`~.exception`) is the timeout: the time, in seconds, to wait for a result.
+:meth:`~.exception`) is the timeout: the time, in seconds, to wait for a result
+before raising an error.
 
 
 .. _sample1b:
