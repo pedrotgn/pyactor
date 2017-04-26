@@ -40,7 +40,7 @@ class Bot(object):
     _tell = ['set_echo', 'ping', 'pong', 'multiping']
     _ask = ['get_name', 'get_proxy', 'get_host', 'get_echo', 'get_echo_ref',
             'check_ref', 'get_real_host']
-    _ref = ['get_name', 'set_echo', 'get_proxy', 'get_host', 'get_echo_ref',
+    _ref = ['set_echo', 'get_proxy', 'get_host', 'get_echo_ref',
             'check_ref', 'multiping']
 
     def get_name(self):

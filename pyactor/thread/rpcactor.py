@@ -65,8 +65,12 @@ class RPCDispatcher(Actor):
                             sink = self.get_sink(self.executing[msg[RPC_ID]])
                             sink.send(msg)
                             del self.executing[msg[RPC_ID]]
+                    except TypeError as p:
+                        print ("Pickle ERR: impossible to marshall a return." +
+                               " Returning a Proxy without the method in " +
+                               "_ref? %s" % p)
                     except Exception, e:
-                        print (('Error sending a response to %r.'
+                        print (('Error sending a response to %r. '
                                % (self.executing[msg[RPC_ID]])) + str(e))
                         del self.executing[msg[RPC_ID]]
                 elif msg[TYPE] == FUTURE:
@@ -75,6 +79,9 @@ class RPCDispatcher(Actor):
                     del msg[CHANNEL]
                     msg[FROM] = self.url
                     self.get_sink(msg[TO]).send(msg)
+            except TypeError as p:
+                print ("Pickle ERROR: impossible to marshall a parameter." +
+                       "Passing a Proxy without the method in _ref? %s" % p)
             except Exception as e:
                 print e
 

@@ -63,8 +63,8 @@ class ActorRef(object):
             self.ask = copy(klass._ask)
 
         if hasattr(klass, '_ref'):
-            self.receive = ref_l(self.receive)
-            self.send_response = ref_d(self.send_response)
+            self.receive = ref_l(self, self.receive)
+            self.send_response = ref_d(self, self.send_response)
 
             self.tell_ref = list(set(self.tell) & set(klass._ref))
             self.ask_ref = list(set(self.ask) & set(klass._ref))
@@ -77,6 +77,10 @@ class ActorRef(object):
             self.tell_ref = []
 
         self.tell.append('stop')
+
+    @property
+    def _ref(self):
+        return list(set(self.tell_ref) | set(self.ask_ref))
 
     def receive(self, msg):
         raise NotImplementedError()

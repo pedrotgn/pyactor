@@ -76,11 +76,12 @@ def get_lock():
             return lock
 
 
-def ref_l(f):
+def ref_l(self, f):
     def wrap_ref_l(*args):
         new_args = list(args)
         try:
-            new_args[0][PARAMS] = get_host().loads(list(args[0][PARAMS]))
+            if (new_args[0][METHOD] in self._ref):
+                new_args[0][PARAMS] = get_host().loads(list(args[0][PARAMS]))
             return f(*new_args)
         except HostError:
             pass
@@ -89,9 +90,10 @@ def ref_l(f):
     return wrap_ref_l
 
 
-def ref_d(f):
+def ref_d(self, f):
     def wrap_ref_d(*args):
         new_args = list(args)
-        new_args[0] = get_host().dumps(args[0])
+        if (new_args[1][METHOD] in self._ref):
+            new_args[0] = get_host().dumps(args[0])
         return f(*new_args)
     return wrap_ref_d
