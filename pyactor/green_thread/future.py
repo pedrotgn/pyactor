@@ -5,8 +5,8 @@ from gevent.event import Event
 from pyactor.util import get_current, get_host, RPC_ID, RESULT
 from pyactor.util import TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
 from pyactor.exceptions import TimeoutError, FutureError
+from pyactor.green_thread import Channel
 
-from actor import Channel
 
 PENDING = 'PENDING'
 RUNNING = 'RUNNING'

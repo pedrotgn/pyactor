@@ -5,7 +5,7 @@ from pyactor.util import get_current, get_host, get_lock, RPC_ID, RESULT
 from pyactor.util import TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
 from pyactor.exceptions import TimeoutError, FutureError
 
-from actor import Channel
+from pyactor.thread import Channel
 
 PENDING = 'PENDING'
 RUNNING = 'RUNNING'

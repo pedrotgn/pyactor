@@ -1,42 +1,12 @@
 from copy import copy
 
 from gevent import spawn
-from gevent.queue import Queue
 
 from pyactor.util import ASK, TELL, FUTURE, TYPE, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
 from pyactor.util import ref_l, ref_d, get_host
-
-
-class Channel(Queue):
-    """
-    Channel is the main communication mechanism between actors. It is
-    actually a simple facade to the gevent.Queue class.
-    """
-    def __init__(self):
-        Queue.__init__(self)
-
-    def send(self, msg):
-        """
-        It sends a message to the current channel.
-
-        :param msg: The message sent to an actor. It is a dictionary
-            using the constants in util.py (:mod:`pyactor.util`).
-        """
-        self.put(msg)
-
-    def receive(self, timeout=None):
-        """
-        It receives a message from the channel, blocking the calling
-        thread until the response is received, or the timeout is
-        triggered.
-
-        :param int timeout: timeout to wait for messages. If none
-            provided it will block until a message arrives.
-        :return: returns a message sent to the channel. It is a
-            dictionary the constants in util.py (:mod:`pyactor.util`).
-        """
-        return self.get(timeout=timeout)
+from pyactor.green_thread import Channel
+from future import FutureManager
 
 
 class ActorRef(object):
@@ -115,6 +85,7 @@ class Actor(ActorRef):
         self._obj = obj
         self.id = obj.id
         self.running = True
+        self.future_manager = FutureManager()
 
     def __processQueue(self):
         while self.running:
@@ -143,6 +114,7 @@ class Actor(ActorRef):
         '''
         if msg[METHOD] == 'stop':
             self.running = False
+            self.future_manager.stop()
             # get_host().proxy.stop_actor(self.url)
         else:
             result = None

@@ -8,6 +8,9 @@ Actor
 
 :ref:`<See source> <tactor_source>`
 
+.. automodule:: pyactor.thread
+    :members:
+
 .. automodule:: pyactor.thread.actor
     :members:
 

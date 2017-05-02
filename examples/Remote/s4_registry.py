@@ -18,6 +18,7 @@ class Registry(object):
         self.actors = {}
 
     def bind(self, name, actor):
+        print "server registred", name
         self.actors[name] = actor
 
     def unbind(self, name):

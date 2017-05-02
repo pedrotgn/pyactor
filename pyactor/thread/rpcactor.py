@@ -5,7 +5,8 @@ from urlparse import urlparse
 from pyactor.util import TYPE, METHOD, TELL, ASK, CHANNEL, FROM, TO, RPC_ID
 from pyactor.util import FUTURE, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import get_host, get_current
-from actor import Actor, Channel
+from pyactor.thread import Channel
+from actor import Actor
 
 
 class RPCDispatcher(Actor):

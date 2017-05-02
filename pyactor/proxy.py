@@ -2,12 +2,12 @@ from Queue import Empty
 
 from util import ASK, TELL, TYPE, METHOD, PARAMS, CHANNEL, TO, RESULT
 from exceptions import TimeoutError, NotFoundError, HostError
-from util import get_host, get_lock
+from util import get_host, get_lock, get_current
 
 
 def set_actor(module_name):
     global actorm
-    actorm = __import__(module_name + '.actor', globals(), locals(),
+    actorm = __import__(module_name, globals(), locals(),
                         ['Channel'], -1)
     global future
     future = __import__(module_name + '.future', globals(), locals(),
@@ -163,7 +163,11 @@ class AskWrapper(object):
             future_ref = {METHOD: self._method, PARAMS: args,
                           CHANNEL: self._actor_channel, TO: self.target,
                           'LOCK': self.__lock}
-            return get_host().future_manager.new_future(future_ref)
+            manager = get_current()
+            if manager is None:
+                manager = get_host()
+            return manager.future_manager.new_future(future_ref)
+            # return get_host().future_manager.new_future(future_ref)
 
 
 class AskRefWrapper(AskWrapper):
@@ -183,7 +187,12 @@ class AskRefWrapper(AskWrapper):
             future_ref = {METHOD: self._method, PARAMS: args,
                           CHANNEL: self._actor_channel, TO: self.target,
                           'LOCK': self.__lock}
-            return get_host().future_manager.new_future(future_ref, ref=True)
+
+            manager = get_current()
+            if manager is None:
+                manager = get_host()
+            return manager.future_manager.new_future(future_ref, ref=True)
+            # return get_host().future_manager.new_future(future_ref, ref=True)
         else:
             result = super(AskRefWrapper, self).__call__(*new_args, **kwargs)
             return get_host().loads(result)

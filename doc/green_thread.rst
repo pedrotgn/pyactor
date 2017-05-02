@@ -8,6 +8,9 @@ Actor
 
 :ref:`<See source> <gactor_source>`
 
+.. automodule:: pyactor.green_thread
+    :members:
+
 .. automodule:: pyactor.green_thread.actor
     :members:
 
