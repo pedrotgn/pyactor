@@ -420,8 +420,8 @@ class Host(object):
         actors from another host.
         '''
         if isinstance(param, Proxy):
-            filename = sys.modules[param.actor.klass.__module__].__file__
-            module_name = os.path.splitext(os.path.basename(filename))[0]
+            module_name = param.actor.klass.__module__
+            filename = sys.modules[module_name].__file__
             return ProxyRef(param.actor.url, param.actor.klass.__name__,
                             module_name)
         elif isinstance(param, list):
