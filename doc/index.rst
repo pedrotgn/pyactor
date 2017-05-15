@@ -24,7 +24,7 @@ that uses RabbitMQ message system in a transparent way.
 
 For install instructions, see :ref:`install`.
 
-Visit the repository at ` GitHub <https://github.com/pedrotgn/pyactor>`_.
+Visit the repository at `GitHub <https://github.com/pedrotgn/pyactor>`_.
 
 See the :ref:`tuturial` for a complete review on the features of PyActor.
 And complete it with the :ref:`remote_tuto`.

@@ -150,7 +150,7 @@ should be always called at the end to do a clean exit::
 .. note:: As the host is an actor itself, it has sync and async methods and can
     receive remote queries if we use its proxy.
 
-..note:: As said, the host is also a living actor so it could receive queries
+.. note:: As said, the host is also a living actor so it could receive queries
     remotely in the future. This means you can send its reference to another
     host, which allows to spawn remotely (remote spawns require a bit more info,
     see the remote tutorial).

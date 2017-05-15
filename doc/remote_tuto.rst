@@ -81,7 +81,7 @@ In this case the server part only creates its host and makes it serve forever
 to get the server reference and spawn an actor in it. Then, sends the work to
 the actor. To spawn the actor, as the class of it is defined in the client
 module, the method uses a string to do define where is the Class so the server
-can import it. This string uses the form ``module/class_name``:
+can import it. This string uses the form ``module/class_name``::
 
     server = remote_host.spawn('server', 's3_client/Server')
 
