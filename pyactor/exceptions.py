@@ -4,6 +4,7 @@ PyActor exceptions.
 
 
 class TimeoutError(Exception):
+    """Wait time expired."""
     def __init__(self, meth='Not specified'):
         self.method = meth
 
@@ -12,6 +13,7 @@ class TimeoutError(Exception):
 
 
 class AlreadyExistsError(Exception):
+    """Actor ID repeated."""
     def __init__(self, value='Not specified'):
         self.value = value
 
@@ -20,6 +22,7 @@ class AlreadyExistsError(Exception):
 
 
 class NotFoundError(Exception):
+    """Actor not found in Host."""
     def __init__(self, value='Not specified'):
         self.value = value
 
@@ -28,11 +31,13 @@ class NotFoundError(Exception):
 
 
 class HostDownError(Exception):
+    """The Host is down."""
     def __str__(self):
         return ("The host is down.")
 
 
 class HostError(Exception):
+    """Some problem with the Host."""
     def __init__(self, value='Not specified'):
         self.value = value
 
@@ -41,6 +46,7 @@ class HostError(Exception):
 
 
 class FutureError(Exception):
+    """Some problem with the Future."""
     def __init__(self, value='Not specified'):
         self.value = value
 
@@ -49,6 +55,7 @@ class FutureError(Exception):
 
 
 class IntervalError(Exception):
+    """Some problem with the interval."""
     def __init__(self, value='Not specified'):
         self.value = value
 

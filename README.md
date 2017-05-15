@@ -107,4 +107,4 @@ Or directly get one of its actors:
 PyActor has many examples and a tutorial explaining all its functionalities.
 This examples can be found in the
 'pyactor/examples' directory of the project. They are also explained in the
-documentation as a tutorial, hosted at readthedocs.org which you can find above.
+documentation as a tutorial, hosted at [readthedocs.org](http://pyactor.readthedocs.io/en/master/?badge=master).

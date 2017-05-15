@@ -238,14 +238,8 @@ class FutureManager(object):
         return future
 
     def stop(self):
-        # self.running = False
         self.channel.send('stop')
         if self.t is not None:
             self.t.join()
             self.t = None
         self.futures = {}
-
-    # def clean_futures(self):
-    #     for key, future in self.futures.items():
-    #         if future.done():
-    #             del self.futures[key]

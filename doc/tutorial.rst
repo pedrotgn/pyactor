@@ -11,9 +11,9 @@ A quick guide on how to use the PyActor library through examples.
 Installation
 ================================================================================
 
-This library allows the creation and management of actors in a distributed system
-using Python. It follows the classic actor model and tries to be a simple way to
-get two remote actors to quickly communicate.
+This library allows the creation and management of actors in a distributed
+system using Python. It follows the classic actor model and tries to be a simple
+way to get two remote actors to quickly communicate.
 
 To install the library use::
 
@@ -22,14 +22,14 @@ To install the library use::
 You can check that works with the examples explained in this page, that you can
 find in the ./examples directory of this project. Tested with Python 2.7.
 
-The library requires Gevent, so you may need to install it for using the green
-thread version of this library.
+The library requires Gevent, so you may need to install it.
 
 It is also available at PYPI, so the most easy way of installing PyActor is by::
 
     pip install pyactor
 
-Then you can check the examples from `the repository <https://github.com/pedrotgn/pyactor>`_.
+Then you can check the examples from
+`the repository <https://github.com/pedrotgn/pyactor>`_.
 
 
 .. _global:
@@ -48,8 +48,8 @@ threads but you can specify the mode with one of the following strings:
 Then, first of all, a :class:`~.context.Host` is needed in order to create some
 actors. To create a host, use the function :func:`~.create_host` which returns
 a proxy (:class:`~.proxy.Proxy`) to the instance of a :class:`~.Host`.
-You should never work with the
-instance itself, but always with proxies to maintain the actor model.
+You should never work with the instance itself, but always with proxies to
+maintain the actor model.
 When you have the proxy, use it to spawn actors by giving the
 class type of the actor to create and one string that will identify it among the
 host. The :meth:`~.context.Host.spawn` method will return the proxy
@@ -106,8 +106,8 @@ and ``_ask=[]`` that include the names of the methods that can be remotely
 invoked in an asynchronous or synchronous way, respectively. In this sample we
 have the echo method, which is async, as no response from it is needed.
 
-.. note:: In this sample we have the _ask list also defined as a learning purpose,
-    but you could just not write that list if none method goes there.
+.. note:: In this sample we have the _ask list also defined as a learning
+    purpose, but you could just not write that list if none method goes there.
 
 The first thing to do is define which model are we going to use. For the moment
 we are using the classic threads, so we'll call the function without parameters
@@ -122,16 +122,15 @@ that, we create a new variable by using the function we imported before. ::
 
 Now we have a :class:`~.Host` in the 'h' variable. Actually, as Host objects are
 also actors, this call returns  a :class:`Proxy` that will manage that actor.
-It can create actors attached
-to itself. To do that, we use the :meth:`~.Host.spawn` method. The first
-parameter is a string with the ID of the actor that will identify it among the
-host so no repeated values are allowed. The second is the class the actor will
-be instance of. In this case we create an actor which will be an :class:`Echo`
-and with the id 'echo1'::
+It can create actors attached to itself. To do that, we use the
+:meth:`~.Host.spawn` method. The first parameter is a string with the ID of the
+actor that will identify it among the host, so no repeated values are allowed.
+The second is the class the actor will be instance of. In this case we create an
+actor which will be an :class:`Echo` and with the id 'echo1'::
 
     e1 = h.spawn('echo1',Echo)
 
-'e1' will now represent that actor (actually, the :class:`Proxy` that manages
+'e1' will now represent that actor (actually, it's a :class:`Proxy` that manages
 it).
 
 As we have the actor, we can invoke his methods as we would do normally since
@@ -144,17 +143,17 @@ The execution should work properly and print on screen::
 
 Then, the sleep gives time to the actor for doing the work and finally, we close
 the host, which will stop all its actors. This function (:func:`~.shutdown`)
-should be always called at the end::
+should be always called at the end to do a clean exit::
 
     shutdown()
 
 .. note:: As the host is an actor itself, it has sync and async methods and can
     receive remote queries if we use its proxy.
 
-..note:: As said, he host is also a living actor so it could receive queries remotely in the
-    future. This means you can send its reference to another host, which allows to
-    spawn remotely (remote spawns require a bit more info, see the remote
-    tutorial).
+..note:: As said, the host is also a living actor so it could receive queries
+    remotely in the future. This means you can send its reference to another
+    host, which allows to spawn remotely (remote spawns require a bit more info,
+    see the remote tutorial).
 
 .. note:: Now you can try and see how it works with green threads by just
     specifying 'green_thread' in the setting function.
@@ -207,6 +206,13 @@ the :meth:`say_something` method and sets the callback for this to his other
 method :meth:`pong`. This second will receive the result of the execution of the
 :meth:`say_something` method.
 
+As you can see, :meth:`set_echo` is listed in a new list of the :class:`Bot`
+class. The `_ref` list is for methods that contain references to actors
+(Proxies) in its parameters or return variable. This is absolutely necessary to
+do for every method with this characteristic for the library to work properly,
+specially with remote models. This is more deeply explained in the
+:ref:`sample7` section of this tutorial.
+
 In order to add a callback, the sync call must be defined as a Future. We do
 this by adding the parameter `future=True` to the call. This will make the query
 return a :class:`~.Future` instance instead of the result. That means that the
@@ -252,16 +258,18 @@ sample, which you can find and test in ``pyactor\examples\sample4.py``:
 
 Now we have the same :class:`Echo` class but in the sync method we added a sleep
 of 2 seconds. Also, we surrounded the call of the method by a try structure
-catching a :class:`~.TimeoutError` exception. Since we are giving to the invocation
-a expire time of 1 second, the timeout will be reached and the exception raised.
+catching a :class:`~.TimeoutError` exception from pyactor.exceptions. Since we
+are giving to the invocation a expire time of 1 second, the timeout will be
+reached and the exception raised.
 
 
-You can set a timeout for the query if you like. For that, add the parameter with
-the tag `timeout=X` in the call, in seconds. ::
+You can set a timeout for the query of your choice. For that, add the parameter
+with the tag `timeout=X` in the call, in seconds. ::
 
     x = e1.say_something(timeout=3)
 
-The default timeout is 10 seconds. To wait indefinitely, just set it to `None`.
+The default timeout is 10 seconds. To wait indefinitely, just set it to `None`,
+but that is not recommended.
 
 The correct output for this sample is the following::
 
@@ -290,7 +298,7 @@ giving by parameter only the id of the actor you wish::
 
 If you are working remotely, you could need :meth:`~.lookup_url` to get the
 reference. In this example, it is used also to get a local reference giving the
-standard local url at which the host is initialized by default::
+standard local URL at which the host is initialized by default::
 
     ee = h.lookup_url('local://local:6666/echo1')
 
@@ -315,7 +323,8 @@ managing the actor so you can give it to another function, class or module in a
 safe and easy way.
 
 It is also possible to use ``self.host``, which will give a proxy to the host in
-which the actor is so you can :meth:`~.lookup` other actors from there.
+which the actor is so you can :meth:`~.lookup` other actors from there, among
+many other possibilities.
 
 In the example, we use these three calls to send various salutations from a
 :class:`Bot` to an :class:`Echo` giving by parameter also a proxy from the Bot
@@ -337,7 +346,7 @@ The correct output for this sample is the following::
 
 In this sample, we also see the usage of the :func:`~.serve_forever` function
 which is very useful in remote communication in order to keep a host alive as
-another one sends queries to his actors. The usage is very simple, instead of
+another one sends queries to its actors. The usage is very simple, instead of
 shutting the host down at the end, we call::
 
     serve_forever()
@@ -365,7 +374,7 @@ that, you have to indicate that a method receives or returns a proxy by adding
 it to the _ref list of the class (it yet must be in _ask or _tell).
 
 With this indication, pyActor will search for proxies in the parameters and make
-a new proxy for the actor in the context that the method will be executed (the
+a new proxy for its actor in the context that the method will be executed (the
 actor's).
 
 Bot has a method ``set_echo`` that gets the echo it will use by parameter. As
@@ -403,35 +412,36 @@ Parallels are a way of letting one actor to process many queries at a time.
 This will allow the actor to keep receiving calls when another call has been
 blocked with another job (an I/O call or a synchronous call to another actor).
 
-To make one method execute parallel, you need to specify it in the class attribute
-_parallel, which is a list. The method must also be in one of the lists _tell or
-_ask. The methods with this tag will be executed in new threads so their execution
-do not interfere with other queries. That is, the actor can attend other queries
-while executing the parallel method.
+To make one method execute parallel, you need to specify it in the class
+attribute _parallel, which is a list. The method must also be in one of the
+lists _tell or _ask. The methods with this tag will be executed in new threads
+so their execution do not interfere with receiving other queries. That is, the
+actor can attend other queries while executing the parallel method.
 
-As you could think, executing methods of the same actor at the same time can compromise
-the integrity of data. PyActor ensures that only one thread is executing on an
-actor at the same time, allowing other threads to execute when the one executing
-is blocked with some call. This prevents two threads from accessing the same data
-at a time, but is up to the programmer to prevent the data to change during the
-execution of a method if that is not intended, as a method could modify a property
-of the actor while a parallel, that operates with that data, is blocked, leading
-to an inconsistency.
+As you could think, executing methods of the same actor at the same time can
+compromise the integrity of data. PyActor ensures that only one thread is
+executing on an actor at the same time, allowing other threads to execute when
+the one executing is blocked with some call. This prevents two threads from
+accessing the same data at a time, but is up to the programmer to prevent the
+data to change during the execution of a method if that is not intended, as a
+method could modify a property of the actor while a parallel, that operates with
+that data, is blocked, leading to an inconsistency.
 
 In this example we have three classes: File, Web and Workload. File represents a
 server that serve the download of files. Simulates the work with a sleep.
-Web represents a web server which contains a list of files. It has to have a file
-server that provide the files and can list its files (list_files) and return one
-of them (get_file). Workload is the class that will do the work. It asks the web
-to list its files ten times, or request to download one of the files.
+Web represents a web server which contains a list of files. It has to have a
+file server that provide the files and can list its files (list_files) and
+return one of them (get_file). Workload is the class that will do the work. It
+asks the web to list its files ten times, or request to download one of the
+files.
 
-The execution is simple, we create one file server, one web server and attach the
-file server to the web::
+The execution is simple, we create one file server, one web server and attach
+the file server to the web::
 
     web.remote_server(f1)
 
-Then lets do the work. Create two Workload instance and pass to them the web server
-we created::
+Then lets do the work. Create two Workload instance and pass to them the web
+server we created::
 
     load = host.spawn('wl1', Workload)
     load.remote_server(web)
@@ -444,9 +454,9 @@ will download a file::
     load.launch()
     load2.download()
 
-As the method get_file is marked as parallel, its execution will be done in another
-thread, so when the method blocks downloading (in the sleep), it will free the actor
-so it can keep serving answers to the first load.
+As the method get_file is marked as parallel, its execution will be done in
+another thread, so when the method blocks downloading (in the sleep), it will
+free the actor so it can keep serving answers to the first load.
 
 If we do not use parallels in this example (which you can try by commenting the
 right line as indicated) some of the calls to the list_files method will raise
@@ -476,11 +486,11 @@ will manage the interval, accessible from within the actor by `self.host`; next,
 the interval time and the proxy to the actor to which make the periodic call
 (that can be itself with `self.proxy` or another actor) as
 well as the name of the method in that actor that will be called.
-The method to be executed must be a tell method (with ref or without it), otherwise,
-it will raise and exception.
+The method to be executed must be a tell method (with ref or without it),
+otherwise, it will raise and exception.
 
-This function returns an interval instance
-that we have to keep in order to stop it later by calling *.set()*.
+This function returns an interval instance that we have to keep in order to
+stop it later by calling *.set()*.
 
 In this example we use :func:`context.later` to set a timer that will stop the
 interval after a certain time. This method works similar to the other. You
@@ -492,7 +502,7 @@ example, hello needs one argument and it is passed as::
 
     self.host.interval(1, self.proxy, "hello", "you")
 
-If the method needed two of them, it will be like follows::
+If the method needed two of them, it would be like follows::
 
     self.host.interval(1, self.proxy, "hello", "you", "too")
 

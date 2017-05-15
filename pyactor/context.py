@@ -139,8 +139,6 @@ class Host(object):
         self.load_transport(url)
         self.init_host()
 
-        self.future_manager = future.FutureManager()
-
         self.ppool = None
         # self.cleaner = interval_host(get_host(), CLEAN_INT, self.do_clean)
 
@@ -271,8 +269,6 @@ class Host(object):
         if self.alive:
             for interval_event in self.intervals.values():
                 interval_event.set()
-
-            self.future_manager.stop()
 
             for actor in self.actors.values():
                 Proxy(actor).stop()
@@ -448,7 +444,7 @@ class Host(object):
             except HostError:
                 print "Can't lookup for the actor received with the call. \
                     It does not exist or the url is unreachable.", param
-                raise HostError
+                raise HostError(param)
         elif isinstance(param, list):
             return [self.loads(elem) for elem in param]
         elif isinstance(param, tuple):

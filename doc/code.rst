@@ -38,3 +38,9 @@ Remote Solutions
 
 .. automodule:: pyactor.rabbitserver
     :members:
+
+Exceptions
+==========
+
+.. automodule:: pyactor.exceptions
+    :members:

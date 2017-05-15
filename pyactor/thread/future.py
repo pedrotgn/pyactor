@@ -4,7 +4,6 @@ from threading import Condition, Thread
 from pyactor.util import get_current, get_host, get_lock, RPC_ID, RESULT
 from pyactor.util import TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
 from pyactor.exceptions import TimeoutError, FutureError
-
 from pyactor.thread import Channel
 
 PENDING = 'PENDING'
@@ -252,8 +251,3 @@ class FutureManager(object):
             self.t.join()
             self.t = None
         self.futures = {}
-
-    # def clean_futures(self):
-    #     for key, future in self.futures.items():
-    #         if future.done():
-    #             del self.futures[key]

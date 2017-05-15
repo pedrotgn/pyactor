@@ -126,4 +126,4 @@ PyActor has many examples and a tutorial explaining all its functionalities.
 This examples can be found in the ``'pyactor/examples'`` directory of the project
 (`github <https://github.com/pedrotgn/pyactor>`_).
 They are also explained in the documentation as a tutorial, hosted at
-readthedocs.org which you can find above.
+`readthedocs.org <http://pyactor.readthedocs.io/en/latest/?badge=latest>`_ which you can find above.

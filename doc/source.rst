@@ -79,7 +79,6 @@ Thread Dispatcher
     :linenos:
 
 
-
 .. _gactor_source:
 
 Green Thread Actor

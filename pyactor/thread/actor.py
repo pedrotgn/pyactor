@@ -3,7 +3,7 @@ from copy import copy
 
 from pyactor.util import ASK, TELL, FUTURE, TYPE, ASKRESPONSE, FUTURERESPONSE
 from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
-from pyactor.util import ref_l, ref_d, get_host
+from pyactor.util import ref_l, ref_d
 from pyactor.thread import Channel
 from future import FutureManager
 
@@ -50,15 +50,15 @@ class ActorRef(object):
 
         self.tell.append('stop')
 
-    @property
-    def _ref(self):
-        return list(set(self.tell_ref) | set(self.ask_ref))
-
     def receive(self, msg):
         raise NotImplementedError()
 
     def send_response(self, result, msg):
         raise NotImplementedError()
+
+    @property
+    def _ref(self):
+        return list(set(self.tell_ref) | set(self.ask_ref))
 
     def __str__(self):
         return 'Actor %s (%s)' % (self.url, self.klass.__name__)
@@ -111,10 +111,9 @@ class Actor(ActorRef):
         :param msg: The message is a dictionary using the constants
             defined in util.py (:mod:`pyactor.util`).
         '''
-        if msg[METHOD] == 'stop':
+        if msg[TYPE] == TELL and msg[METHOD] == 'stop':
             self.running = False
             self.future_manager.stop()
-            # get_host().proxy.stop_actor(self.url)
         else:
             result = None
             try:

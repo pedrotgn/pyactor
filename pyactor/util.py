@@ -85,8 +85,8 @@ def ref_l(self, f):
             return f(*new_args)
         except HostError:
             pass
-            # If there is a problem deserializing the params, the method is not
-            # executed.
+            # If there is a problem deserializing the params, the method
+            # is not executed.
     return wrap_ref_l
 
 

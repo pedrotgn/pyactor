@@ -1,7 +1,7 @@
 from Queue import Empty
 
 from util import ASK, TELL, TYPE, METHOD, PARAMS, CHANNEL, TO, RESULT
-from exceptions import TimeoutError, NotFoundError, HostError
+from exceptions import TimeoutError, HostError
 from util import get_host, get_lock, get_current
 
 
@@ -165,9 +165,8 @@ class AskWrapper(object):
                           'LOCK': self.__lock}
             manager = get_current()
             if manager is None:
-                manager = get_host()
+                manager = get_host().proxy.actor
             return manager.future_manager.new_future(future_ref)
-            # return get_host().future_manager.new_future(future_ref)
 
 
 class AskRefWrapper(AskWrapper):
@@ -190,9 +189,8 @@ class AskRefWrapper(AskWrapper):
 
             manager = get_current()
             if manager is None:
-                manager = get_host()
+                manager = get_host().proxy.actor
             return manager.future_manager.new_future(future_ref, ref=True)
-            # return get_host().future_manager.new_future(future_ref, ref=True)
         else:
             result = super(AskRefWrapper, self).__call__(*new_args, **kwargs)
             return get_host().loads(result)

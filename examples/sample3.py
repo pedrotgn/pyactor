@@ -22,6 +22,7 @@ class Echo(object):
 class Bot(object):
     _tell = ['set_echo', 'ping', 'pong']
     _ask = []
+    _ref = ['set_echo']
 
     def set_echo(self, echo):
         self.echo = echo

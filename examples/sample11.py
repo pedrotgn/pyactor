@@ -41,8 +41,8 @@ class Bot(object):
 
 
 if __name__ == "__main__":
-    # set_context()
-    set_context('green_thread')
+    set_context()
+    # set_context('green_thread')
     h = create_host()
     e1 = h.spawn('echo1', Echo)
     e1.echo('hello there !!')

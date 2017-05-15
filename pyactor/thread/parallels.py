@@ -1,9 +1,9 @@
 import uuid
-from threading import Lock, Thread, current_thread
+from threading import Lock, current_thread
 from time import sleep
 
 from actor import Actor
-from pyactor.util import get_host, METHOD, PARAMS
+from pyactor.util import get_host, METHOD, PARAMS, TYPE, TELL
 
 
 class ActorParallel(Actor):
@@ -40,7 +40,7 @@ class ActorParallel(Actor):
         :param msg: The message is a dictionary using the constants
             defined in util.py (:mod:`pyactor.util`).
         '''
-        if msg[METHOD] == 'stop':
+        if msg[TYPE] == TELL and msg[METHOD] == 'stop':
             self.running = False
         else:
             result = None
