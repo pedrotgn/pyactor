@@ -348,9 +348,16 @@ class Host(object):
             try:
                 dispatcher = self.actors[aurl.scheme]
                 if module is not None:
-                    module_ = __import__(module, globals(), locals(),
-                                         [klass], -1)
-                    klass_ = getattr(module_, klass)
+                    try:
+                        module_ = __import__(module, globals(), locals(),
+                                             [klass], -1)
+                        klass_ = getattr(module_, klass)
+                    except Exception, e:
+                        raise HostError("At lookup_url: " +
+                                        "Import failed for module " + module +
+                                        ", class " + klass +
+                                        ". Check this values for the lookup." +
+                                        " ERROR: " + str(e))
                 elif isinstance(klass, (types.TypeType, types.ClassType)):
                     klass_ = klass
                 else:
@@ -360,10 +367,10 @@ class Host(object):
                 return Proxy(remote_actor)
             except HostError:
                 raise
-            except Exception:
+            except Exception, e:
                 raise HostError("ERROR looking for the actor on another " +
                                 "server. Hosts must " +
-                                "be in http to work properly.")
+                                "be in http to work properly. " + str(e))
 
     def is_local(self, aurl):
         # '''Private method.
