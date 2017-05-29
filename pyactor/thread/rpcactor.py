@@ -101,5 +101,7 @@ class RPCDispatcher(Actor):
                 if msg[RPC_ID] in self.pending.keys():
                     self.pending[msg[RPC_ID]].send(msg)
                     del self.pending[msg[RPC_ID]]
+        except KeyError, ke:
+            print "ERROR: The actor", ke, "is offline."
         except Exception, e:
-            print 'TCP ERROR:', e
+            print 'Connection ERROR:', e
