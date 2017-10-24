@@ -175,7 +175,7 @@ class Host(object):
             self.launch_actor('amqp', rpcactor.RPCDispatcher(url, self,
                                                              'rabbit'))
 
-    def spawn(self, aid, klass, param=None):
+    def spawn(self, aid, klass, *param, **kparam):
         '''
         This method creates an actor attached to this host. It will be
         an instance of the class *klass* and it will be assigned an ID
@@ -190,7 +190,7 @@ class Host(object):
             you must specify here the path to that class in the form
             'module.py/Class' so the server can import the class and create
             the instance.
-        :param list param: arguments for the init function of the
+        :param param-kparam: arguments for the init function of the
             spawning actor class.
         :return: :class:`~.Proxy` of the actor spawned.
         :raises: :class:`AlreadyExistsError`, if the ID specified is
@@ -212,7 +212,7 @@ class Host(object):
         if url in self.actors.keys():
             raise AlreadyExistsError(url)
         else:
-            obj = klass_(*param)
+            obj = klass_(*param, **kparam)
             obj.id = aid
             obj.url = url
             if self.running:

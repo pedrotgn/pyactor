@@ -74,7 +74,7 @@ if __name__ == "__main__":
     host = create_host('amqp://127.0.0.1:9111/')
 
     pong = host.lookup_url('amqp://127.0.0.1:9000/pong', 'PongActor', 'rpong')
-    ping = host.spawn('ping', PingActor, [N, pong])
+    ping = host.spawn('ping', PingActor, N, pong)
 
     pong.set_ping(ping)
     init = time()

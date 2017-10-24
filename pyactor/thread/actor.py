@@ -119,7 +119,7 @@ class Actor(ActorRef):
             try:
                 invoke = getattr(self._obj, msg[METHOD])
                 params = msg[PARAMS]
-                result = invoke(*params)
+                result = invoke(*params[0], **params[1])
             except Exception, e:
                 if msg[TYPE] == TELL:
                     print e

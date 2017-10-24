@@ -53,14 +53,14 @@ class ActorParallel(Actor):
                     # add rpc message to pendent AskResponse s
                     self.pending[rpc_id] = msg
                     # insert an rpc id to args
-                    params = list(params)
-                    params.insert(0, rpc_id)
-                    invoke(*params)
+                    para = list(params[0])
+                    para.insert(0, rpc_id)
+                    invoke(*para, **params[1])
                     return
                 else:
                     with self.__lock:
                         sleep(0.01)
-                        result = invoke(*params)
+                        result = invoke(*params[0], **params[1])
             except Exception, e:
                 result = e
                 print result

@@ -90,7 +90,7 @@ if __name__ == "__main__":
     host = create_host()
 
     pong = host.spawn('pong', PongActor)
-    ping = host.spawn('ping', PingActor, [N, pong])
+    ping = host.spawn('ping', PingActor, N, pong)
 
     init = time()
 

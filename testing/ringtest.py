@@ -50,9 +50,9 @@ if __name__ == "__main__":
 
     ni = nf
     for i in range(NUM_NODES - 2):
-        ni = host.spawn(str(i), Node, [ni])
+        ni = host.spawn(str(i), Node, ni)
 
-    n1 = host.spawn('end', Node, [ni])
+    n1 = host.spawn('end', Node, ni)
 
     nf.set_next(n1)
     print 'start time!!'

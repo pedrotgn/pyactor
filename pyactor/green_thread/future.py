@@ -36,7 +36,7 @@ class Future(object):
         for callback in self.__callbacks:
             try:
                 # msg = TellRequest(TELL, callback[0], [self], callback[2])
-                msg = {TYPE: TELL, METHOD: callback[0], PARAMS: [self],
+                msg = {TYPE: TELL, METHOD: callback[0], PARAMS: ([self], {}),
                        TO: callback[2]}
                 callback[1].send(msg)
             except Exception, e:
@@ -82,7 +82,7 @@ class Future(object):
                 return
             # Invoke the callback directly
             # msg = TellRequest(TELL, method, [self], from_actor.url)
-            msg = {TYPE: TELL, METHOD: method, PARAMS: [self],
+            msg = {TYPE: TELL, METHOD: method, PARAMS: ([self], {}),
                    TO: from_actor.url}
             from_actor.channel.send(msg)
         else:
