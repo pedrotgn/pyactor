@@ -10,7 +10,7 @@ setup(
     license='GNU',
     description='The minimalistic Python Actor middleware',
     long_description=open('README.rst').read(),
-    install_requires=['gevent'],
+    install_requires=['gevent==1.2.2'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
 
