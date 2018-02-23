@@ -109,7 +109,7 @@ have the echo method, which is async, as no response from it is needed.
 .. note:: In this sample we have the _ask list also defined as a learning
     purpose, but you could just not write that list if none method goes there.
 
-The first thing to do is define which model are we going to use. For the moment
+The first thing to do is define which model are we going to use. For now,
 we are using the classic threads, so we'll call the function without parameters
 to use the default solution. ::
 
@@ -128,12 +128,12 @@ actor that will identify it among the host, so no repeated values are allowed.
 The second is the class the actor will be instance of. In this case we create an
 actor which will be an :class:`Echo` and with the id 'echo1'::
 
-    e1 = h.spawn('echo1',Echo)
+    e1 = h.spawn('echo1', Echo)
 
 'e1' will now represent that actor (actually, it's a :class:`Proxy` that manages
 it).
 
-As we have the actor, we can invoke his methods as we would do normally since
+As we have the actor, we can invoke its methods as we would do normally since
 the proxy will redirect the queries to the actual placement of it. If we didn't
 have specified the methods in the statements appointed before (_tell and _ask),
 we wouldn't be able to do this now, giving a 'no such attribute error'.
@@ -186,74 +186,17 @@ The correct output for this sample is the following::
     something
 
 
+
 .. _sample3:
 
-Sample 3 - Callback
-================================================================================
-
-This example tries the functionality of the callback element of the synchronous
-queries. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample3.py``:
-
-.. literalinclude:: ../examples/sample3.py
-    :linenos:
-
-This time we keep having the same initialization as before, but now there is
-a new class. :class:`Bot` has three async methods that will allow to prove the
-callback functionality. :meth:`set_echo` registers an
-:class:`Echo` to the Bot so it can call it. :math:`ping` creates the query for
-the :meth:`say_something` method and sets the callback for this to his other
-method :meth:`pong`. This second will receive the result of the execution of the
-:meth:`say_something` method.
-
-As you can see, :meth:`set_echo` is listed in a new list of the :class:`Bot`
-class. The `_ref` list is for methods that contain references to actors
-(Proxies) in its parameters or return variable. This is absolutely necessary to
-do for every method with this characteristic for the library to work properly,
-specially with remote models. This is more deeply explained in the
-:ref:`sample7` section of this tutorial.
-
-In order to add a callback, the sync call must be defined as a Future. We do
-this by adding the parameter `future=True` to the call. This will make the query
-return a :class:`~.Future` instance instead of the result. That means that the
-execution of the query may has not been completed yet. To get the result from a
-Future, use the method :meth:`~.result` as you can see inside the `pong` method.
-
-To add a callback use the Future method :meth:`~.add_callback` which takes by
-parameter the name of the method to callback, which is one from the actor that
-calls it. You can add various callbacks to one future, and them will be called
-in order when the work is finished. Also, if you add a callback to a finished
-future, it will be directly invoked.
-
-See :ref:`sample11` for a more complex sample on Futures.
-
-.. note:: :meth:`~.add_callback` needs to be called from inside an actor,
-    specifying a method of that same actor.
-
-.. note:: The method treated as a callback must have one unique parameter, which
-    is the future. Inside the method you can use :meth:`~.result` to get the
-    result of the call (exceptions can be raised) or :meth:`~.exception` to get
-    the instance of a possible raised exception. You can also check the state of
-    the future with one of its methods: :meth:`~.done` or :meth:`~.running`.
-
-The correct output for this sample is the following::
-
-    pinging...
-    callback something
-
-
-
-.. _sample4:
-
-Sample 4 - Timeout
+Sample 3 - Timeout
 ================================================================================
 
 This example tests the raising of timeouts. This is the full code of this
-sample, which you can find and test in ``pyactor\examples\sample4.py``:
+sample, which you can find and test in ``pyactor\examples\sample3.py``:
 
-.. literalinclude:: ../examples/sample4.py
+.. literalinclude:: ../examples/sample3.py
     :linenos:
-
 
 
 Now we have the same :class:`Echo` class but in the sync method we added a sleep
@@ -278,9 +221,10 @@ The correct output for this sample is the following::
     timeout caught
 
 
-.. _sample5:
 
-Sample 5 - Lookup
+.. _sample4:
+
+Sample 4 - Lookup
 ================================================================================
 
 This example shows the usage of the lookup methods applied to a host. This is
@@ -302,6 +246,47 @@ standard local URL at which the host is initialized by default::
 
     ee = h.lookup_url('local://local:6666/echo1')
 
+.. note:: Please follow the remote tutorial to get a better overview of the
+    programming with remote hosts. This tutorial focuses on local hosts.
+
+
+.. _sample5:
+
+Sample 5 - References to actors
+================================================================================
+
+This example tests the sending of proxy references by parameter using the
+definition of the _ref list. This is the full code of this sample, which you can
+find and test in ``pyactor\examples\sample5.py``:
+
+.. literalinclude:: ../examples/sample5.py
+    :linenos:
+
+If you pass references to actors (proxies) by parameter in actors methods, would
+mean they are sharing the same instance of a proxy. This could cause various
+problems of concurrency so we might want different proxies in different spots.
+To achieve that, you have to indicate that a method *receives or returns* a
+proxy by adding it to the _ref list of the class (it yet must be in _ask or
+_tell).
+
+With this indication, pyActor will search for proxies in the parameters and make
+a new proxy for its actor in the context that the method will be executed (the
+actor's).
+
+In the example, Echo has methods that receive a proxy, in this methods
+you can see examples of passing proxies even inside lists or dictionaries.
+For that to work correctly on any system, Echo needs to define its methods
+as they have this functionality. This why all three methods are in the _ref
+list ::
+
+    _ref = ['echo', 'echo2', 'echo3']
+
+Although the proxies are different, you may yet compare them directly so when
+using ``p1 == p2`` on two proxies, the comparison will be done on the actors
+that they represent and not on the proxy instance itself.
+See the basic examples on ``proxies_test.py``.
+
+
 
 .. _sample6:
 
@@ -318,12 +303,13 @@ code of this sample, which you can find and test in
 This sample demonstrates how to get references to an actor from the actor
 itself. With ``self.id`` we obtain the string that identifies the actor in the
 host it is located, ``self.url`` contains its network location. Then, with
-``self.proxy`` you can get a reference to a proxy
-managing the actor so you can give it to another function, class or module in a
-safe and easy way.
+``self.proxy`` you can get a reference to a proxy managing the actor so you can
+give it to another function, class or module in a safe and easy way.
+
+.. note:: Remember to put methods that receive or return proxies at _ref list.
 
 It is also possible to use ``self.host``, which will give a proxy to the host in
-which the actor is so you can :meth:`~.lookup` other actors from there, among
+which the actor is, so you can :meth:`~.lookup` other actors from there, among
 many other possibilities.
 
 In the example, we use these three calls to send various salutations from a
@@ -334,7 +320,9 @@ It uses the inside reference it already has to call a :meth:`~.lookup` to the
 host and get the wanted reference.
 
 Also notice that every proxy has the methods ``get_id`` and ``get_url`` already
-defined, so you can get the actor's information directly from the proxy.
+defined, so you can get the actor's information directly from the proxy. This
+means we could use ``sender.get_id()`` instead of ``sender.get_name()``; and
+``sender.get_url()`` instead of ``sender.get_net()`` on the echo method.
 
 The correct output for this sample is the following::
 
@@ -355,27 +343,21 @@ This will maintain the host alive in lower process consumption until the user
 presses ``Ctrl+C`` allowing other hosts to lookup and call methods from actors
 in this host.
 
+
 .. _sample7:
 
-Sample 7 - references
+Sample 7 - References extended
 ================================================================================
 
-This example tests the sending of proxy references by parameter using the
-definition of the _ref list. This is the full code of this sample, which you can
-find and test in ``pyactor\examples\sample7.py``:
+This example extends sample 5. This is the full code of this sample, which you
+can find and test in ``pyactor\examples\sample7.py``:
 
 .. literalinclude:: ../examples/sample7.py
     :linenos:
 
-The previous examples may pass proxy references by parameter in its methods, but
-they are sharing the same instance of a proxy. This could cause various problems
-of concurrency so we might want different proxies in different spots. To achieve
-that, you have to indicate that a method receives or returns a proxy by adding
-it to the _ref list of the class (it yet must be in _ask or _tell).
-
-With this indication, pyActor will search for proxies in the parameters and make
-a new proxy for its actor in the context that the method will be executed (the
-actor's).
+To remark the importance of using the _ref list, we extend here sample 5 with
+more examples of passing proxies combined with the self references we saw in
+sample 6.
 
 Bot has a method ``set_echo`` that gets the echo it will use by parameter. As
 this echo has to be a proxy, Bot includes the next definition::
@@ -387,25 +369,105 @@ problems, as the proxies are not shared::
 
     bot.set_echo(e1)
 
-Also seen in the example, Echo has methods that receive a proxy, in this methods
-you can see examples of passing proxies even inside lists or dictionaries.
-
-Although the proxies are different, you may yet compare them directly so when
-using ``p1 == p2`` on two proxies, the comparison will be done on the actors
-that they represent and not on the proxy instance itself.
-See the basic examples on ``proxies_test.py``.
+As already seen in sample 5, Echo has methods that receive a proxy.
+Including examples of passing proxies even inside lists or dictionaries.
 
 
 .. _sample8:
 
-Sample 8 - Parallel
+Sample 8 - Futures
+================================================================================
+
+This example tests more deeply the functionalities of futures. This is the full
+code of this sample, which you can find and test in
+``pyactor\examples\sample8.py``:
+
+.. literalinclude:: ../examples/sample8.py
+    :linenos:
+
+The example is like Sample 3, but here we use the futures approach.
+
+We do this by adding the parameter `future=True` to the call. This will make
+the query return a :class:`~.Future` instance instead of the result. That means
+that the execution of the query may have not been completed yet. To get the
+result from a Future, use the method :meth:`~.result` as you can see in the
+try section.
+
+Also shows the usage of the consulting methods of futures: :meth:`~.done`,
+and :meth:`~.exception`.
+
+Change between this lines::
+
+    ask = e1.raise_something(future=True)
+    ask = e1.say_something(future=True)
+
+to check the raising of exceptions.
+
+Finally, note that the only argument for :meth:`~.result` (also for
+:meth:`~.exception`) is the timeout: the time, in seconds, to wait for a result
+before raising an error.
+
+
+.. _sample9:
+
+Sample 9 - Callback
+================================================================================
+
+This example tries the functionality of the callback element of the synchronous
+queries. This is the full code of this sample, which you can find and test in
+``pyactor\examples\sample9.py``:
+
+.. literalinclude:: ../examples/sample9.py
+    :linenos:
+
+This time we keep having the same initialization as before, but now there is
+a new class. :class:`Bot` has three async methods that will allow to prove the
+callback functionality. :meth:`set_echo` registers an
+:class:`Echo` to the Bot so it can call it. :math:`ping` creates the query for
+the :meth:`say_something` method and sets the callback for this to his other
+method :meth:`pong`. This second will receive the result of the execution of the
+:meth:`say_something` method.
+
+Remember, :meth:`set_echo` needs to be listed in the `_ref` list of the
+:class:`Bot` class.
+
+In order to add a callback, the sync call must be defined as a Future. We do
+this by adding the parameter `future=True` to the call.
+
+Then, use the Future method :meth:`~.add_callback` which takes by
+parameter the name of the method to callback, which is one from the actor that
+calls it. You can add various callbacks to one future, and them will be called
+in order when the work is finished. Also, if you add a callback to a finished
+future, it will be directly invoked.
+
+See :ref:`sample8` for a more complex sample on Futures.
+
+.. note:: :meth:`~.add_callback` needs to be called from inside an actor,
+    specifying a method of that same actor.
+
+.. note:: The method treated as a callback must have one unique parameter, which
+    is the future. Inside the method you can use :meth:`~.result` to get the
+    result of the call (exceptions can be raised) or :meth:`~.exception` to get
+    the instance of a possible raised exception. You can also check the state of
+    the future with one of its methods: :meth:`~.done` or :meth:`~.running`.
+
+The correct output for this sample is the following::
+
+    pinging...
+    callback something
+    callback something
+
+
+.. _sample10:
+
+Sample 10 - Parallel
 ================================================================================
 
 This example tests the creation and execution of actors with parallel methods.
 This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample8.py``:
+``pyactor\examples\sample10.py``:
 
-.. literalinclude:: ../examples/sample8.py
+.. literalinclude:: ../examples/sample10.py
     :linenos:
 
 Parallels are a way of letting one actor to process many queries at a time.
@@ -462,21 +524,22 @@ If we do not use parallels in this example (which you can try by commenting the
 right line as indicated) some of the calls to the list_files method will raise
 TimeoutError as the thread of that actor is blocked with the download.
 
-.. note:: `sample8b` combines this example with the use of Futures.
+.. note:: `sample10b` combines this example with the use of Futures.
 
-.. note:: You can test another parallel example with `parall.py`.
+.. note:: You can test another parallel example with `parall.py`. That might
+    result simpler to follow.
 
 
 .. _sample_inter:
 
-Sample 10 - Intervals
+Sample 11 - Intervals
 ================================================================================
 
 This example tests the usage of intervals that allow an actor to periodically do
 an action. This is the full code of this sample, which you can find and test in
-``pyactor\examples\sample10.py``:
+``pyactor\examples\sample11.py``:
 
-.. literalinclude:: ../examples/sample10.py
+.. literalinclude:: ../examples/sample11.py
     :linenos:
 
 To generate intervals, we use the functions :func:`context.interval` and
@@ -507,34 +570,6 @@ If the method needed two of them, it would be like follows::
     self.host.interval(1, self.proxy, "hello", "you", "too")
 
 
-.. _sample11:
-
-Sample 11 - Futures
-================================================================================
-
-This example tests more deeply the functionalities of futures. This is the full
-code of this sample, which you can find and test in
-``pyactor\examples\sample10.py``:
-
-.. literalinclude:: ../examples/sample11.py
-    :linenos:
-
-Not much to explain here, just see it by yourself. The example is like Sample 3,
-but here we set various callbacks and use more of the methods futures provide.
-
-Also shows the usage of the consulting methods of futures: :meth:`~.done`,
-:meth:`~.result`, :meth:`~.exception`.
-
-Change between this lines::
-
-    ask = e1.raise_something(future=True)
-    ask = e1.say_something(future=True)
-
-to check the raising of exceptions.
-
-Finally, note that the only argument for :meth:`~.result` (also for
-:meth:`~.exception`) is the timeout: the time, in seconds, to wait for a result
-before raising an error.
 
 
 .. _sample1b:

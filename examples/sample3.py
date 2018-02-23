@@ -1,7 +1,8 @@
 '''
-Callback sample.
+Timeout sample.
 '''
 from pyactor.context import set_context, create_host, sleep, shutdown
+from pyactor.exceptions import TimeoutError
 
 
 class Echo(object):
@@ -15,36 +16,20 @@ class Echo(object):
         print 'bye'
 
     def say_something(self):
-        sleep(1)
+        sleep(2)
         return 'something'
-
-
-class Bot(object):
-    _tell = ['set_echo', 'ping', 'pong']
-    _ask = []
-    _ref = ['set_echo']
-
-    def set_echo(self, echo):
-        self.echo = echo
-
-    def ping(self):
-        future = self.echo.say_something(future=True)
-        future.add_callback('pong')
-        future.add_callback('pong')
-        print 'pinging..'
-
-    def pong(self, future):
-        msg = future.result()
-        print 'callback', msg
 
 
 if __name__ == "__main__":
     set_context()
     h = create_host()
     e1 = h.spawn('echo1', Echo)
-    bot = h.spawn('bot', Bot)
-    bot.set_echo(e1)
-    bot.ping()
+    e1.echo('hello there !!')
+    e1.bye()
 
-    sleep(2)
+    try:
+        x = e1.say_something(timeout=1)
+    except TimeoutError:
+        print 'timeout caught'
+    sleep(1)
     shutdown()

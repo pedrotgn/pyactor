@@ -7,6 +7,7 @@ from pyactor.context import set_context, create_host, sleep, serve_forever
 class Echo(object):
     _tell = ['echo']
     _ask = []
+    _ref = ['echo']
 
     def echo(self, msg, sender):
         print msg, 'from:', sender.get_name(), 'at', sender.get_net()

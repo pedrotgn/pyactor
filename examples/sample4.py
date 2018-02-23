@@ -1,8 +1,7 @@
 '''
-Timeout sample.
+Lookup sample.
 '''
 from pyactor.context import set_context, create_host, sleep, shutdown
-from pyactor.exceptions import TimeoutError
 
 
 class Echo(object):
@@ -16,7 +15,6 @@ class Echo(object):
         print 'bye'
 
     def say_something(self):
-        sleep(2)
         return 'something'
 
 
@@ -24,12 +22,12 @@ if __name__ == "__main__":
     set_context()
     h = create_host()
     e1 = h.spawn('echo1', Echo)
-    e1.echo('hello there !!')
-    e1.bye()
 
-    try:
-        x = e1.say_something(timeout=1)
-    except TimeoutError:
-        print 'timeout caught'
+    e = h.lookup('echo1')
+    print e.say_something()
+
+    ee = h.lookup_url('local://local:6666/echo1', Echo)
+    print ee.say_something()
+
     sleep(1)
     shutdown()

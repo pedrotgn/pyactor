@@ -125,16 +125,16 @@ remote_host.
 
 
 
-.. _sample9:
+.. _sample5:
 
-Sample 9 - Multiple Hosts
+Sample 5 - Multiple Hosts
 ================================================================================
 
 This example tests the creation of multiple host at the same time on one unique
 execution. This is the full code of this sample, which you can find and test in
-``pyactor\examples\Remote\sample9.py``:
+``pyactor\examples\Remote\sample5.py``:
 
-.. literalinclude:: ../examples/Remote/sample9.py
+.. literalinclude:: ../examples/Remote/sample5.py
     :linenos:
 
 The first thing to make clear is that you should never need to create more than

@@ -1,7 +1,7 @@
 '''
 Testing comparation of proxies.
 '''
-from pyactor.context import set_context, create_host, sleep, shutdown
+from pyactor.context import set_context, create_host, sleep, serve_forever
 
 
 class Echo(object):
@@ -14,7 +14,7 @@ class Echo(object):
 
 def main():
     set_context()
-    host = create_host()
+    host = create_host('http://127.0.0.1:1277')
     p1 = host.spawn('1', Echo)
     p2 = host.lookup('1')
 
@@ -33,7 +33,7 @@ def main():
     print p1
     print repr(p1)
 
-    shutdown()
+    serve_forever()
 
 
 if __name__ == '__main__':

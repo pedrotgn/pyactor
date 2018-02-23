@@ -1,39 +1,77 @@
 '''
-Intervals sample
-@author: Daniel Barcelona Pons
+Parallel methods sample.
 '''
-from pyactor.context import set_context, create_host, sleep, shutdown, \
-    interval, later
+from pyactor.context import set_context, create_host, sleep, shutdown
+from pyactor.exceptions import TimeoutError
 
 
-class Registry(object):
+class File(object):
+    _ask = ['download']
+
+    def download(self, filename):
+        print 'downloading ' + filename
+        sleep(5)
+        return True
+
+
+class Web(object):
+    _ask = ['list_files', 'get_file']
+    _tell = ['remote_server']
+    _parallel = ['list_files', 'get_file', 'remote_server']
+# Comment the line above to check the raise of timeouts if paral are not used.
+    _ref = ["remote_server"]
+
+    def __init__(self):
+        self.files = ['a1.txt', 'a2.txt', 'a3.txt', 'a4.zip']
+
+    def remote_server(self, file_server):
+        self.server = file_server
+
+    def list_files(self):
+        return self.files
+
+    def get_file(self, filename):
+        return self.server.download(filename, timeout=6)
+
+
+class Workload(object):
     _ask = []
-    _tell = ['hello', 'init_start', 'stop_interval']
-    # _ref = ['hello']
+    _tell = ['launch', 'download', 'remote_server']
+    _parallel = []
+    _ref = ["remote_server"]
 
-    def init_start(self):
-        self.interval1 = interval(self.host, 1, self.proxy, "hello", "you")
-        later(5, self.proxy, "stop_interval")
+    def launch(self):
+        for i in range(10):
+            try:
+                print self.server.list_files(timeout=2)
+            except TimeoutError as e:
+                print i, e
 
-    def stop_interval(self):
-        print "stopping interval"
-        self.interval1.set()
+    def remote_server(self, web_server):
+        self.server = web_server
 
-    def hello(self, msg):
-        print self.id, 'Hello', msg
+    def download(self):
+        self.server.get_file('a1.txt', timeout=10)
+        print 'download finished'
 
 
 if __name__ == "__main__":
-    N = 10   # 10000
+    set_context('green_thread')
+    # set_context()
 
-    set_context()
     host = create_host()
-    registry = list()
-    for i in xrange(0, N):
-        registry.append(host.spawn(str(i), Registry))
 
-    for i in xrange(0, N):
-        registry[i].init_start()
+    f1 = host.spawn('file1', File)
+    web = host.spawn('web1', Web)
+    sleep(1)
+    web.remote_server(f1)
+    load = host.spawn('wl1', Workload)
+    load.remote_server(web)
+    load2 = host.spawn('wl2', Workload)
+    load2.remote_server(web)
 
-    sleep(8)
+    load.launch()
+    load2.download()
+
+    sleep(7)
     shutdown()
