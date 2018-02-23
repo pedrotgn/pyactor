@@ -3,6 +3,8 @@
 ###### _The minimalistic python actor middleware_
 -------------------------------------
 
+[![PyPI version](https://badge.fury.io/py/pyactor.svg)](https://badge.fury.io/py/pyactor)
+
 PyActor is a python actor middleware for an object oriented architecture
 constructed with the idea of getting two remote actors
 to quickly communicate in a very simple, lightweight and minimalistic way.
