@@ -229,9 +229,9 @@ Sample 4 - Lookup
 
 This example shows the usage of the lookup methods applied to a host. This is
 the full code of this sample, which you can find and test in
-``pyactor\examples\sample5.py``:
+``pyactor\examples\sample4.py``:
 
-.. literalinclude:: ../examples/sample5.py
+.. literalinclude:: ../examples/sample4.py
     :linenos:
 
 We have two ways to get the reference of one already existing actor of a host.
