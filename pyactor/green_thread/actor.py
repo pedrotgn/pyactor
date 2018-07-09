@@ -2,15 +2,15 @@ from copy import copy
 
 from gevent import spawn
 
-from pyactor.util import ASK, TELL, FUTURE, TYPE, ASKRESPONSE, FUTURERESPONSE
-from pyactor.util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
-from pyactor.util import ref_l, ref_d
-from pyactor.green_thread import Channel
-from future import FutureManager
+from .channel import Channel
+from .future import FutureManager
+from ..util import ASK, TELL, FUTURE, TYPE, ASK_RESPONSE, FUTURE_RESPONSE
+from ..util import METHOD, PARAMS, RESULT, CHANNEL, RPC_ID
+from ..util import ref_l, ref_d
 
 
 class ActorRef(object):
-    '''
+    """
     ActorRef contains the main components of an actor. These are the
     URL where it is located, the communication :class:`~.Channel` and
     the class of the actor as also the synchronous and asynchronous
@@ -20,7 +20,8 @@ class ActorRef(object):
     .. note:: This is a superclass of :py:class:`Actor` and has no
         direct functionality.
 
-    '''
+    """
+
     def __init__(self, url, klass, channel=None):
         self.url = url
         self.tell = []
@@ -63,15 +64,15 @@ class ActorRef(object):
         return list(set(self.tell_ref) | set(self.ask_ref))
 
     def __str__(self):
-        return 'Actor %s (%s)' % (self.url, self.klass.__name__)
+        return f'Actor {self.url} ({self.klass.__name__})'
 
     def __repr__(self):
-        return 'Actor(url=%s, class=%s)' % (self.url, self.klass)
+        return f'Actor(url={self.url}, class={self.klass})'
 
 
 class Actor(ActorRef):
-    '''
-    Actor is the instance of an object to which is possible to acces
+    """
+    Actor is the instance of an object to which is possible to access
     and invoke its methods remotely. Main element of the model. The
     host is the one to create them (spawning -> see :meth:`~.spawn`).
 
@@ -79,7 +80,8 @@ class Actor(ActorRef):
     :param class klass: class type for the actor.
     :param klass obj: instance of the *klass* class to attach to the
         actor.
-    '''
+    """
+
     def __init__(self, url, klass, obj):
         super(Actor, self).__init__(url, klass)
         self._obj = obj
@@ -87,63 +89,62 @@ class Actor(ActorRef):
         self.running = True
         self.future_manager = FutureManager()
 
-    def __processQueue(self):
+    def __process_queue(self):
         while self.running:
             message = self.channel.receive()  # Timeout = None
             self.receive(message)
 
     def is_alive(self):
-        '''
+        """
         :return: (*bool.*) identifies the current state of the actor.
             **True** if it is running.
-        '''
+        """
         return self.running
 
     def receive(self, msg):
-        '''
+        """
         The message received from the queue specify a method of the
         class the actor represents. This invokes it. If the
         communication is an ASK, sends the result back
-        to the channel included in the message as an ASKRESPONSE.
+        to the channel included in the message as an ASK_RESPONSE.
 
-        If it is a FUTURE, generates a FUTURERESPONSE
+        If it is a FUTURE, generates a FUTURE_RESPONSE
         to send the result to the manager.
 
         :param msg: The message is a dictionary using the constants
             defined in util.py (:mod:`pyactor.util`).
-        '''
+        """
         if msg[TYPE] == TELL and msg[METHOD] == 'stop':
             self.running = False
             self.future_manager.stop()
         else:
-            result = None
             try:
                 invoke = getattr(self._obj, msg[METHOD])
                 params = msg[PARAMS]
                 result = invoke(*params[0], **params[1])
-            except Exception, e:
+            except Exception as e:
                 if msg[TYPE] == TELL:
-                    print e
+                    print(e)
                     return
                 result = e
             self.send_response(result, msg)
 
     def send_response(self, result, msg):
         if msg[TYPE] == ASK:
-            response = {TYPE: ASKRESPONSE, RESULT: result,
+            response = {TYPE: ASK_RESPONSE, RESULT: result,
                         RPC_ID: msg[RPC_ID] if RPC_ID in msg.keys() else None}
             # response = AskResponse(result)
             msg[CHANNEL].send(response)
         elif msg[TYPE] == FUTURE:
-            response = {TYPE: FUTURERESPONSE, RPC_ID: msg[RPC_ID],
+            response = {TYPE: FUTURE_RESPONSE, RPC_ID: msg[RPC_ID],
                         RESULT: result}
             # response = FutureResponse(msg.future_id, result)
             msg[CHANNEL].send(response)
 
     def run(self):
-        '''
-        Creates the actor thread wich will process the channel queue
+        """
+        Creates the actor thread which will process the channel queue
         while the actor :meth:`is_alive`, making it able to receive
         queries.
-        '''
-        self.thread = spawn(self.__processQueue)
+        """
+        self.thread = spawn(self.__process_queue)

@@ -2,7 +2,7 @@
 Timeout sample.
 '''
 from pyactor.context import set_context, create_host, sleep, shutdown
-from pyactor.exceptions import TimeoutError
+from pyactor.exceptions import PyActorTimeoutError
 
 
 class Echo(object):
@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     try:
         x = e1.say_something(timeout=1)
-    except TimeoutError:
+    except PyActorTimeoutError:
         print 'timeout caught'
     sleep(1)
     shutdown()

@@ -3,7 +3,7 @@ More simple Parallel methods sample.
 @author: Daniel Barcelona Pons
 '''
 from pyactor.context import set_context, create_host, sleep, shutdown
-from pyactor.exceptions import TimeoutError
+from pyactor.exceptions import PyActorTimeoutError
 
 
 class Work(object):
@@ -43,14 +43,14 @@ if __name__ == "__main__":
 
     try:
         worker.work()
-    except TimeoutError, e:
+    except PyActorTimeoutError, e:
         print e
 
     for i in xrange(5):
         try:
             print worker.check_work(timeout=None)
             sleep(1)
-        except TimeoutError, e:
+        except PyActorTimeoutError, e:
             print e
 
     sleep(7)

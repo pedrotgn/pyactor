@@ -1,40 +1,48 @@
-from Queue import Empty
+import importlib
+from queue import Empty
 
-from util import ASK, TELL, TYPE, METHOD, PARAMS, CHANNEL, TO, RESULT
-from exceptions import TimeoutError, HostError
-from util import get_host, get_lock, get_current
+from .exceptions import PyActorTimeoutError, HostError
+from .util import ASK, TELL, TYPE, METHOD, PARAMS, CHANNEL, TO, RESULT
+from .util import get_host, get_lock, get_current
 
 
 def set_actor(module_name):
-    global actorm
-    actorm = __import__(module_name, globals(), locals(),
-                        ['Channel'], -1)
-    global future
-    future = __import__(module_name + '.future', globals(), locals(),
-                        ['Future'], -1)
+    global actor_channel
+    actor_channel = importlib.import_module('.' + module_name + '.channel',
+                                            __package__)
+
+    # __import__(module_name, globals(), locals(),
+    #                       ['Channel'])
+    global future_module
+    future_module = importlib.import_module('.' + module_name + '.future',
+                                            __package__)
+
+    # __import__(module_name + '.future', globals(),
+    #                        locals(), ['Future'])
 
 
 class ProxyRef(object):
-    def __init__(self, actor, kclass, modul):
+    def __init__(self, actor, kclass, module):
         self.url = actor
         self.klass = kclass
-        self.module = modul
+        self.module = module
 
     def __repr__(self):
-        return 'ProxyRef(actor=%s, class=%s mod=%s)' % \
-               (self.url, self.klass, self.module)
+        return f'ProxyRef(actor={self.url}, class={self.klass} ' \
+               f'mod={self.module})'
 
 
 class Proxy(object):
-    '''
+    """
     Proxy is the class that supports to create a remote reference to an
     actor and invoke its methods. All the references to actors will be
     proxies, even the host.
-    To get aproxy to an Actor, you should use one of the host functions
+    To get a proxy to an Actor, you should use one of the host functions
     that provide one, like :meth:`~.spawn` or :meth:`~.lookup_url`.
 
     :param Actor actor: the actor the proxy will manage.
-    '''
+    """
+
     def __init__(self, actor):
         self.__channel = actor.channel
         self.actor = actor
@@ -53,12 +61,12 @@ class Proxy(object):
                                              actor.url))
 
     def __repr__(self):
-        return 'Proxy(actor=%s, tell=%s ref=%s, ask=%s ref=%s)' % \
-               (self.actor, self.actor.tell, self.actor.tell_ref,
-                self.actor.ask, self.actor.ask_ref)
+        return f'Proxy(actor={self.actor}, tell={self.actor.tell}' \
+               f' ref={self.actor.tell_ref}, ask={self.actor.ask}' \
+               f' ref={self.actor.ask_ref})'
 
     def __str__(self):
-        return '%s\'s proxy' % (self.actor,)
+        return f'{self.actor}\'s proxy'
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -74,10 +82,10 @@ class Proxy(object):
         return hash(self.actor.url)
 
     def get_id(self):
-        '''
+        """
         :return: the id of the actor that this proxy holds.
         :raises: Exception if the proxy holds a remote actor. Use URL.
-        '''
+        """
         try:
             return self.actor.id
         except AttributeError:
@@ -85,21 +93,22 @@ class Proxy(object):
                             " Use the url instead of the id.")
 
     def get_url(self):
-        '''
+        """
         :return: the URL of the actor that this proxy holds.
-        '''
+        """
         return self.actor.url
 
 
 class TellWrapper(object):
-    '''
+    """
     Wrapper for Tell type queries to the proxy. Creates the request and
     sends it through the channel.
 
     :param Channel channel: communication way for the query.
     :param str. method: name of the method this query is going to invoke.
     :param str. actor_url: URL address where the actor is set.
-    '''
+    """
+
     def __init__(self, channel, method, actor_url):
         self.__channel = channel
         self.__method = method
@@ -114,7 +123,7 @@ class TellWrapper(object):
 
 
 class AskWrapper(object):
-    '''
+    """
     Wrapper for Ask type queries to the proxy. Calling it blocks the
     execution until the result is returned or timeout is reached. You
     can add the tagged parameter "timeout" to change the time limit to
@@ -125,7 +134,8 @@ class AskWrapper(object):
     :param Channel channel: communication way for the query.
     :param str. method: name of the method this query is gonna invoke.
     :param str. actor_url: URL address where the actor is set.
-    '''
+    """
+
     def __init__(self, channel, method, actor_url):
         self._actor_channel = channel
         self._method = method
@@ -140,7 +150,7 @@ class AskWrapper(object):
 
         self.__lock = get_lock()
         if not future:
-            self.__channel = actorm.Channel()
+            self.__channel = actor_channel.Channel()
             if 'timeout' in kwargs.keys():
                 timeout = kwargs['timeout']
                 del kwargs['timeout']
@@ -160,7 +170,7 @@ class AskWrapper(object):
             except Empty:
                 if self.__lock is not None:
                     self.__lock.acquire()
-                raise TimeoutError(self._method)
+                raise PyActorTimeoutError(self._method)
             if self.__lock is not None:
                 self.__lock.acquire()
             if isinstance(result, Exception):
@@ -178,9 +188,10 @@ class AskWrapper(object):
 
 
 class AskRefWrapper(AskWrapper):
-    '''
+    """
     Wrapper for Ask queries that have a proxy in parameters or returns.
-    '''
+    """
+
     def __call__(self, *args, **kwargs):
         if 'future' in kwargs.keys():
             future = kwargs['future']
@@ -211,7 +222,8 @@ class AskRefWrapper(AskWrapper):
 
 
 class TellRefWrapper(TellWrapper):
-    '''Wrapper for Tell queries that have a proxy in parameters.'''
+    """Wrapper for Tell queries that have a proxy in parameters."""
+
     def __call__(self, *args, **kwargs):
         host = get_host()
         if host is not None:

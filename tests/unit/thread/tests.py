@@ -1,10 +1,9 @@
-'''
+"""
 Local queries unittest module: python threads core
 @author: Daniel Barcelona Pons
-'''
+"""
 import unittest
 import sys
-# from time import sleep
 import os
 import signal
 
@@ -27,7 +26,7 @@ class Echo:
         return 'something'
 
     def say_something_slow(self):
-        sleep(2)
+        pyactor.context.sleep(2)
         return 'something'
 
     def raise_something(self):
@@ -111,7 +110,7 @@ class File(object):
     _tell = []
 
     def download(self, filename):
-        print 'downloading ' + filename
+        print('downloading ' + filename)
         sleep(5)
         return True
 
@@ -184,17 +183,17 @@ class Workload(object):
         global cnt
         for i in range(10):
             try:
-                print self.server.list_files(timeout=2)
-            except TimeoutError as e:
+                print(self.server.list_files(timeout=2))
+            except PyActorTimeoutError as e:
                 cnt = 1000
-                raise TimeoutError
+                raise PyActorTimeoutError
 
     def remote_server(self, web_server):
         self.server = web_server
 
     def download(self):
         self.server.get_file('a1.txt', timeout=10)
-        print 'download finished'
+        print('download finished')
 
 
 class TestBasic(unittest.TestCase):
@@ -215,12 +214,14 @@ class TestBasic(unittest.TestCase):
     def test_1hostcreation(self):
         self.assertEqual(self.h.__class__.__name__, 'Proxy')
         self.assertEqual(self.h.actor.klass.__name__, 'Host')
-        self.assertEqual(self.h.actor.tell, ['attach_interval',
-                                             'detach_interval', 'hello',
-                                             'stop_actor', 'stop'])
-        self.assertEqual(self.h.actor.ask, ['say_hello', 'has_actor'])
-        self.assertEqual(self.h.actor.ask_ref, ['spawn', 'lookup',
-                                                'lookup_url'])
+        self.assertTrue(all(elem in self.h.actor.tell
+                            for elem in ['attach_interval',
+                                         'detach_interval', 'hello',
+                                         'stop_actor', 'stop']))
+        self.assertTrue(all(elem in self.h.actor.ask
+                            for elem in ['say_hello', 'has_actor']))
+        self.assertTrue(all(elem in self.h.actor.ask_ref
+                            for elem in ['spawn', 'lookup', 'lookup_url']))
         with self.assertRaises(Exception):
             h2 = create_host()
         self.assertEqual(self.h.actor._obj, get_host())
@@ -279,9 +280,9 @@ class TestBasic(unittest.TestCase):
         self.assertFalse(ask.done())
         with self.assertRaises(Exception):
             ask.send_work()
-        with self.assertRaises(TimeoutError):
+        with self.assertRaises(PyActorTimeoutError):
             ask.exception(0.2)
-        with self.assertRaises(TimeoutError):
+        with self.assertRaises(PyActorTimeoutError):
             ask.result(0.2)
         self.assertEqual(ask.__class__.__name__, 'Future')
         self.assertEqual(ask.exception(1).__str__(), 'raising something')
@@ -307,7 +308,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(out, 'something')
         self.assertEqual(cnt, 3)
 
-        with self.assertRaises(TimeoutError):
+        with self.assertRaises(PyActorTimeoutError):
             self.e1.say_something_slow(timeout=1)
 
         with self.assertRaises(Exception):
@@ -347,7 +348,7 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(HostError):
             self.h.spawn('bot', Bot)
         # Now the actor is not running, invoking a method should raise Timeout.
-        with self.assertRaises(TimeoutError):
+        with self.assertRaises(PyActorTimeoutError):
             self.e1.say_something(timeout=1)
         # The actor should not be alive.
         self.assertFalse(self.e1.actor.is_alive())
@@ -406,11 +407,14 @@ class TestBasic(unittest.TestCase):
     def test_checklist(self):
         w = self.h.spawn('web', Web)
         self.assertEqual(w.actor.tell, ['stop'])
-        self.assertEqual(w.actor.ask, ['list_files', 'get_file'])
+        self.assertTrue(all(elem in w.actor.ask
+                            for elem in ['list_files', 'get_file']))
         self.assertEqual(w.actor.tell_ref, ['remote_server'])
         self.assertEqual(w.actor.ask_ref, [])
         self.assertEqual(w.actor.tell_parallel, ['remote_server'])
-        self.assertEqual(w.actor.ask_parallel, ['list_files', 'get_file'])
+        self.assertTrue(all(elem in w.actor.ask_parallel
+                            for elem in ['list_files', 'get_file']))
+
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBasic)

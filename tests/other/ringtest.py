@@ -1,11 +1,10 @@
-'''
+"""
 RING test. Messages per second. Number of nodes.
 @author: Daniel Barcelona Pons
-'''
-from pyactor.context import set_context, create_host, sleep, shutdown
-
+"""
 from time import time
 
+from pyactor.context import set_context, create_host, sleep, shutdown
 
 NUM_NODES = 10000
 NUM_MSGS = 100
@@ -34,7 +33,7 @@ class Node(object):
 
     def take_token(self):
         self.cnt += 1
-        if (not self.is_finished()):
+        if not self.is_finished():
             self.next.take_token()
 
 
@@ -42,7 +41,7 @@ if __name__ == "__main__":
     set_context('green_thread')
     # set_context('thread')
 
-    print 'TEST ', NUM_NODES, ' nodes and', NUM_MSGS, "messages."
+    print('TEST ', NUM_NODES, ' nodes and', NUM_MSGS, "messages.")
 
     host = create_host()
 
@@ -55,16 +54,16 @@ if __name__ == "__main__":
     n1 = host.spawn('end', Node, ni)
 
     nf.set_next(n1)
-    print 'start time!!'
+    print('start time!!')
     init = time()
 
     nf.init_token()
 
-    while (not n1.is_finished()):
+    while not n1.is_finished():
         sleep(0.01)
 
     end = time()
 
-    print ((end - init) * 1000), ' ms.'
+    print((end - init) * 1000, ' ms.')
 
     shutdown()

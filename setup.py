@@ -1,16 +1,17 @@
 from setuptools import setup, find_packages
+from pyactor import __version__
 
 setup(
     name='pyactor',
-    version='1.4.0',
+    version=__version__,
     author='Pedro Garcia Lopez & Daniel Barcelona Pons',
     author_email='pedro.garcia@urv.cat, daniel.barcelona@urv.cat',
-    packages=find_packages(),
+    packages=find_packages(exclude=["tests", "examples", "docs"]),
     url='https://github.com/pedrotgn/pyactor',
     license='GNU',
     description='The minimalistic Python Actor middleware',
     long_description=open('README.rst').read(),
-    install_requires=['gevent==1.2.2'],
+    install_requires=['gevent'],
     classifiers=[
         'Development Status :: 5 - Production/Stable',
 
@@ -20,7 +21,7 @@ setup(
         'License :: OSI Approved :: GNU Lesser General Public' +
         ' License v3 (LGPLv3)',
 
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
     ],
 )

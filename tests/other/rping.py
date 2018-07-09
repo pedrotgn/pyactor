@@ -1,11 +1,11 @@
-'''
+"""
 PING-PONG test. Messages per second. REMOTE PING
 @author: Daniel Barcelona Pons
-'''
-
-from pyactor.context import set_context, create_host, sleep, shutdown
+"""
 
 from time import time
+
+from pyactor.context import set_context, create_host, sleep, shutdown
 
 N = 100
 working = True
@@ -55,7 +55,7 @@ class PingActor(object):
             self.pong.send(ping)
             self.pingsLeft = self.pingsLeft - 1
         elif isinstance(msg, SendPongMessage):
-            if (self.pingsLeft > 0):
+            if self.pingsLeft > 0:
                 msg = PingMessage()
                 self.send(msg)
             else:
@@ -87,6 +87,6 @@ if __name__ == "__main__":
 
     end = time()
 
-    print (end - init), 's.'
+    print(end - init, 's.')
 
     shutdown()

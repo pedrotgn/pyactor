@@ -2,7 +2,7 @@
 Parallel methods sample.
 '''
 from pyactor.context import set_context, create_host, sleep, shutdown
-from pyactor.exceptions import TimeoutError
+from pyactor.exceptions import PyActorTimeoutError
 
 
 class File(object):
@@ -44,7 +44,7 @@ class Workload(object):
         for i in range(10):
             try:
                 print self.server.list_files(timeout=2)
-            except TimeoutError as e:
+            except PyActorTimeoutError as e:
                 print i, e
 
     def remote_server(self, web_server):

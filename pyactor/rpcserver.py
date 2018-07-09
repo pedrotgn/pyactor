@@ -1,8 +1,8 @@
-from SimpleXMLRPCServer import SimpleXMLRPCServer
-from SimpleXMLRPCServer import SimpleXMLRPCRequestHandler
-import cPickle
-import xmlrpclib
+import pickle
 import threading
+import xmlrpc.client
+from xmlrpc.server import SimpleXMLRPCRequestHandler
+from xmlrpc.server import SimpleXMLRPCServer
 
 
 class RequestHandler(SimpleXMLRPCRequestHandler):
@@ -10,8 +10,10 @@ class RequestHandler(SimpleXMLRPCRequestHandler):
 
 
 class Source(threading.Thread):
-    ''' Facade for simple remote communication using XMLRPCServer.
-    '''
+    """
+    Facade for simple remote communication using XMLRPCServer.
+    """
+
     def __init__(self, addr):
         threading.Thread.__init__(self)
         ip, port = addr
@@ -35,11 +37,13 @@ class Source(threading.Thread):
 
 
 class Sink(object):
-    ''' Facade for XMLRPC proxies.
-    '''
+    """
+    Facade for XMLRPC proxies.
+    """
+
     def __init__(self, url):
-        self.endpoint = xmlrpclib.ServerProxy(url)
+        self.endpoint = xmlrpc.client.ServerProxy(url)
 
     def send(self, msg):
-        msg = cPickle.dumps(msg)
+        msg = pickle.dumps(msg)
         return self.endpoint.send(msg)

@@ -1,19 +1,20 @@
+import pickle
 import uuid
-import cPickle
-from urlparse import urlparse
+from urllib.parse import urlparse
 
-from pyactor.util import TYPE, METHOD, TELL, ASK, CHANNEL, FROM, TO, RPC_ID
-from pyactor.util import FUTURE, ASKRESPONSE, FUTURERESPONSE
-from pyactor.green_thread import Channel
-from actor import Actor
+from .actor import Actor
+from .channel import Channel
+from ..util import FUTURE, ASK_RESPONSE, FUTURE_RESPONSE
+from ..util import TYPE, METHOD, TELL, ASK, CHANNEL, FROM, TO, RPC_ID
 
 
 class RPCDispatcher(Actor):
-    '''
+    """
     This is the actor that will manage the sends and receives of remote
     queries with other hosts. Each host has one, configured depending on
     the scheme specified when created.
-    '''
+    """
+
     def __init__(self, url, host, mode):
         global server
         server = __import__('pyactor.' + mode + 'server',
@@ -29,7 +30,7 @@ class RPCDispatcher(Actor):
         self.source.start()
         self.running = True
         self.channel = Channel()
-        self.pending = {}   # Sent to another host
+        self.pending = {}  # Sent to another host
         self.executing = {}  # Waiting for the response in this server
         self.tell = ['stop']
         self.ask = []
@@ -51,7 +52,7 @@ class RPCDispatcher(Actor):
         else:
             try:
                 if msg[TYPE] == TELL:
-                    sink = self.get_sink(msg[TO]).send(msg)
+                    self.get_sink(msg[TO]).send(msg)
                 elif msg[TYPE] == ASK:
                     rpc_id = str(uuid.uuid4())
                     msg[RPC_ID] = rpc_id
@@ -59,19 +60,19 @@ class RPCDispatcher(Actor):
                     del msg[CHANNEL]
                     msg[FROM] = self.url
                     self.get_sink(msg[TO]).send(msg)
-                elif msg[TYPE] == ASKRESPONSE or msg[TYPE] == FUTURERESPONSE:
+                elif msg[TYPE] == ASK_RESPONSE or msg[TYPE] == FUTURE_RESPONSE:
                     try:
                         if msg[RPC_ID] in self.executing.keys():
                             sink = self.get_sink(self.executing[msg[RPC_ID]])
                             sink.send(msg)
                             del self.executing[msg[RPC_ID]]
                     except TypeError as p:
-                        print ("Pickle ERR: impossible to marshall a return." +
-                               " Returning a Proxy without the method in " +
-                               "_ref? %s" % p)
-                    except Exception, e:
-                        print (('Error sending a response to %r. '
-                               % (self.executing[msg[RPC_ID]])) + str(e))
+                        print("Pickle ERR: impossible to marshall a return." +
+                              " Returning a Proxy without the method in " +
+                              f"_ref? {p}")
+                    except Exception as e:
+                        print((f'Error sending a response to '
+                               f'{self.executing[msg[RPC_ID]]!r}. ') + str(e))
                         del self.executing[msg[RPC_ID]]
                 elif msg[TYPE] == FUTURE:
                     rpc_id = msg[RPC_ID]
@@ -80,14 +81,14 @@ class RPCDispatcher(Actor):
                     msg[FROM] = self.url
                     self.get_sink(msg[TO]).send(msg)
             except TypeError as p:
-                print ("Pickle ERROR: impossible to marshall a parameter." +
-                       "Passing a Proxy without the method in _ref? %s" % p)
+                print("Pickle ERROR: impossible to marshall a parameter." +
+                      f"Passing a Proxy without the method in _ref? {p}")
             except Exception as e:
-                print e
+                print(e)
 
     def on_message(self, msg):
         try:
-            msg = cPickle.loads(msg)
+            msg = pickle.loads(msg)
             if msg[TYPE] == TELL:
                 self.host.actors[msg[TO]].channel.send(msg)
             elif msg[TYPE] == ASK or msg[TYPE] == FUTURE:
@@ -97,11 +98,11 @@ class RPCDispatcher(Actor):
                 # Change msg callback channel, add id
                 msg[CHANNEL] = self.channel
                 self.host.actors[msg[TO]].channel.send(msg)
-            elif msg[TYPE] == ASKRESPONSE or msg[TYPE] == FUTURERESPONSE:
+            elif msg[TYPE] == ASK_RESPONSE or msg[TYPE] == FUTURE_RESPONSE:
                 if msg[RPC_ID] in self.pending.keys():
                     self.pending[msg[RPC_ID]].send(msg)
                     del self.pending[msg[RPC_ID]]
-        except KeyError, ke:
-            print "ERROR: The actor", ke, "is offline."
-        except Exception, e:
-            print 'Connection ERROR:', e
+        except KeyError as ke:
+            print("ERROR: The actor", ke, "is offline.")
+        except Exception as e:
+            print('Connection ERROR:', e)

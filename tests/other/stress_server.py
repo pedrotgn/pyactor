@@ -1,7 +1,7 @@
-'''
+"""
 Stress test. SERVER
 @author: Daniel Barcelona Pons
-'''
+"""
 from pyactor.context import set_context, create_host, serve_forever
 
 
@@ -19,7 +19,7 @@ class Counter(object):
         for char in chars:
             line += char
             summ = summ * ord(char) / self.count
-        print line, summ
+        print(line, summ)
         self.count = self.count + 1
         # print self.count
 
@@ -31,6 +31,6 @@ if __name__ == "__main__":
     set_context()
     host = create_host('http://127.0.0.1:1277/')
     c = host.spawn('worker', Counter)
-    print 'host listening at port 1277'
+    print('host listening at port 1277')
 
     serve_forever()

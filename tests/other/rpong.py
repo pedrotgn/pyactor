@@ -1,9 +1,9 @@
-'''
+"""
 PING-PONG test. Messages per second. REMOTE PONG
 @author: Daniel Barcelona Pons
-'''
+"""
 
-from pyactor.context import set_context, create_host, sleep, serve_forever
+from pyactor.context import set_context, create_host, serve_forever
 
 
 class Message(object):

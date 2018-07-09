@@ -201,7 +201,7 @@ sample, which you can find and test in ``pyactor\examples\sample3.py``:
 
 Now we have the same :class:`Echo` class but in the sync method we added a sleep
 of 2 seconds. Also, we surrounded the call of the method by a try structure
-catching a :class:`~.TimeoutError` exception from pyactor.exceptions. Since we
+catching a :class:`~.PyActorTimeoutError` exception from pyactor.exceptions. Since we
 are giving to the invocation a expire time of 1 second, the timeout will be
 reached and the exception raised.
 

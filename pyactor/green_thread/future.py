@@ -1,12 +1,12 @@
 import uuid
+
 from gevent import spawn
 from gevent.event import Event
 
-from pyactor.util import get_current, get_host, RPC_ID, RESULT
-from pyactor.util import TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
-from pyactor.exceptions import TimeoutError, FutureError
-from pyactor.green_thread import Channel
-
+from .channel import Channel
+from ..exceptions import PyActorTimeoutError, FutureError
+from ..util import TELL, FUTURE, TYPE, METHOD, PARAMS, CHANNEL, TO
+from ..util import get_current, get_host, RPC_ID, RESULT
 
 PENDING = 'PENDING'
 RUNNING = 'RUNNING'
@@ -18,6 +18,7 @@ class Future(object):
     Container for the result of an ask query sent asynchronously which
     could not be resolved yet.
     """
+
     def __init__(self, fid, future_ref, manager_channel):
         self.__condition = Event()
         self.__state = PENDING
@@ -39,9 +40,9 @@ class Future(object):
                 msg = {TYPE: TELL, METHOD: callback[0], PARAMS: ([self], {}),
                        TO: callback[2]}
                 callback[1].send(msg)
-            except Exception, e:
-                raise FutureError('Exception calling callback for %r: %r'
-                                  % (self, e))
+            except Exception as e:
+                raise FutureError(
+                    f'Exception calling callback for {self!r}: {e!r}')
 
     def running(self):
         """Return True if the future is currently executing."""
@@ -61,16 +62,16 @@ class Future(object):
 
     def add_callback(self, method):
         """
-        Attaches a mehtod that will be called when the future finishes.
+        Attaches a method that will be called when the future finishes.
 
         :param method: A callable from an actor that will be called
             when the future completes. The only argument for that
-            method must be the future itself from wich you can get the
+            method must be the future itself from which you can get the
             result though `future.:meth:`result()``. If the future has
             already completed, then the callable will be called
             immediately.
 
-        .. note:: This functionallity only works when called from an actor,
+        .. note:: This functionality only works when called from an actor,
             specifying a method from the same actor.
         """
         from_actor = get_current()
@@ -90,7 +91,8 @@ class Future(object):
                               "from inside an actor")
 
     def result(self, timeout=None):
-        """Returns the result of the call that the future represents.
+        """
+        Returns the result of the call that the future represents.
 
         :param timeout: The number of seconds to wait for the result
             if the future has not been completed. None, the default,
@@ -109,10 +111,11 @@ class Future(object):
         if self.__state == FINISHED:
             return self.__get__result()
         else:
-            raise TimeoutError('Future: %r' % self.__method)
+            raise PyActorTimeoutError(f'Future: {self.__method!r}')
 
     def exception(self, timeout=None):
-        """Return a exception raised by the call that the future
+        """
+        Return a exception raised by the call that the future
         represents.
         :param timeout: The number of seconds to wait for the exception
             if the future has not been completed. None, the default,
@@ -131,16 +134,16 @@ class Future(object):
         if self.__state == FINISHED:
             return self.__exception
         else:
-            raise TimeoutError('Future: %r' % self.__method)
+            raise PyActorTimeoutError(f'Future: {self.__method!r}')
 
     def send_work(self):
-        '''Sends the query to the actor for it to start executing the
-        work.
+        """
+        Sends the query to the actor for it to start executing the work.
 
         It is possible to execute once again a future that has finished
         if necessary (overwriting the results), but only one execution
         at a time.
-        '''
+        """
         if self.__set_running():
             # msg = FutureRequest(FUTURE, self.__method, self.__params,
             #                     self.__channel, self.__target, self.__id)
@@ -164,7 +167,8 @@ class Future(object):
             return False
 
     def set_result(self, result):
-        """Sets the return value of work associated with the future.
+        """
+        Sets the return value of work associated with the future.
         Only called internally.
         """
         # with self.__condition:
@@ -174,7 +178,8 @@ class Future(object):
         self._invoke_callbacks()
 
     def set_exception(self, exception):
-        """Sets the result of the future as being the given exception.
+        """
+        Sets the result of the future as being the given exception.
         Only called internally.
         """
         # with self.__condition:
@@ -186,7 +191,8 @@ class Future(object):
 
 class FutureRef(Future):
     def result(self, timeout=None):
-        """Returns the result of the call that the future represents.
+        """
+        Returns the result of the call that the future represents.
 
         :param timeout: The number of seconds to wait for the result
             if the future has not been completed. None, the default,
@@ -201,9 +207,10 @@ class FutureRef(Future):
 
 
 class FutureManager(object):
-    '''
+    """
     A manager that controls the creation and execution of the futures.
-    '''
+    """
+
     def __init__(self):
         self.running = False
         self.channel = Channel()

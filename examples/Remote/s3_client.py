@@ -3,7 +3,7 @@ Remote example spawning on a remote server. CLIENT
 @author: Daniel Barcelona Pons
 '''
 from pyactor.context import set_context, create_host, Host, sleep, shutdown
-from pyactor.exceptions import TimeoutError
+from pyactor.exceptions import PyActorTimeoutError
 
 
 class Server(object):
@@ -36,7 +36,7 @@ if __name__ == "__main__":
 
     try:
         print server.wait_a_lot(timeout=1)
-    except TimeoutError, e:
+    except PyActorTimeoutError, e:
         print e
 
     sleep(3)

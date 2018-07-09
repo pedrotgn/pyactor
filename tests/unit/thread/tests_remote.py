@@ -1,18 +1,14 @@
-'''
+"""
 Remote queries unittest module: python threads core
 @author: Daniel Barcelona Pons
-'''
-import unittest
-import sys
+"""
 import os
-import signal
+import unittest
 
 from pyactor.context import *
-from pyactor.proxy import *
-from pyactor.util import *
 from pyactor.exceptions import *
 from pyactor.thread.rpcactor import RPCDispatcher
-import pyactor.context
+from pyactor.util import *
 
 
 class Echo(object):
@@ -21,7 +17,7 @@ class Echo(object):
 
     def echo(self, msg):
         global out
-        print msg
+        print(msg)
         out = msg
 
     def say_something(self):
@@ -146,6 +142,6 @@ class TestBasic(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    print ('## Remote WITH THREADS')
+    print('## Remote WITH THREADS')
     suite = unittest.TestLoader().loadTestsFromTestCase(TestBasic)
     unittest.TextTestRunner(verbosity=2).run(suite)

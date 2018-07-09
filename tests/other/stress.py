@@ -1,10 +1,8 @@
-'''
-Stress test. CLIENTs
+"""
+Stress test. CLIENT
 @author: Daniel Barcelona Pons
-'''
+"""
 from pyactor.context import set_context, create_host, serve_forever, interval
-from pyactor.exceptions import TimeoutError
-
 
 CLIENTS = 100
 
@@ -36,7 +34,7 @@ class Show(object):
         self.interval1 = interval(self.host, 1, self.proxy, "send_message")
 
     def send_message(self):
-        print self.server.see()
+        print(self.server.see())
 
 
 if __name__ == "__main__":
@@ -49,7 +47,7 @@ if __name__ == "__main__":
     s = host.spawn('show', Show)
     s.set_server(counter)
     s.init_start()
-    for i in xrange(CLIENTS):
+    for i in range(CLIENTS):
         c = host.spawn(str(i), Connecter)
         c.set_server(counter)
         c.init_start()

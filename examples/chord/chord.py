@@ -1,4 +1,4 @@
-from pyactor.exceptions import TimeoutError
+from pyactor.exceptions import PyActorTimeoutError
 
 
 k = 7
@@ -87,7 +87,7 @@ class Node(object):
                 return self.proxy
             n = self.proxy.find_predecessor(nid, timeout=2)
             return n.successor(timeout=2)
-        except TimeoutError, e:
+        except PyActorTimeoutError, e:
             raise e
 
     def get_predecessor(self):
@@ -108,7 +108,7 @@ class Node(object):
             return n1
         except SuccessorError, e:
             raise e
-        except TimeoutError, e:
+        except PyActorTimeoutError, e:
             raise e
 
     def closest_preceding_finger(self, nid):
@@ -117,7 +117,7 @@ class Node(object):
                 if between(long(self.finger[i].get_id()), long(self.id), nid):
                     return self.finger[i]
             return self.proxy
-        except(TimeoutError):
+        except(PyActorTimeoutError):
             raise SuccessorError()
 
     def join(self, n1):
@@ -145,7 +145,7 @@ class Node(object):
             self.predecessor = self.finger[0].get_predecessor(timeout=10)
         except SuccessorError, e:
             raise e
-        except TimeoutError, e:
+        except PyActorTimeoutError, e:
             print e
             raise e
         else:
