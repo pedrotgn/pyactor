@@ -1,7 +1,10 @@
 # **PyActor**
+
 -----------------------------
-###### _The minimalistic python actor middleware_
--------------------------------------
+
+## _The minimalistic python actor middleware_
+
+-----------------------------
 
 [![PyPI version](https://badge.fury.io/py/pyactor.svg)](https://badge.fury.io/py/pyactor)
 
@@ -10,15 +13,17 @@ constructed with the idea of getting two remote actors
 to quickly communicate in a very simple, lightweight and minimalistic way.
 
 It supports two versions:
+
 * Threading
 * Gevent green threads
 
-<!-- +grafic tests -->
+<!-- +graphic tests -->
 
 It also includes communication between machines using XMLRPC and a second version
 that uses RabbitMQ message system in a transparent way.
 
 ### Installation
+
 Install using:
 
     python setup.py install
@@ -27,7 +32,7 @@ Check that works executing the examples:
 
     cd examples
     python sample1.py
-    ...
+    …
 
 Check also the docs for a tutorial:
 
@@ -46,7 +51,6 @@ The code is also checked for its health at every push by [landscape.io](https://
 (PEP8, common bad smells, etc.):
 
 [![Code Health](https://landscape.io/github/pedrotgn/pyactor/master/landscape.svg?style=flat)](https://landscape.io/github/pedrotgn/pyactor/master)
-
 
 ## First steps
 
@@ -96,7 +100,7 @@ various machines by only giving an IP to the host. For example:
 
     host = create_host('http://127.0.0.1:1277/')
 
-An this host is online, so the other machine only needs to lookup for it:
+And this host is online, so the other machine only needs to lookup for it:
 
     host = create_host('http://127.0.0.1:1679')
     remote_host = host.lookup_url('http://127.0.0.1:1277/', Host)
@@ -106,6 +110,7 @@ Or directly get one of its actors:
     c = host.lookup_url('http://127.0.0.1:1277/id1', 'MyClass', 'module')
 
 ## Tutorial
+
 PyActor has many examples and a tutorial explaining all its functionalities.
 This examples can be found in the
 'pyactor/examples' directory of the project. They are also explained in the
