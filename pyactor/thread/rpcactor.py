@@ -19,7 +19,7 @@ class RPCDispatcher(Actor):
         global server
         server = __import__('pyactor.' + mode + 'server',
                             globals(), locals(),
-                            ['Source', 'Sink'], -1)
+                            ['Source', 'Sink'])
         self.url = url
         self.host = host
         aurl = urlparse(url)
