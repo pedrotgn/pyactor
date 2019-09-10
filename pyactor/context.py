@@ -204,7 +204,7 @@ class Host(object):
         if isinstance(klass, str):
             module, klass = klass.split('/')
             module_ = __import__(module, globals(), locals(),
-                                 [klass], -1)
+                                 [klass])
             klass_ = getattr(module_, klass)
         elif isinstance(klass, type):
             klass_ = klass
@@ -350,7 +350,7 @@ class Host(object):
                 if module is not None:
                     try:
                         module_ = __import__(module, globals(), locals(),
-                                             [klass], -1)
+                                             [klass])
                         klass_ = getattr(module_, klass)
                     except Exception as e:
                         raise HostError("At lookup_url: " +
