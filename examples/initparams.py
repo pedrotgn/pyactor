@@ -9,7 +9,7 @@ class Someclass(object):
         self.things = [op, thing]
 
     def show_things(self):
-        print self.things
+        print(self.things)
 
 
 if __name__ == "__main__":

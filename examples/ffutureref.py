@@ -13,15 +13,15 @@ class DB(object):
     def set_proxies(self, p1, p2):
         self.proxies.append(p1)
         self.proxies.append(p2)
-        # print self.proxies
+        # print(self.proxies)
 
     def get_proxies(self):
         return self.proxies
-        sleep(5)
-        return 'hi'
+        # sleep(5)
+        # return 'hi'
 
     def read_future(self, future):
-        print future.result()
+        print(future.result())
 
 
 if __name__ == "__main__":

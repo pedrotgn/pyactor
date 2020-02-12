@@ -6,7 +6,7 @@ class Echo(object):
     _ask = ['ret']
 
     def echo(self, msg):
-        print msg
+        print(msg)
 
     def ret(self, msg):
         return msg

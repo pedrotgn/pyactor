@@ -14,8 +14,8 @@ if __name__ == "__main__":
     # e1.echo('Hi there!')    # TELL message
     # e1.echo('See ya!')
     try:
-        print e1.ret('hi')
-    except Exception, e:
-        print e
+        print(e1.ret('hi'))
+    except Exception as e:
+        print(e)
 
     shutdown()

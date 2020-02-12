@@ -1,19 +1,20 @@
-'''
-Stress test. FUTUREs
+"""
+Stress test. FUTURE
 @author: Daniel Barcelona Pons
-'''
+"""
+import functools
+
 from pyactor.context import set_context, create_host, shutdown, sleep, interval
-from pyactor.exceptions import TimeoutError
+from pyactor.exceptions import PyActorTimeoutError
 
 from time import time
 
-
 SERVERS = 5
-CLIENTS = 20       # per server
+CLIENTS = 20  # per server
 INTERVALS = 50
 
 
-class Connecter(object):
+class Connector(object):
     _tell = ['update', 'receive', 'init_start', 'set_server']
     _ref = ['set_server']
 
@@ -58,7 +59,7 @@ class Server(object):
         del self.clients[cli]
         # print "stoped", cli
         if not self.clients.keys():
-            print "Server", self.id, "ended."
+            print("Server", self.id, "ended.")
 
     def end(self):
         return not self.clients.keys()
@@ -71,28 +72,29 @@ if __name__ == "__main__":
     clies = []
     servs = []
 
-    for si in xrange(SERVERS):
+    for si in range(SERVERS):
         serv = host.spawn('s' + str(si), Server)
         servs.append(serv)
-        for i in xrange(CLIENTS):
-            c = host.spawn(str(si) + str(i), Connecter)
+        for i in range(CLIENTS):
+            c = host.spawn(str(si) + str(i), Connector)
             c.set_server(serv)
             serv.register_client(c)
             clies.append(c)
-        print si, 'online'
+        print(si, 'online')
 
-    print "All nodes created. Starting..."
+    print("All nodes created. Starting...")
     init = time()
     for node in clies:
         node.init_start()
 
     try:
-        while not reduce(lambda x, y: x and y.end(timeout=None), servs, True):
+        while not functools.reduce(lambda x, y: x and y.end(timeout=None),
+                                   servs, True):
             sleep(0.01)
 
         end = time()
 
-        print ((end - init) * 1000), ' ms.'
-    except TimeoutError:
-        print "Timeout"
+        print((end - init) * 1000, ' ms.')
+    except PyActorTimeoutError:
+        print("Timeout")
     shutdown()

@@ -1,5 +1,6 @@
 import uuid
 import pickle
+import traceback
 from urllib.parse import urlparse
 
 from .channel import Channel
@@ -88,7 +89,7 @@ class RPCDispatcher(Actor):
 
     def on_message(self, msg):
         try:
-            msg = pickle.loads(msg)
+            msg = pickle.loads(msg.data)
             if msg[TYPE] == TELL:
                 self.host.actors[msg[TO]].channel.send(msg)
             elif msg[TYPE] == ASK or msg[TYPE] == FUTURE:
@@ -106,3 +107,4 @@ class RPCDispatcher(Actor):
             print("ERROR: The actor", ke, "is offline.")
         except Exception as e:
             print('Connection ERROR:', e)
+            traceback.print_exc()

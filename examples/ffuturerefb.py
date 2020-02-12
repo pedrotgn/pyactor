@@ -8,17 +8,17 @@ class Consum(object):
     # _parallel = ['get_proxies']
 
     def say_hi(self):
-        print 'hi', self.id
+        print('hi', self.id)
 
     def get_proxies(self, db):
         future = db.get_proxies(future=True)
         # future.add_callback('read_future', db)
-        print future.result()
+        print(future.result())
         return future
-        while not future.done:
-            sleep(0.1)
-        proxies = future.result()
-        return proxies
+        # while not future.done:
+        #     sleep(0.1)
+        # proxies = future.result()
+        # return proxies
 
 
 if __name__ == "__main__":
@@ -34,10 +34,10 @@ if __name__ == "__main__":
     # db.set_proxies(p1, p2)
     try:
         result = c.get_proxies(db)
-        print result.result()
+        print(result.result())
     # db.read_future(result)
-    except Exception, e:
-        print e
+    except Exception as e:
+        print(e)
 
     sleep(1)
     shutdown()
