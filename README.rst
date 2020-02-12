@@ -53,12 +53,12 @@ See code coverage at `codecov.io <https://codecov.io/gh/pedrotgn/pyactor>`_ or `
 .. .. image:: https://coveralls.io/repos/github/pedrotgn/pyactor/badge.svg?branch=master
     :target: https://coveralls.io/github/pedrotgn/pyactor?branch=master
 
-The code is also checked for its health at every push by `landscape.io <https://landscape.io/github/pedrotgn/pyactor>`_
-(PEP8, common bad smells, etc.):
+.. The code is also checked for its health at every push by `landscape.io <https://landscape.io/github/pedrotgn/pyactor>`_
+    (PEP8, common bad smells, etc.):
 
-.. image:: https://landscape.io/github/pedrotgn/pyactor/master/landscape.svg?style=flat
-   :target: https://landscape.io/github/pedrotgn/pyactor/master
-   :alt: Code Health
+.. .. image:: https://landscape.io/github/pedrotgn/pyactor/master/landscape.svg?style=flat
+       :target: https://landscape.io/github/pedrotgn/pyactor/master
+       :alt: Code Health
 
 
 First steps

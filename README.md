@@ -32,7 +32,7 @@ Check that works executing the examples:
 
     cd examples
     python sample1.py
-    …
+    ...
 
 Check also the docs for a tutorial:
 
@@ -47,11 +47,13 @@ See code coverage at [codecov.io](https://codecov.io/gh/pedrotgn/pyactor) or [co
 [![Coverage Status](https://codecov.io/gh/pedrotgn/pyactor/branch/master/graph/badge.svg)](https://codecov.io/gh/pedrotgn/pyactor)
 <!-- [![Coverage Status](https://coveralls.io/repos/github/pedrotgn/pyactor/badge.svg?branch=master)](https://coveralls.io/github/pedrotgn/pyactor?branch=master) -->
 
+<!-- %%%% Landscape kind of died. %%%%%%
 The code is also checked for its health at every push by [landscape.io](https://landscape.io/github/pedrotgn/pyactor)
 (PEP8, common bad smells, etc.):
 
 [![Code Health](https://landscape.io/github/pedrotgn/pyactor/master/landscape.svg?style=flat)](https://landscape.io/github/pedrotgn/pyactor/master)
-
+ -->
+ 
 ## First steps
 
 This library is implemented using two types of concurrence:
