@@ -111,7 +111,7 @@ various machines by only giving an IP to the host. For example::
 
     host = create_host('http://127.0.0.1:1277/')
 
-An this host is online, so the other machine only needs to lookup for it::
+And this host is online, so the other machine only needs to lookup for it::
 
     host = create_host('http://127.0.0.1:1679')
     remote_host = host.lookup_url('http://127.0.0.1:1277/', Host)

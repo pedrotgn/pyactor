@@ -1,20 +1,19 @@
-"""
-Stress test. FUTURE
+'''
+Stress test. FUTUREs
 @author: Daniel Barcelona Pons
-"""
-import functools
-
+'''
 from pyactor.context import set_context, create_host, shutdown, sleep, interval
-from pyactor.exceptions import PyActorTimeoutError
+from pyactor.exceptions import TimeoutError
 
 from time import time
 
+
 SERVERS = 5
-CLIENTS = 20  # per server
+CLIENTS = 20       # per server
 INTERVALS = 50
 
 
-class Connector(object):
+class Connecter(object):
     _tell = ['update', 'receive', 'init_start', 'set_server']
     _ref = ['set_server']
 
@@ -59,7 +58,7 @@ class Server(object):
         del self.clients[cli]
         # print "stoped", cli
         if not self.clients.keys():
-            print("Server", self.id, "ended.")
+            print "Server", self.id, "ended."
 
     def end(self):
         return not self.clients.keys()
@@ -72,29 +71,28 @@ if __name__ == "__main__":
     clies = []
     servs = []
 
-    for si in range(SERVERS):
+    for si in xrange(SERVERS):
         serv = host.spawn('s' + str(si), Server)
         servs.append(serv)
-        for i in range(CLIENTS):
-            c = host.spawn(str(si) + str(i), Connector)
+        for i in xrange(CLIENTS):
+            c = host.spawn(str(si) + str(i), Connecter)
             c.set_server(serv)
             serv.register_client(c)
             clies.append(c)
-        print(si, 'online')
+        print si, 'online'
 
-    print("All nodes created. Starting...")
+    print "All nodes created. Starting..."
     init = time()
     for node in clies:
         node.init_start()
 
     try:
-        while not functools.reduce(lambda x, y: x and y.end(timeout=None),
-                                   servs, True):
+        while not reduce(lambda x, y: x and y.end(timeout=None), servs, True):
             sleep(0.01)
 
         end = time()
 
-        print((end - init) * 1000, ' ms.')
-    except PyActorTimeoutError:
-        print("Timeout")
+        print ((end - init) * 1000), ' ms.'
+    except TimeoutError:
+        print "Timeout"
     shutdown()
