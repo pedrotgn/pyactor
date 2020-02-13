@@ -3,6 +3,7 @@ Remote queries unittest module: python threads core
 @author: Daniel Barcelona Pons
 """
 import os
+import sys
 import unittest
 
 from pyactor.context import *
@@ -93,22 +94,23 @@ class TestBasic(unittest.TestCase):
         sys.stdout = open(os.devnull, 'w')
         # self.out = ""
         set_context()
-        self.h = create_host('http://127.0.0.1:1277')
+        self.h = create_host('http://127.0.0.1:12777')
         self.e1 = self.h.spawn('echo1', Echo)
 
     def tearDown(self):
         shutdown()
+        sys.stdout.close()
         sys.stdout = self.bu
 
     def test_1hostbasic(self):
         global out
         out = ""
-        host2 = create_host('http://127.0.0.1:1288')
+        host2 = create_host('http://127.0.0.1:12888')
         self.assertEqual(self.h.actor._obj.actors['http'].__class__,
                          RPCDispatcher)
 
         with self.assertRaises(HostError):
-            h2 = create_host('http://127.0.0.1:1277')
+            h2 = create_host('http://127.0.0.1:12777')
         self.assertEqual(self.h.actor._obj, get_host())
 
         host2.hello()
@@ -119,14 +121,14 @@ class TestBasic(unittest.TestCase):
         sleep(1)
         self.assertEqual(out, '1')
 
-        shutdown('http://127.0.0.1:1288')
+        shutdown('http://127.0.0.1:12888')
 
     def test_2remotespawn(self):
         global out
         out = ""
-        host2 = create_host('http://127.0.0.1:1389')
+        host2 = create_host('http://127.0.0.1:12999')
 
-        e2 = host2.spawn('echo', 'tests_tremote/Echo')
+        e2 = host2.spawn('echo', 'tests.unit.thread.tests_remote/Echo')
         e2.echo('1')
         sleep(2)
         # self.assertEqual(out, '1')
@@ -138,7 +140,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(str(b1.get_host()), str(host2))
         self.assertNotEqual(id(b1.get_host()), id(host2))
 
-        shutdown('http://127.0.0.1:1389')
+        shutdown('http://127.0.0.1:12999')
 
 
 if __name__ == '__main__':

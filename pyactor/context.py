@@ -1,5 +1,5 @@
+import inspect
 from signal import SIGINT
-import types
 
 from urllib.parse import urlparse
 from .proxy import Proxy, set_actor, ProxyRef, TellWrapper
@@ -7,6 +7,8 @@ from .exceptions import HostDownError, AlreadyExistsError, NotFoundError, \
     HostError, IntervalError
 from . import util
 
+# import pyactor.thread.parallels
+# parallels = pyactor.thread.parallels
 core_type = None
 available_types = ['thread', 'green_thread']
 
@@ -44,8 +46,8 @@ def set_context(module_name='thread'):
         core_type = module_name
         util.core_type = core_type
         global actor_module
-        actor_module = __import__('pyactor.' + module_name + '.actor', globals(),
-                                  locals(), ['Actor', 'ActorRef'])
+        actor_module = __import__('pyactor.' + module_name + '.actor',
+                                  globals(), locals(), ['Actor', 'ActorRef'])
         global intervals
         intervals = __import__('pyactor.' + module_name + '.intervals',
                                globals(), locals(),
@@ -267,6 +269,7 @@ class Host(object):
         # For internal calls.
         # '''
         if self.alive:
+            print(f"Host {self.addr} :#: shutting down...")
             for interval_event in self.intervals.values():
                 interval_event.set()
 
@@ -300,6 +303,8 @@ class Host(object):
             if util.main_host.url == self.url:
                 util.main_host = (list(util.hosts.values())[0]
                                   if util.hosts.values() else None)
+
+            print(f"Host {self.addr} :#: Bye!")
 
     def stop_actor(self, aid):
         """
@@ -358,19 +363,20 @@ class Host(object):
                                         ", class " + klass +
                                         ". Check this values for the lookup." +
                                         " ERROR: " + str(e))
-                elif isinstance(klass, (types.TypeType, types.ClassType)):
+                elif inspect.isclass(klass):
                     klass_ = klass
                 else:
                     raise HostError("The class specified to look up is" +
                                     " not a class.")
-                remote_actor = actor_module.ActorRef(url, klass_, dispatcher.channel)
+                remote_actor = actor_module.ActorRef(url, klass_,
+                                                     dispatcher.channel)
                 return Proxy(remote_actor)
             except HostError:
                 raise
             except Exception as e:
-                raise HostError("ERROR looking for the actor on another " +
-                                "server. Hosts must " +
-                                "be in http to work properly. " + str(e))
+                raise HostError(
+                    f"ERROR looking for the actor on another server. Hosts must"
+                    f" be in http to work properly. {str(e)}")
 
     def is_local(self, aurl):
         # '''Private method.

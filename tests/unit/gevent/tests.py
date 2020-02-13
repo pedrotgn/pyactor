@@ -184,7 +184,7 @@ class Workload(object):
         global cnt
         for i in range(10):
             try:
-                print(self.server.list_files(timeout=0))
+                print(self.server.list_files(timeout=2))
             except PyActorTimeoutError as e:
                 cnt = 1000
                 raise PyActorTimeoutError
@@ -209,6 +209,7 @@ class TestBasic(unittest.TestCase):
 
     def tearDown(self):
         shutdown()
+        sys.stdout.close()
         sys.stdout = self.bu
 
     def test_1hostcreation(self):
@@ -218,8 +219,10 @@ class TestBasic(unittest.TestCase):
                                              'detach_interval',
                                              'hello', 'stop_actor', 'stop'])
         self.assertEqual(self.h.actor.ask, ['say_hello', 'has_actor'])
-        self.assertEqual(self.h.actor.ask_ref, ['spawn', 'lookup',
-                                                'lookup_url'])
+        self.assertSetEqual(set(self.h.actor.ask_ref),
+                            {'spawn', 'lookup', 'lookup_url'})
+        # self.assertEqual(self.h.actor.ask_ref, ['spawn', 'lookup',
+        #                                         'lookup_url'])
         with self.assertRaises(Exception):
             h2 = create_host()
         self.assertEqual(self.h.actor._obj, get_host())
@@ -404,11 +407,11 @@ class TestBasic(unittest.TestCase):
     def test_checklist(self):
         w = self.h.spawn('web', Web)
         self.assertEqual(w.actor.tell, ['stop'])
-        self.assertEqual(w.actor.ask, ['list_files', 'get_file'])
+        self.assertSetEqual(set(w.actor.ask), {'list_files', 'get_file'})
         self.assertEqual(w.actor.tell_ref, ['remote_server'])
         self.assertEqual(w.actor.ask_ref, [])
         self.assertEqual(w.actor.tell_parallel, ['remote_server'])
-        self.assertEqual(w.actor.ask_parallel, ['list_files', 'get_file'])
+        self.assertSetEqual(set(w.actor.ask_parallel), {'list_files', 'get_file'})
 
 
 if __name__ == '__main__':

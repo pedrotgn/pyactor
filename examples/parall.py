@@ -1,13 +1,13 @@
-'''
+"""
 More simple Parallel methods sample.
 @author: Daniel Barcelona Pons
-'''
+"""
 from pyactor.context import set_context, create_host, sleep, shutdown
 from pyactor.exceptions import PyActorTimeoutError
 
 
 class Work(object):
-    _ask = ['sleeping']
+    _ask = ["sleeping"]
 
     def sleeping(self, t):
         sleep(t)
@@ -24,9 +24,9 @@ class ParaWork(object):
 
     def work(self):
         sl = self.host.spawn('sl', Work)
-        for i in xrange(5):
-            print 'working', i
-            sl.sleeping(1, timeout=2)
+        for i in range(5):
+            print(f"working {i}")
+            sl.sleeping(2, timeout=3)
             self.count += 1
         # return True
 
@@ -43,15 +43,15 @@ if __name__ == "__main__":
 
     try:
         worker.work()
-    except PyActorTimeoutError, e:
-        print e
+    except PyActorTimeoutError as e:
+        print(e)
 
-    for i in xrange(5):
+    for i in range(10):
         try:
-            print worker.check_work(timeout=None)
+            print(worker.check_work(timeout=None))
             sleep(1)
-        except PyActorTimeoutError, e:
-            print e
+        except PyActorTimeoutError as e:
+            print(e)
 
-    sleep(7)
+    sleep(2)
     shutdown()

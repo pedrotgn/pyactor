@@ -1,28 +1,28 @@
-'''
+"""
 Parallel methods sample. With Futures.
-'''
+"""
 from pyactor.context import set_context, create_host, sleep, shutdown
 from pyactor.exceptions import PyActorTimeoutError
 
 
 class File(object):
-    _ask = ['download']
+    _ask = ["download"]
 
     def download(self, filename):
-        print 'downloading ' + filename
+        print(f"downloading {filename}")
         sleep(5)
         return True
 
 
 class Web(object):
-    _ask = ['list_files', 'get_file']
-    _tell = ['remote_server']
-    _parallel = ['list_files', 'get_file', 'remote_server']
+    _ask = ["list_files", "get_file"]
+    _tell = ["remote_server"]
+    _parallel = ["list_files", "get_file", "remote_server"]
 # Comment the line above to check the raise of timeouts if paral are not used.
     _ref = ["remote_server"]
 
     def __init__(self):
-        self.files = ['a1.txt', 'a2.txt', 'a3.txt', 'a4.zip']
+        self.files = ["a1.txt", "a2.txt", "a3.txt", "a4.zip"]
 
     def remote_server(self, file_server):
         self.server = file_server
@@ -37,23 +37,23 @@ class Web(object):
 
 class Workload(object):
     _ask = []
-    _tell = ['launch', 'download', 'remote_server']
+    _tell = ["launch", "download", "remote_server"]
     _parallel = []
     _ref = ["remote_server"]
 
     def launch(self):
         for i in range(10):
             try:
-                print self.server.list_files(timeout=2)
+                print(self.server.list_files(timeout=2))
             except PyActorTimeoutError as e:
-                print i, e
+                print(i, e)
 
     def remote_server(self, web_server):
         self.server = web_server
 
     def download(self):
         self.server.get_file('a1.txt', timeout=10)
-        print 'download finished'
+        print("download finished")
 
 
 if __name__ == "__main__":

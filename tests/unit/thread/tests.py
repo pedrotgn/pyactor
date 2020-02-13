@@ -209,6 +209,7 @@ class TestBasic(unittest.TestCase):
     def tearDown(self):
         shutdown()
         # sleep(1)
+        sys.stdout.close()
         sys.stdout = self.bu
 
     def test_1hostcreation(self):

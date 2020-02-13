@@ -11,7 +11,8 @@ setup(
     license='GNU',
     description='The minimalistic Python Actor middleware',
     long_description=open('README.rst').read(),
-    install_requires=['gevent'],
+    install_requires=['gevent==1.4.0'],
+    # gevent 1.4.0 does not work with python 3.8
     classifiers=[
         'Development Status :: 5 - Production/Stable',
 

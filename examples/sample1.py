@@ -1,6 +1,6 @@
-'''
+"""
 Basic host creation sample.
-'''
+"""
 from pyactor.context import set_context, create_host, sleep, shutdown
 
 
@@ -9,7 +9,7 @@ class Echo(object):
     _ask = []
 
     def echo(self, msg):
-        print msg
+        print(msg)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 nose
 nose-cov
 pycodestyle
-gevent
+gevent==1.4.0
 pika

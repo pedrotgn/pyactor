@@ -106,5 +106,5 @@ class RPCDispatcher(Actor):
         except KeyError as ke:
             print("ERROR: The actor", ke, "is offline.")
         except Exception as e:
-            print('Connection ERROR:', e)
+            print(f"{self.url} :#: Connection ERROR: {e}")
             traceback.print_exc()

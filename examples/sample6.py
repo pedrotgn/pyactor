@@ -1,25 +1,25 @@
-'''
+"""
 Self references sample. Actor id/proxy. + serve_forever
-'''
+"""
 from pyactor.context import set_context, create_host, sleep, serve_forever
 
 
 class Echo(object):
-    _tell = ['echo']
+    _tell = ["echo"]
     _ask = []
-    _ref = ['echo']
+    _ref = ["echo"]
 
     def echo(self, msg, sender):
-        print msg, 'from:', sender.get_name(), 'at', sender.get_net()
-        # print sender.get_id(), sender.get_url()
+        print(f"{msg} from: {sender.get_name()} at {sender.get_net()}")
+        # print(sender.get_id(), sender.get_url())
 
 
 class Bot(object):
-    _tell = ['set_echo', 'say_hi']
-    _ask = ['get_name', 'get_net']
+    _tell = ["set_echo", "say_hi"]
+    _ask = ["get_name", "get_net"]
 
     def __init__(self):
-        self.greetings = ['hello', 'hi', 'hey', 'what`s up?']
+        self.greetings = ["hello", "hi", "hey", "what's up?"]
 
     def set_echo(self):
         self.echo = self.host.lookup('echo1')
