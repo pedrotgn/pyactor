@@ -2,8 +2,8 @@ import uuid
 from threading import Lock, current_thread
 from time import sleep
 
-from ..util import get_host, METHOD, PARAMS, TYPE, TELL
 from .actor import Actor
+from ..util import get_host, METHOD, PARAMS, TYPE, TELL
 
 
 class ActorParallel(Actor):
@@ -19,10 +19,8 @@ class ActorParallel(Actor):
         super(ActorParallel, self).__init__(url, klass, obj)
         self.__lock = Lock()
         self.pending = {}
-        self.ask_parallel = list((set(self.ask) | set(self.ask_ref)) &
-                                 set(klass._parallel))
-        self.tell_parallel = list((set(self.tell) | set(self.tell_ref)) &
-                                  set(klass._parallel))
+        self.ask_parallel = (self.ask | self.ask_ref) & klass._parallel
+        self.tell_parallel = (self.tell | self.tell_ref) & klass._parallel
 
         for method in self.ask_parallel:
             setattr(self._obj, method,
@@ -35,8 +33,8 @@ class ActorParallel(Actor):
 
     def receive(self, msg):
         """
-        Overwriting :meth:`Actor.receive`, adds the checks and
-        functionalities required by parallel methods.
+        Overwriting :meth:`Actor.receive`. Adds the checks and
+        features required by parallel methods.
 
         :param msg: The message is a dictionary using the constants
             defined in util.py (:mod:`pyactor.util`).
@@ -59,7 +57,7 @@ class ActorParallel(Actor):
                     return
                 else:
                     with self.__lock:
-                        sleep(0.01)
+                        sleep(0.001)
                         result = invoke(*params[0], **params[1])
             except Exception as e:
                 result = e
@@ -80,7 +78,7 @@ class ActorParallel(Actor):
 
 
 class ParallelAskWrapper(object):
-    """Wrapper for ask methods that have to be called in a parallel form."""
+    """Wrapper for ask methods that have to be called in a parallel way."""
 
     def __init__(self, method, actor, lock):
         self.__method = method
@@ -94,15 +92,13 @@ class ParallelAskWrapper(object):
         args = tuple(args)
         self.host = get_host()
         param = (self.__method, rpc_id, args, kwargs)
-        # t = Thread(target=self.invoke, args=param)
-        # t.start()
         self.host.new_parallel(self.invoke, param)
 
     def invoke(self, func, rpc_id, args, kwargs):
         # put the process in the host list pthreads
         self.host.pthreads[current_thread()] = self.__actor.url
         with self.__lock:
-            sleep(0.01)
+            sleep(0.001)
             try:
                 result = func(*args, **kwargs)
             except Exception as e:
@@ -114,7 +110,7 @@ class ParallelAskWrapper(object):
 
 class ParallelTellWrapper(object):
     """
-    Wrapper for tell methods that have to be called in a parallel form.
+    Wrapper for tell methods that have to be called in a parallel way.
     """
 
     def __init__(self, method, actor, lock):
@@ -123,15 +119,13 @@ class ParallelTellWrapper(object):
         self.__lock = lock
 
     def __call__(self, *args, **kwargs):
-        param = (self.__method, args, kwargs)
         self.host = get_host()
-        # t = Thread(target=self.invoke, args=param)
-        # t.start()
+        param = (self.__method, args, kwargs)
         self.host.new_parallel(self.invoke, param)
 
     def invoke(self, func, args, kwargs):
         self.host.pthreads[current_thread()] = self.__actor.url
         with self.__lock:
-            sleep(0.01)
+            sleep(0.001)
             func(*args, **kwargs)
         del self.host.pthreads[current_thread()]

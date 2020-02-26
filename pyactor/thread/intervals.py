@@ -1,5 +1,5 @@
 import time as timep
-from threading import Thread, Timer, Event, currentThread
+from threading import Thread, Timer, Event
 
 
 def sleep(time):
@@ -36,14 +36,13 @@ def interval_host(host, time, f, *args, **kwargs):
 
     See example in :ref:`sample_inter`
 
-    :param Proxy host: proxy of the host. Can be obtained from inside a
+    :param Proxy host: host proxy. Can be obtained from inside a
         class with ``self.host``.
     :param int time: seconds for the intervals.
     :param func f: function to be called every *time* seconds.
     :param list args: arguments for *f*.
     :return: :class:`Event` instance of the interval.
     """
-
     def wrap(*args, **kwargs):
         # thread = currentThread()
         args = list(args)

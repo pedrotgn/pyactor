@@ -1,35 +1,31 @@
-import importlib
+from importlib import import_module
 from queue import Empty
 
 from .exceptions import PyActorTimeoutError, HostError
 from .util import ASK, TELL, TYPE, METHOD, PARAMS, CHANNEL, TO, RESULT
 from .util import get_host, get_lock, get_current
 
+actor_channel = None
+future_module = None
+
 
 def set_actor(module_name):
     global actor_channel
-    actor_channel = importlib.import_module('.' + module_name + '.channel',
-                                            __package__)
+    actor_channel = import_module('.' + module_name + '.channel', __package__)
 
-    # __import__(module_name, globals(), locals(),
-    #                       ['Channel'])
     global future_module
-    future_module = importlib.import_module('.' + module_name + '.future',
-                                            __package__)
-
-    # __import__(module_name + '.future', globals(),
-    #                        locals(), ['Future'])
+    future_module = import_module('.' + module_name + '.future', __package__)
 
 
 class ProxyRef(object):
-    def __init__(self, actor, kclass, module):
+    def __init__(self, actor, class_, module):
         self.url = actor
-        self.klass = kclass
+        self.klass = class_
         self.module = module
 
     def __repr__(self):
-        return f'ProxyRef(actor={self.url}, class={self.klass} ' \
-               f'mod={self.module})'
+        return f"ProxyRef(actor={self.url}, class={self.klass} " \
+               f"mod={self.module})"
 
 
 class Proxy(object):
@@ -61,12 +57,12 @@ class Proxy(object):
                                              actor.url))
 
     def __repr__(self):
-        return f'Proxy(actor={self.actor}, tell={self.actor.tell}' \
-               f' ref={self.actor.tell_ref}, ask={self.actor.ask}' \
-               f' ref={self.actor.ask_ref})'
+        return f"Proxy(actor={self.actor}, tell={self.actor.tell}" \
+               f" ref={self.actor.tell_ref}, ask={self.actor.ask}" \
+               f" ref={self.actor.ask_ref})"
 
     def __str__(self):
-        return f'{self.actor}\'s proxy'
+        return f"{self.actor}'s proxy"
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
@@ -129,7 +125,7 @@ class AskWrapper(object):
     can add the tagged parameter "timeout" to change the time limit to
     wait. Default timeout is set to 10s. It is also possible to specify
     "future=True" to get an instant response with a :class:`Future`
-    object with which one you can manage the result reply.
+    object with which you can manage the result.
 
     :param Channel channel: communication way for the query.
     :param str. method: name of the method this query is gonna invoke.
@@ -203,7 +199,7 @@ class AskRefWrapper(AskWrapper):
             new_args = host.dumps(list(args))
             new_kwargs = host.dumps(kwargs)
         else:
-            raise HostError('No such Host on the context of the call.')
+            raise HostError("No such Host on the context of the call.")
 
         if future:
             self.__lock = get_lock()
@@ -230,5 +226,5 @@ class TellRefWrapper(TellWrapper):
             new_args = host.dumps(list(args))
             new_kwargs = host.dumps(kwargs)
         else:
-            raise HostError('No such Host on the context of the call.')
+            raise HostError("No such Host on the context of the call.")
         return super(TellRefWrapper, self).__call__(*new_args, **new_kwargs)

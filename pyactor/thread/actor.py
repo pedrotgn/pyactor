@@ -23,8 +23,8 @@ class ActorRef(object):
 
     def __init__(self, url, klass, channel=None):
         self.url = url
-        self.tell = []
-        self.ask = []
+        self.tell = set()
+        self.ask = set()
         self.klass = klass
         if channel:
             self.channel = channel
@@ -39,17 +39,17 @@ class ActorRef(object):
             self.receive = ref_l(self, self.receive)
             self.send_response = ref_d(self, self.send_response)
 
-            self.tell_ref = list(set(self.tell) & set(klass._ref))
-            self.ask_ref = list(set(self.ask) & set(klass._ref))
+            self.tell_ref = self.tell & klass._ref
+            self.ask_ref = self.ask & klass._ref
             for method in self.ask_ref:
                 self.ask.remove(method)
             for method in self.tell_ref:
                 self.tell.remove(method)
         else:
-            self.ask_ref = []
-            self.tell_ref = []
+            self.ask_ref = set()
+            self.tell_ref = set()
 
-        self.tell.append('stop')
+        self.tell.add('stop')
 
     def receive(self, msg):
         raise NotImplementedError()
@@ -59,13 +59,13 @@ class ActorRef(object):
 
     @property
     def _ref(self):
-        return list(set(self.tell_ref) | set(self.ask_ref))
+        return self.tell_ref | self.ask_ref
 
     def __str__(self):
-        return f'Actor {self.url} ({self.klass.__name__})'
+        return f"Actor {self.url} ({self.klass.__name__})"
 
     def __repr__(self):
-        return f'Actor(url={self.url}, class={self.klass})'
+        return f"Actor(url={self.url}, class={self.klass})"
 
 
 class Actor(ActorRef):
@@ -85,6 +85,7 @@ class Actor(ActorRef):
         self._obj = obj
         self.id = obj.id
         self.running = True
+        self.thread = None
         self.future_manager = FutureManager()
 
     def __process_queue(self):
@@ -101,11 +102,10 @@ class Actor(ActorRef):
 
     def receive(self, msg):
         """
-        The message received from the queue specify a method of the
+        The message received from the queue specifies a method of the
         class the actor represents. This invokes it. If the
         communication is an ASK, sends the result back
-        to the channel included in the message as an
-        ASK_RESPONSE.
+        to the channel included in the message as an ASK_RESPONSE.
 
         If it is a FUTURE, generates a FUTURE_RESPONSE
         to send the result to the manager.
@@ -132,7 +132,6 @@ class Actor(ActorRef):
         if msg[TYPE] == ASK:
             response = {TYPE: ASK_RESPONSE, RESULT: result,
                         RPC_ID: msg[RPC_ID] if RPC_ID in msg.keys() else None}
-            # AskResponse(result)
             msg[CHANNEL].send(response)
         elif msg[TYPE] == FUTURE:
             response = {TYPE: FUTURE_RESPONSE, RPC_ID: msg[RPC_ID],

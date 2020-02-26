@@ -26,6 +26,8 @@ class Source(threading.Thread):
         self.channel.queue_declare(queue=self.url)
         # self.channel.basic_qos(prefetch_count=1)
 
+        self.on_message = None
+
     def register_function(self, func):
         self.on_message = func
         self.channel.basic_consume(self.url, self.on_request,

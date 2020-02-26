@@ -2,31 +2,29 @@ import uuid
 import pickle
 import traceback
 from urllib.parse import urlparse
+from importlib import import_module
 
+from .actor import Actor
 from .channel import Channel
 from ..util import FUTURE, ASK_RESPONSE, FUTURE_RESPONSE
 from ..util import TYPE, METHOD, TELL, ASK, CHANNEL, FROM, TO, RPC_ID
-from .actor import Actor
 
 
 class RPCDispatcher(Actor):
     """
-    This is the actor that will manage the sends and receives of remote
-    queries with other hosts. Each host has one, configured depending on
+    This is the actor that will manage remote sends and receives
+    with other hosts. Each host has one, configured depending on
     the scheme specified when created.
     """
 
     def __init__(self, url, host, mode):
-        global server
-        server = __import__('pyactor.' + mode + 'server',
-                            globals(), locals(),
-                            ['Source', 'Sink'])
+        self.server_model = import_module('pyactor.' + mode + 'server')
         self.url = url
         self.host = host
         aurl = urlparse(url)
         address = aurl.netloc.split(':')
         ip, port = address[0], address[1]
-        self.source = server.Source((ip, int(port)))
+        self.source = self.server_model.Source((ip, int(port)))
         self.source.register_function(self.on_message)
         self.source.start()
         self.running = True
@@ -43,7 +41,7 @@ class RPCDispatcher(Actor):
         if url in self.sinks.keys():
             return self.sinks[url]
         else:
-            self.sinks[url] = server.Sink(url)
+            self.sinks[url] = self.server_model.Sink(url)
             return self.sinks[url]
 
     def receive(self, msg):
@@ -72,7 +70,7 @@ class RPCDispatcher(Actor):
                               " Returning a Proxy without the method in " +
                               f"_ref? {p}")
                     except Exception as e:
-                        print(('Error sending a response to {!r}. '
+                        print(("Error sending a response to {!r}. "
                                .format(self.executing[msg[RPC_ID]])) + str(e))
                         del self.executing[msg[RPC_ID]]
                 elif msg[TYPE] == FUTURE:

@@ -42,7 +42,7 @@ class Future(object):
                 callback[1].send(msg)
             except Exception as e:
                 raise FutureError(
-                    f'Exception calling callback for {self!r}: {e!r}')
+                    f"Exception calling callback for {self!r}: {e!r}")
 
     def running(self):
         """Return True if the future is currently executing."""
@@ -111,7 +111,7 @@ class Future(object):
         if self.__state == FINISHED:
             return self.__get__result()
         else:
-            raise PyActorTimeoutError(f'Future: {self.__method!r}')
+            raise PyActorTimeoutError(f"Future: {self.__method!r}")
 
     def exception(self, timeout=None):
         """
@@ -134,7 +134,7 @@ class Future(object):
         if self.__state == FINISHED:
             return self.__exception
         else:
-            raise PyActorTimeoutError(f'Future: {self.__method!r}')
+            raise PyActorTimeoutError(f"Future: {self.__method!r}")
 
     def send_work(self):
         """
@@ -166,7 +166,7 @@ class Future(object):
         elif self.__state == RUNNING:
             return False
 
-    def set_result(self, result):
+    def __set_result(self, result):
         """
         Sets the return value of work associated with the future.
         Only called internally.
@@ -177,7 +177,7 @@ class Future(object):
         self.__condition.set()
         self._invoke_callbacks()
 
-    def set_exception(self, exception):
+    def __set_exception(self, exception):
         """
         Sets the result of the future as being the given exception.
         Only called internally.
@@ -208,7 +208,7 @@ class FutureRef(Future):
 
 class FutureManager(object):
     """
-    A manager that controls the creation and execution of the futures.
+    A manager that controls the creation and execution of the futures in a host.
     """
 
     def __init__(self):
@@ -227,9 +227,9 @@ class FutureManager(object):
                 result = response[RESULT]
                 future = self.futures[response[RPC_ID]]
                 if isinstance(result, Exception):
-                    future.set_exception(result)
+                    future.__set_exception(result)
                 else:
-                    future.set_result(result)
+                    future.__set_result(result)
 
     def new_future(self, future_ref, ref=False):
         future_id = str(uuid.uuid4())

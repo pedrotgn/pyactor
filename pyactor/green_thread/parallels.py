@@ -18,10 +18,8 @@ class ActorParallel(Actor):
     def __init__(self, url, klass, obj):
         super(ActorParallel, self).__init__(url, klass, obj)
         self.pending = {}
-        self.ask_parallel = list((set(self.ask) | set(self.ask_ref)) &
-                                 set(klass._parallel))
-        self.tell_parallel = list((set(self.tell) | set(self.tell_ref)) &
-                                  set(klass._parallel))
+        self.ask_parallel = (self.ask | self.ask_ref) & klass._parallel
+        self.tell_parallel = (self.tell | self.tell_ref) & klass._parallel
 
         for method in self.ask_parallel:
             setattr(self._obj, method,
@@ -32,8 +30,8 @@ class ActorParallel(Actor):
 
     def receive(self, msg):
         """
-        Overwriting :meth:`Actor.receive`, adds the checks and
-        functionalities required by parallel methods.
+        Overwriting :meth:`Actor.receive`. Adds the checks and
+        features required by parallel methods.
 
         :param msg: The message is a dictionary using the constants
             defined in util.py (:mod:`pyactor.util`).
@@ -66,13 +64,13 @@ class ActorParallel(Actor):
         del self.pending[rpc_id]
         self.send_response(result, msg)
 
-    # For compatibility. Green threads do no use Locks.
+    # For compatibility. Green threads do not use Locks.
     def get_lock(self):
         return None
 
 
 class ParallelAskWrapper(object):
-    """Wrapper for ask methods that have to be called in a parallel form."""
+    """Wrapper for ask methods that have to be called in a parallel way."""
 
     def __init__(self, method, actor):
         self.__method = method
@@ -84,11 +82,7 @@ class ParallelAskWrapper(object):
         del args[0]
         args = tuple(args)
         self.host = get_host()
-
         param = (self.__method, rpc_id, args, kwargs)
-        # t = spawn(self.invoke, *param)  # New thread
-
-        # get_host().new_parallel(self.__actor.url, t)
         self.host.new_parallel(self.invoke, param)
 
     def invoke(self, func, rpc_id, args, kwargs):
@@ -105,7 +99,7 @@ class ParallelAskWrapper(object):
 
 class ParallelTellWrapper(object):
     """
-    Wrapper for tell methods that have to be called in a parallel form.
+    Wrapper for tell methods that have to be called in a parallel way.
     """
 
     def __init__(self, method, actor):
@@ -115,8 +109,6 @@ class ParallelTellWrapper(object):
     def __call__(self, *args, **kwargs):
         self.host = get_host()
         param = (self.__method, args, kwargs)
-        # t = spawn(self.invoke, *param)
-        # get_host().new_parallel(self.__actor.url, t)
         self.host.new_parallel(self.invoke, param)
 
     def invoke(self, func, args, kwargs):

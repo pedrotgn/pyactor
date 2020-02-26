@@ -1,5 +1,6 @@
 import inspect
 from signal import SIGINT
+from importlib import import_module
 
 from urllib.parse import urlparse
 from .proxy import Proxy, set_actor, ProxyRef, TellWrapper
@@ -11,11 +12,17 @@ from . import util
 # parallels = pyactor.thread.parallels
 core_type = None
 available_types = ['thread', 'green_thread']
+actor_module = None
+intervals = None
+parallels = None
+future = None
+rpcactor = None
+signal = None
 
 
 def set_rabbit_credentials(user, password):
     """
-    If you use a RabbitMQ server an want to make remote queries, you might
+    If you use a RabbitMQ server and want to make remote queries, you might
     need to specify new credentials for connection.
 
     By default, PyActor uses the guest RabbitMQ user.
@@ -29,7 +36,7 @@ def set_rabbit_credentials(user, password):
 
 def set_context(module_name='thread'):
     """
-    This function initializes the context of execution deciding which
+    This function initializes the execution context deciding which
     type of threads are being used: classic python threads or green
     threads, provided by Gevent.
 
@@ -46,45 +53,39 @@ def set_context(module_name='thread'):
         core_type = module_name
         util.core_type = core_type
         global actor_module
-        actor_module = __import__('pyactor.' + module_name + '.actor',
-                                  globals(), locals(), ['Actor', 'ActorRef'])
+        actor_module = import_module('pyactor.' + module_name + '.actor')
         global intervals
-        intervals = __import__('pyactor.' + module_name + '.intervals',
-                               globals(), locals(),
-                               ['interval_host', 'sleep', 'later'])
+        intervals = import_module('pyactor.' + module_name + '.intervals')
         global parallels
-        parallels = __import__('pyactor.' + module_name + '.parallels',
-                               globals(), locals(),
-                               ['ActorParallel'])
+        parallels = import_module('pyactor.' + module_name + '.parallels')
         global future
-        future = __import__('pyactor.' + module_name + '.future',
-                            globals(), locals(), ['FutureManager'])
+        future = import_module('pyactor.' + module_name + '.future')
         set_actor(module_name)
         global rpcactor
-        rpcactor = __import__('pyactor.' + module_name + '.rpcactor',
-                              globals(), locals(), ['RPCDispatcher'])
+        rpcactor = import_module('pyactor.' + module_name + '.rpcactor')
         global signal
         if module_name == 'green_thread':
-            signal = __import__('gevent', ['signal'])
+            signal = import_module('gevent')
         else:
-            signal = __import__('signal', ['signal'])
+            signal = import_module('signal')
     else:
-        raise Exception('Bad core type.')
+        if core_type is not None:
+            raise Exception("The core type was previously configured.")
+        raise Exception("Bad core type.")
 
 
 def create_host(url="local://local:6666/host"):
     """
     This is the main function to create a new Host to which you can
     spawn actors. It will be set by default at local address if no
-    parameter *url* is given, which would result in remote
-    incommunication between hosts. This function should be called once
+    parameter *url* is given. This function should be called once
     for execution or after calling :meth:`~.shutdown` to the previous
     host.
 
-    Nevertheless, it is possible to create locally more than one host
+    However, it is possible to create locally more than one host
     and simulate a remote communication between them if they are of some
     remote type (`http` or `amqp`), but the first one created will
-    be the main host, which is the one that will host the queries from
+    be the main host, which is the one hosting the queries from
     the main function.
     Of course, every host must be initialized with a different URL(port).
     Although that, more than one host should not be required for any real
@@ -95,8 +96,8 @@ def create_host(url="local://local:6666/host"):
     :raises: Exception if there is a host already created with that URL.
     """
     if url in util.hosts.keys():
-        raise HostError('Host already created. Only one host can' +
-                        ' be ran with the same url.')
+        raise HostError("Host already created. Only one host can"
+                        " be ran with the same url.")
     else:
         if not util.hosts:
             util.main_host = Host(url)
@@ -111,11 +112,11 @@ class Host(object):
     Host must be created using the function :func:`~create_host`.
     Do not create a Host directly.
 
-    Host is the container of the actors. It manages the spawn and
+    Host is a container for actors. It manages the spawn and
     elimination of actors and their communication through channels. Also
     configures the remote points where the actors will be able to receive
     and send queries remotely. Additionally, controls the correct management
-    of the threads and intervals of its actors.
+    of its actors' threads and intervals.
 
     The host is managed as an actor itself so you interact with it through
     its :class:`~.Proxy`. This allows you to pass it to another host to
@@ -123,9 +124,9 @@ class Host(object):
 
     :param str. url: URL that identifies the host and where to find it.
     """
-    _tell = ['attach_interval', 'detach_interval', 'hello', 'stop_actor']
-    _ask = ['spawn', 'lookup', 'lookup_url', 'say_hello', 'has_actor']
-    _ref = ['spawn', 'lookup', 'lookup_url']
+    _tell = {'attach_interval', 'detach_interval', 'hello', 'stop_actor'}
+    _ask = {'spawn', 'lookup', 'lookup_url', 'say_hello', 'has_actor'}
+    _ref = {'spawn', 'lookup', 'lookup_url'}
 
     def __init__(self, url):
         self.actors = {}
@@ -136,31 +137,32 @@ class Host(object):
         self.url = url
         self.running = False
         self.alive = True
-        self.load_transport(url)
-        self.init_host()
+        self.__load_transport(url)
+        self.__init_host()
 
         self.ppool = None
         # self.cleaner = interval_host(get_host(), CLEAN_INT, self.do_clean)
 
     def hello(self):
-        print('Hello!!')
+        print("Hello!!")
 
+    @property
     def say_hello(self):
-        print('Sending hello.')
-        return 'Hello from HOST!!'
+        print("Sending hello.")
+        return "Hello from HOST!!"
 
-    def load_transport(self, url):
+    def __load_transport(self, url):
         """
-        For remote communication. Sets the communication dispatcher of the host
+        For remote communication. Sets this host's communication dispatcher
         at the address and port specified.
 
-        The scheme must be http if using a XMLRPC dispatcher.
-        amqp for RabbitMQ communications.
+        The scheme must be 'http' if using a XMLRPC dispatcher.
+        'amqp' for RabbitMQ communications.
 
-        This methos is internal. Automatically called when creating the host.
+        This method is internal. Automatically called when creating the host.
 
         :param str. url: URL where to bind the host. Must be provided in
-            the tipical form: 'scheme://address:port/hierarchical_path'
+            the typical form: 'scheme://address:port/hierarchical_path'
         """
         aurl = urlparse(url)
         addrl = aurl.netloc.split(':')
@@ -169,10 +171,10 @@ class Host(object):
         self.host_url = aurl
 
         if aurl.scheme == 'http':
-            self.launch_actor('http', rpcactor.RPCDispatcher(url, self, 'rpc'))
+            self.__launch_actor('http', rpcactor.RPCDispatcher(url, self, 'rpc'))
 
         elif aurl.scheme == 'amqp':
-            self.launch_actor('amqp', rpcactor.RPCDispatcher(url, self,
+            self.__launch_actor('amqp', rpcactor.RPCDispatcher(url, self,
                                                              'rabbit'))
 
     def spawn(self, aid, klass, *param, **kparam):
@@ -194,7 +196,7 @@ class Host(object):
             spawning actor class.
         :param kparam: arguments for the init function of the
             spawning actor class.
-        :return: :class:`~.Proxy` of the actor spawned.
+        :return: :class:`~.Proxy` to the spawned actor.
         :raises: :class:`AlreadyExistsError`, if the ID specified is
             already in use.
         :raises: :class:`HostDownError` if the host is not initiated.
@@ -210,6 +212,8 @@ class Host(object):
             klass_ = getattr(module_, klass)
         elif isinstance(klass, type):
             klass_ = klass
+        else:
+            raise Exception(f"Given class is not a class: {klass}")
         url = f'{self.transport}://{self.host_url.netloc}/{aid}'
         if url in self.actors.keys():
             raise AlreadyExistsError(url)
@@ -231,7 +235,7 @@ class Host(object):
                 new_actor = actor_module.Actor(url, klass_, obj)
 
             obj.proxy = Proxy(new_actor)
-            self.launch_actor(url, new_actor)
+            self.__launch_actor(url, new_actor)
             return Proxy(new_actor)
 
     def has_actor(self, aid):
@@ -252,22 +256,22 @@ class Host(object):
         This method can be called remotely synchronously.
 
         :param str. aid: identifier of the actor you want.
-        :return: :class:`~.Proxy` of the actor required.
-        :raises: :class:`NotFoundError`  if the actor does not exist.
-        :raises: :class:`HostDownError`  if the host is down.
+        :return: :class:`~.Proxy` to the actor required.
+        :raises: :class:`NotFoundError` if the actor does not exist.
+        :raises: :class:`HostDownError` if the host is down.
         """
         if not self.alive:
             raise HostDownError()
-        url = f'{self.transport}://{self.host_url.netloc}/{aid}'
+        url = f"{self.transport}://{self.host_url.netloc}/{aid}"
         if url in self.actors.keys():
             return Proxy(self.actors[url])
         else:
             raise NotFoundError(url)
 
     def shutdown(self):
-        # '''
+        # """
         # For internal calls.
-        # '''
+        # """
         if self.alive:
             print(f"Host {self.addr} :#: shutting down...")
             for interval_event in self.intervals.values():
@@ -313,7 +317,7 @@ class Host(object):
 
         :param str. aid: identifier of the actor you want to stop.
         """
-        url = f'{self.transport}://{self.host_url.netloc}/{aid}'
+        url = f"{self.transport}://{self.host_url.netloc}/{aid}"
         if url != self.url:
             a = self.actors[url]
             Proxy(a).stop()
@@ -344,7 +348,7 @@ class Host(object):
         if not self.alive:
             raise HostDownError()
         aurl = urlparse(url)
-        if self.is_local(aurl):
+        if self.__is_local(aurl):
             if url not in self.actors.keys():
                 raise NotFoundError(url)
             else:
@@ -378,7 +382,7 @@ class Host(object):
                     f"ERROR looking for the actor on another server. Hosts must"
                     f" be in http to work properly. {str(e)}")
 
-    def is_local(self, aurl):
+    def __is_local(self, aurl):
         # '''Private method.
         # Tells if the address given is from this host.
         #
@@ -387,7 +391,7 @@ class Host(object):
         # '''
         return self.host_url.netloc == aurl.netloc
 
-    def launch_actor(self, url, actor):
+    def __launch_actor(self, url, actor):
         # '''Private method.
         # This function makes an actor alive to start processing queries.
         #
@@ -398,7 +402,7 @@ class Host(object):
         self.actors[url] = actor
         self.threads[actor.thread] = url
 
-    def init_host(self):
+    def __init_host(self):
         # '''
         # This method creates an actor for the Host so it can spawn actors
         # remotely. Called always from the init function of the host, so
@@ -409,7 +413,7 @@ class Host(object):
             host = actor_module.Actor(self.url, Host, self)
             self.proxy = Proxy(host)
             # self.actors[self.url] = host
-            self.launch_actor(self.url, host)
+            self.__launch_actor(self.url, host)
             # host.run()
             # self.threads[host.thread] = self.url
             self.running = True
@@ -511,7 +515,7 @@ def signal_handler(signal=None, frame=None):
     # :param signal: SIGINT signal interruption sent with a Ctrl+C.
     # :param frame: the current stack frame. (not used)
     # '''
-    print('You pressed Ctrl+C!')
+    print("You pressed Ctrl+C!")
     util.main_host.serving = False
     shutdown(util.main_host.url)
 
@@ -529,13 +533,13 @@ def serve_forever():
         raise Exception("This host is already shut down.")
     util.main_host.serving = True
     signal.signal(SIGINT, signal_handler)
-    print('Press Ctrl+C to kill the execution')
+    print("Press Ctrl+C to kill the execution")
     while util.main_host is not None and util.main_host.serving:
         try:
             sleep(1)
         except Exception:
             pass
-    print('BYE!')
+    print("BYE!")
 
 
 def interval(host, time, actor, method, *args, **kwargs):

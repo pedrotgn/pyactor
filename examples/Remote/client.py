@@ -30,9 +30,9 @@ if __name__ == "__main__":
     e1.echo("HEY!")  # TELL message
 
     h.hello()
-    print(f"{h.say_hello(timeout=1)} ASK message!")  # ASK Message
+    print(f"{h.say_hello} ASK message!")  # ASK Message
 
-    f = h.say_hello(future=True)
+    f = h.say_hello
     e1.set_c(spk)
     # e1.set_c(f)
     # f.add_callback('echoc', e1)

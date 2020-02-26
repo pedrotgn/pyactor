@@ -114,7 +114,7 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(self.h.actor._obj, get_host())
 
         host2.hello()
-        response = host2.say_hello()
+        response = host2.say_hello
         self.assertEqual(response, 'Hello from HOST!!')
 
         self.e1.echo('1')

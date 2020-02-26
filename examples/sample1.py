@@ -16,7 +16,7 @@ if __name__ == "__main__":
     set_context()
     h = create_host()
     e1 = h.spawn('echo1', Echo)
-    e1.echo('hello there !!')
+    e1.echo("hello there !!")
 
     sleep(1)
     shutdown()

@@ -1,5 +1,5 @@
 from gevent.event import Event
-from gevent import getcurrent, spawn
+from gevent import spawn
 from gevent import sleep as gsleep
 
 
@@ -7,6 +7,9 @@ def sleep(seconds):
     """
     Facade for the sleep function. Do not use time.sleep if you are
     running green threads.
+
+    :param  int time: time to sleep, in seconds. (Float for second
+        divisions)
     """
     gsleep(seconds)
 
@@ -29,12 +32,12 @@ def later(timeout, f, *args, **kwargs):
 
 def interval_host(host, time, f, *args, **kwargs):
     """
-    Creates an Event attached to the *host* for management that will
-    execute the *f* function every *time* seconds.
+    Creates an Event attached to the *host* that will execute the *f*
+    function every *time* seconds.
 
     See example in :ref:`sample_inter`
 
-    :param Proxy host: proxy of the host. Can be obtained from inside a
+    :param Proxy host: host proxy. Can be obtained from inside a
         class with ``self.host``.
     :param int time: seconds for the intervals.
     :param func f: function to be called every *time* seconds.
@@ -42,7 +45,7 @@ def interval_host(host, time, f, *args, **kwargs):
     :return: :class:`Event` instance of the interval.
     """
     def wrap(*args, **kwargs):
-        thread = getcurrent()
+        # thread = getcurrent()
         args = list(args)
         stop_event = args[0]
         del args[0]
@@ -50,7 +53,8 @@ def interval_host(host, time, f, *args, **kwargs):
         while not stop_event.is_set():
             f(*args, **kwargs)
             stop_event.wait(time)
-        host.detach_interval(thread)
+        host.detach_interval(thread_id)
+
     t2_stop = Event()
     args = list(args)
     args.insert(0, t2_stop)
