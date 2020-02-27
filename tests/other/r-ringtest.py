@@ -6,8 +6,8 @@ from time import time
 
 from pyactor.context import set_context, create_host, sleep, shutdown
 
-NUM_NODES = 10000
-NUM_MSGS = 100
+NUM_NODES = 5
+NUM_MSGS = 10
 
 
 class Node(object):
@@ -38,20 +38,27 @@ class Node(object):
 
 
 if __name__ == '__main__':
-    set_context('green_thread')
-    # set_context('thread')
+    # set_context('green_thread')
+    set_context('thread')
 
     print(f"TEST {NUM_NODES} nodes and {NUM_MSGS} messages.")
 
-    host = create_host()
+    port = 1260
+    host = [create_host(f"http://127.0.0.1:{port}/")]
 
-    nf = host.spawn('ini', Node)
+    nf = host[0].spawn('ini', Node)
 
-    ni = nf
+    np = nf
     for i in range(NUM_NODES - 2):
-        ni = host.spawn(str(i), Node, ni)
+        port += 1
+        host.append(create_host(f"http://127.0.0.1:{port}/"))
+        ni = host[i+1].spawn(str(i), Node)
+        ni.set_next(np)
+        np = ni
 
-    n1 = host.spawn('end', Node, ni)
+    port += 1
+    host.append(create_host(f"http://127.0.0.1:{port}/"))
+    n1 = host[NUM_NODES-1].spawn('end', Node, ni)
 
     nf.set_next(n1)
     print("start time!!")
@@ -64,6 +71,6 @@ if __name__ == '__main__':
 
     end = time()
 
-    print((end - init) * 1000, "ms")
+    print((end - init) * 1000, " ms")
 
     shutdown()

@@ -31,8 +31,8 @@ class StopMessage(Message):
 
 
 class PongActor(object):
-    _tell = ['send', 'set_ping']
-    _ref = ['set_ping']
+    _tell = {'send', 'set_ping'}
+    _ref = {'set_ping'}
 
     pongCount = 0
 
@@ -55,7 +55,7 @@ class PongActor(object):
 
 if __name__ == '__main__':
     set_context()
-    host = create_host('amqp://127.0.0.1:9000/')
+    host = create_host("amqp://127.0.0.1:9000/")
 
     pong = host.spawn('pong', PongActor)
 

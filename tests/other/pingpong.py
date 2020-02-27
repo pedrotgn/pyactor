@@ -37,7 +37,7 @@ class StopMessage(Message):
 
 
 class PingActor(object):
-    _tell = ['send']
+    _tell = {'send'}
 
     def __init__(self, count, pong):
         self.pingsLeft = count
@@ -67,7 +67,7 @@ class PingActor(object):
 
 
 class PongActor(object):
-    _tell = ['send']
+    _tell = {'send'}
 
     pongCount = 0
 
@@ -102,6 +102,6 @@ if __name__ == '__main__':
 
     end = time()
 
-    print((end - init), ' s.')
+    print((end - init), "s")
 
     shutdown()

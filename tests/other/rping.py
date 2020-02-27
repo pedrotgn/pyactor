@@ -36,7 +36,7 @@ class StopMessage(Message):
 
 
 class PingActor(object):
-    _tell = ['send']
+    _tell = {'send'}
 
     def __init__(self, count, pong):
         self.pingsLeft = count
@@ -71,9 +71,9 @@ class PingActor(object):
 
 if __name__ == '__main__':
     set_context()
-    host = create_host('amqp://127.0.0.1:9111/')
+    host = create_host("amqp://127.0.0.1:9111/")
 
-    pong = host.lookup_url('amqp://127.0.0.1:9000/pong', 'PongActor', 'rpong')
+    pong = host.lookup_url("amqp://127.0.0.1:9000/pong", 'PongActor', 'rpong')
     ping = host.spawn('ping', PingActor, N, pong)
 
     pong.set_ping(ping)
@@ -87,6 +87,6 @@ if __name__ == '__main__':
 
     end = time()
 
-    print(end - init, 's.')
+    print(end - init, "s")
 
     shutdown()

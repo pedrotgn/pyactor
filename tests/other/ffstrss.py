@@ -15,8 +15,8 @@ INTERVALS = 50
 
 
 class Connector(object):
-    _tell = ['update', 'receive', 'init_start', 'set_server']
-    _ref = ['set_server']
+    _tell = {'update', 'receive', 'init_start', 'set_server'}
+    _ref = {'set_server'}
 
     def set_server(self, srvr):
         self.people = []
@@ -24,12 +24,12 @@ class Connector(object):
 
     def init_start(self):
         self.cnt = 0
-        self.interval = interval(self.host, 0.1, self.proxy, "update")
+        self.interval = interval(self.host, 0.1, self.proxy, 'update')
 
     def update(self):
         self.cnt += 1
         f = self.server.get_clients(future=True)
-        f.add_callback("receive")
+        f.add_callback('receive')
         # if self.cnt % 10 == 0:
         #     print self.id, self.cnt
         if self.cnt == INTERVALS:
@@ -42,9 +42,9 @@ class Connector(object):
 
 
 class Server(object):
-    _tell = ['register_client', 'remove_client']
-    _ask = ['get_clients', 'end']
-    _ref = ['register_client', 'get_clients']
+    _tell = {'register_client', 'remove_client'}
+    _ask = {'get_clients', 'end'}
+    _ref = {'register_client', 'get_clients'}
 
     def __init__(self):
         self.clients = {}
@@ -59,7 +59,7 @@ class Server(object):
         del self.clients[cli]
         # print "stoped", cli
         if not self.clients.keys():
-            print("Server", self.id, "ended.")
+            print(f"Server {self.id} ended.")
 
     def end(self):
         return not self.clients.keys()
@@ -67,7 +67,7 @@ class Server(object):
 
 if __name__ == '__main__':
     set_context('green_thread')
-    host = create_host('http://127.0.0.1:1679/')
+    host = create_host("http://127.0.0.1:1679/")
 
     clies = []
     servs = []
@@ -80,7 +80,7 @@ if __name__ == '__main__':
             c.set_server(serv)
             serv.register_client(c)
             clies.append(c)
-        print(si, 'online')
+        print(si, "online")
 
     print("All nodes created. Starting...")
     init = time()
@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
         end = time()
 
-        print((end - init) * 1000, ' ms.')
+        print(f"{(end - init) * 1000} ms.")
     except PyActorTimeoutError:
         print("Timeout")
     shutdown()

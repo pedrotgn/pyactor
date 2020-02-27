@@ -8,14 +8,14 @@ CLIENTS = 100
 
 
 class Connecter(object):
-    _tell = ['send_message', 'init_start', 'set_server']
-    _ref = ['set_server']
+    _tell = {'send_message', 'init_start', 'set_server'}
+    _ref = {'set_server'}
 
     def set_server(self, srvr):
         self.server = srvr
 
     def init_start(self):
-        self.interval1 = interval(self.host, 0.1, self.proxy, "send_message")
+        self.interval1 = interval(self.host, 0.1, self.proxy, 'send_message')
 
     def send_message(self):
         self.server.work('abcdefghijklmnopqrstuvwxyz' +
@@ -24,14 +24,14 @@ class Connecter(object):
 
 
 class Show(object):
-    _tell = ['send_message', 'init_start', 'set_server']
-    _ref = ['set_server']
+    _tell = {'send_message', 'init_start', 'set_server'}
+    _ref = {'set_server'}
 
     def set_server(self, srvr):
         self.server = srvr
 
     def init_start(self):
-        self.interval1 = interval(self.host, 1, self.proxy, "send_message")
+        self.interval1 = interval(self.host, 1, self.proxy, 'send_message')
 
     def send_message(self):
         print(self.server.see())
@@ -39,9 +39,9 @@ class Show(object):
 
 if __name__ == '__main__':
     set_context('green_thread')
-    host = create_host('http://127.0.0.1:1679/')
+    host = create_host("http://127.0.0.1:1679/")
 
-    counter = host.lookup_url('http://127.0.0.1:1277/worker',
+    counter = host.lookup_url("http://127.0.0.1:1277/worker",
                               'Counter', 'stress_server')
 
     s = host.spawn('show', Show)
