@@ -82,25 +82,25 @@ and one string that will identify it among the host. See example::
     h = create_host()
     actor1 = h.spawn('id1', MyClass)
 
-The class of an actor must have defined its methods in the _tell and _ask lists
-so they can be called through the proxy. In the _tell list will be named those
-methods meant to be asynchronous and in the _ask list, the synchronous ones.
+The class of an actor must have defined its methods in the _tell and _ask sets
+so they can be called through the proxy. In the _tell set will be named those
+methods meant to be asynchronous and in the _ask set, the synchronous ones.
 In this example we have a class ``MyClass`` with a sync method *ask_me()* and an
 async method *tell_me()*::
 
     class MyClass:
-        _tell =['tell_me']
-        _ask = ['ask_me']
+        _tell = {'tell_me'}
+        _ask = {'ask_me'}
         def tell_me(self, msg):
             print msg
         def ask_me(self):
-            return 'hello back'
+            return "hello back"
 
 As you can see, the async method receives a message and simply prints it while
 the sync method returns a result. You can now call this methods from your main
 code::
 
-    actor1.tell_me('Hello')
+    actor1.tell_me("Hello")
     print actor1.ask_me()
 
 Remote connections
@@ -122,7 +122,7 @@ Or directly get one of its actors::
 
 Tutorial
 ========
-PyActor has many examples and a tutorial explaining all its functionalities.
+PyActor has many examples and a tutorial explaining all its features.
 This examples can be found in the ``'pyactor/examples'`` directory of the project
 (`github <https://github.com/pedrotgn/pyactor>`_).
 They are also explained in the documentation as a tutorial, hosted at
