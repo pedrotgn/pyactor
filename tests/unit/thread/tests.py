@@ -15,31 +15,31 @@ import pyactor.context
 
 
 class Echo:
-    _tell = ['echo']
-    _ask = ['say_something', 'say_something_slow', 'raise_something']
+    _tell = {'echo'}
+    _ask = {'say_something', 'say_something_slow', 'raise_something'}
 
     def echo(self, msg):
         global out
         out = msg
 
     def say_something(self):
-        return 'something'
+        return "something"
 
     def say_something_slow(self):
         pyactor.context.sleep(2)
-        return 'something'
+        return "something"
 
     def raise_something(self):
         sleep(1)
-        raise Exception('raising something')
+        raise Exception("raising something")
 
 
 class Bot:
-    _tell = ['set_echo', 'ping', 'pong', 'multiping']
-    _ask = ['get_name', 'get_proxy', 'get_host', 'get_echo', 'get_echo_ref',
-            'check_ref', 'get_real_host']
-    _ref = ['get_name', 'set_echo', 'get_proxy', 'get_host', 'get_echo_ref',
-            'check_ref', 'multiping']
+    _tell = {'set_echo', 'ping', 'pong', 'multiping'}
+    _ask = {'get_name', 'get_proxy', 'get_host', 'get_echo', 'get_echo_ref',
+            'check_ref', 'get_real_host'}
+    _ref = {'get_name', 'set_echo', 'get_proxy', 'get_host', 'get_echo_ref',
+            'check_ref', 'multiping'}
 
     def get_name(self):
         return self.id
@@ -89,12 +89,11 @@ class Bot:
 
 
 class Counter:
-    _ask = []
-    _tell = ['count', 'init_start', 'stop_interval']
+    _tell = {'count', 'init_start', 'stop_interval'}
 
     def init_start(self):
         self.interval1 = interval(self.host, 1, self.proxy, "count")
-        later(4, self.proxy, "stop_interval")
+        later(4, self.proxy, 'stop_interval')
 
     def stop_interval(self):
         self.interval1.set()
@@ -106,20 +105,19 @@ class Counter:
 
 
 class File(object):
-    _ask = ['download']
-    _tell = []
+    _ask = {'download'}
 
     def download(self, filename):
-        print('downloading ' + filename)
+        print("downloading " + filename)
         sleep(5)
         return True
 
 
 class Web(object):
-    _ask = ['list_files', 'get_file']
-    _tell = ['remote_server']
-    _parallel = ['list_files', 'remote_server', 'get_file']
-    _ref = ["remote_server"]
+    _ask = {'list_files', 'get_file'}
+    _tell = {'remote_server'}
+    _parallel = {'list_files', 'remote_server', 'get_file'}
+    _ref = {'remote_server'}
 
     def __init__(self):
         self.files = ['a1.txt', 'a2.txt', 'a3.txt', 'a4.zip']
@@ -135,10 +133,10 @@ class Web(object):
 
 
 class WebF(object):
-    _ask = ['list_files', 'get_file']
-    _tell = ['remote_server']
-    _parallel = ['list_files', 'remote_server', 'get_file']
-    _ref = ["remote_server"]
+    _ask = {'list_files', 'get_file'}
+    _tell = {'remote_server'}
+    _parallel = {'list_files', 'remote_server', 'get_file'}
+    _ref = {'remote_server'}
 
     def __init__(self):
         self.files = ['a1.txt', 'a2.txt', 'a3.txt', 'a4.zip']
@@ -155,10 +153,9 @@ class WebF(object):
 
 
 class WebNP(object):
-    _ask = ['list_files', 'get_file']
-    _tell = ['remote_server']
-    # _parallel = ['get_file']
-    _ref = ["remote_server"]
+    _ask = {'list_files', 'get_file'}
+    _tell = {'remote_server'}
+    _ref = {'remote_server'}
 
     def __init__(self):
         self.files = ['a1.txt', 'a2.txt', 'a3.txt', 'a4.zip']
@@ -174,10 +171,8 @@ class WebNP(object):
 
 
 class Workload(object):
-    _ask = []
-    _tell = ['launch', 'download', 'remote_server']
-    _parallel = []
-    _ref = ["remote_server"]
+    _tell = {'launch', 'download', 'remote_server'}
+    _ref = {'remote_server'}
 
     def launch(self):
         global cnt
@@ -193,7 +188,7 @@ class Workload(object):
 
     def download(self):
         self.server.get_file('a1.txt', timeout=10)
-        print('download finished')
+        print("download finished")
 
 
 class TestBasic(unittest.TestCase):
@@ -266,14 +261,14 @@ class TestBasic(unittest.TestCase):
         out = ""
         cnt = 0
         self.assertEqual(self.e1.echo.__class__.__name__, 'TellWrapper')
-        s = self.e1.echo('hello there!!')
+        s = self.e1.echo("hello there!!")
         sleep(0.1)
         self.assertEqual(s, None)
-        self.assertEqual(out, 'hello there!!')
+        self.assertEqual(out, "hello there!!")
 
         ask = self.e1.say_something(future=True)
         self.assertEqual(ask.__class__.__name__, 'Future')
-        self.assertEqual(ask.result(1), 'something')
+        self.assertEqual(ask.result(1), "something")
         self.assertTrue(ask.done())
 
         ask = self.e1.raise_something(future=True)
@@ -286,9 +281,9 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(PyActorTimeoutError):
             ask.result(0.2)
         self.assertEqual(ask.__class__.__name__, 'Future')
-        self.assertEqual(ask.exception(1).__str__(), 'raising something')
+        self.assertEqual(ask.exception(1).__str__(), "raising something")
         with self.assertRaises(Exception):
-            self.assertEqual(ask.result(1), 'something')
+            self.assertEqual(ask.result(1), "something")
         self.assertTrue(ask.done())
         self.assertFalse(ask.running())
 
@@ -301,12 +296,12 @@ class TestBasic(unittest.TestCase):
         self.assertEqual(bot.get_echo(), bot.get_echo_ref())
         bot.ping()
         sleep(1)
-        self.assertEqual(out, 'something')
+        self.assertEqual(out, "something")
 
         bot2 = self.h.spawn('bot2', Bot)
         bot.multiping(bot2)
         sleep(2)
-        self.assertEqual(out, 'something')
+        self.assertEqual(out, "something")
         self.assertEqual(cnt, 3)
 
         with self.assertRaises(PyActorTimeoutError):
@@ -317,26 +312,28 @@ class TestBasic(unittest.TestCase):
 
     def test_4lookup(self):
         global out
+        out = ""
         e = self.h.lookup('echo1')
         self.assertEqual(e.actor.klass.__name__, 'Echo')
         self.assertEqual(e.actor, self.e1.actor)  # !!!!!
         self.assertEqual(e, self.e1)
-        e.echo('hello')
+        e.echo("hello")
         sleep(2)
-        self.assertEqual(out, 'hello')
+        self.assertEqual(out, "hello")
 
         with self.assertRaises(NotFoundError):
             e = self.h.lookup('echo2')
 
-        ee = self.h.lookup_url('local://local:6666/echo1', Echo)
+        out = ""
+        ee = self.h.lookup_url("local://local:6666/echo1", Echo)
         self.assertEqual(ee.actor.klass.__name__, 'Echo')
         self.assertEqual(ee.actor, self.e1.actor)
         self.assertEqual(ee, self.e1)
-        ee.echo('hello')
+        ee.echo("hello")
         sleep(1)
-        self.assertEqual(out, 'hello')
+        self.assertEqual(out, "hello")
         with self.assertRaises(NotFoundError):
-            e = self.h.lookup_url('local://local:6666/echo2', Echo)
+            e = self.h.lookup_url("local://local:6666/echo2", Echo)
 
     def test_5shutdown(self):
         shutdown()
@@ -345,7 +342,7 @@ class TestBasic(unittest.TestCase):
         with self.assertRaises(HostError):
             self.h.lookup('echo1')
         with self.assertRaises(HostError):
-            self.h.lookup_url('local://local:6666/echo1', Echo)
+            self.h.lookup_url("local://local:6666/echo1", Echo)
         with self.assertRaises(HostError):
             self.h.spawn('bot', Bot)
         # Now the actor is not running, invoking a method should raise Timeout.
@@ -407,12 +404,12 @@ class TestBasic(unittest.TestCase):
 
     def test_checklist(self):
         w = self.h.spawn('web', Web)
-        self.assertEqual(w.actor.tell, ['stop'])
+        self.assertEqual(w.actor.tell, {'stop'})
         self.assertTrue(all(elem in w.actor.ask
                             for elem in ['list_files', 'get_file']))
-        self.assertEqual(w.actor.tell_ref, ['remote_server'])
-        self.assertEqual(w.actor.ask_ref, [])
-        self.assertEqual(w.actor.tell_parallel, ['remote_server'])
+        self.assertEqual(w.actor.tell_ref, {'remote_server'})
+        self.assertEqual(w.actor.ask_ref, set())
+        self.assertEqual(w.actor.tell_parallel, {'remote_server'})
         self.assertTrue(all(elem in w.actor.ask_parallel
                             for elem in ['list_files', 'get_file']))
 

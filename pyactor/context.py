@@ -147,7 +147,6 @@ class Host(object):
     def hello(self):
         print("Hello!!")
 
-    @property
     def say_hello(self):
         print("Sending hello.")
         return "Hello from HOST!!"
