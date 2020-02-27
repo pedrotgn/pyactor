@@ -173,7 +173,7 @@ class Future(object):
             elif self.__state == RUNNING:
                 return False
 
-    def __set_result(self, result):
+    def set_result(self, result):
         """
         Sets the return value of work associated with the future.
         Only called internally.
@@ -184,7 +184,7 @@ class Future(object):
             self.__condition.notify_all()
         self._invoke_callbacks()
 
-    def __set_exception(self, exception):
+    def set_exception(self, exception):
         """
         Sets the result of the future as being the given exception.
         Only called internally.
@@ -234,9 +234,9 @@ class FutureManager(object):
                 result = response[RESULT]
                 future = self.futures[response[RPC_ID]]
                 if isinstance(result, Exception):
-                    future.__set_exception(result)
+                    future.set_exception(result)
                 else:
-                    future.__set_result(result)
+                    future.set_result(result)
 
     def new_future(self, future_ref, ref=False):
         future_id = str(uuid.uuid4())

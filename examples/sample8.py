@@ -6,8 +6,8 @@ from pyactor.context import set_context, create_host, sleep, shutdown
 
 
 class Echo(object):
-    _tell = ["echo"]
-    _ask = ["say_something", "raise_something"]
+    _tell = {'echo'}
+    _ask = {'say_something', 'raise_something'}
 
     def echo(self, msg):
         print(msg)
@@ -19,7 +19,7 @@ class Echo(object):
         raise Exception("raising something")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context()
     # set_context('green_thread')
     h = create_host()

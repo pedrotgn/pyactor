@@ -3,7 +3,7 @@ from pyactor.context import set_context, create_host, sleep, shutdown,\
 
 
 class Someclass(object):
-    _tell = ['show_things']
+    _tell = {'show_things'}
 
     def __init__(self, op, thing):
         self.things = [op, thing]
@@ -12,7 +12,7 @@ class Someclass(object):
         print(self.things)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context()
     h = create_host()
 

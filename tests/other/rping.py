@@ -69,7 +69,7 @@ class PingActor(object):
             raise Exception("Unsupported message: " + msg.__class__.__name__)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context()
     host = create_host('amqp://127.0.0.1:9111/')
 

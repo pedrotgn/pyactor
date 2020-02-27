@@ -3,9 +3,9 @@ from pyactor.context import set_context, create_host, sleep, shutdown,\
 
 
 class DB(object):
-    _tell = ['set_proxies', 'read_future']
-    _ask = ['get_proxies']
-    _ref = ['set_proxies', 'get_proxies']
+    _tell = {'set_proxies', 'read_future'}
+    _ask = {'get_proxies'}
+    _ref = {'set_proxies', 'get_proxies'}
 
     def __init__(self):
         self.proxies = []
@@ -24,9 +24,9 @@ class DB(object):
         print(future.result())
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context()
-    h = create_host('http://127.0.0.1:1277')
+    h = create_host("http://127.0.0.1:12777")
     db = h.spawn('db', DB)
     # c = h.spawn('c', Consum)
     p1 = h.spawn('p1', DB)

@@ -37,7 +37,7 @@ class Node(object):
             self.next.take_token()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context('green_thread')
     # set_context('thread')
 

@@ -27,7 +27,7 @@ class Counter(object):
         return self.count
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context()
     host = create_host('http://127.0.0.1:1277/')
     c = host.spawn('worker', Counter)

@@ -7,12 +7,11 @@ from pyactor.context import set_context, create_host, sleep, shutdown, \
 
 
 class Registry(object):
-    _ask = []
-    _tell = ["hello", "init_start", "stop_interval"]
-    # _ref = ['hello']
+    _tell = {'hello', 'init_start', 'stop_interval'}
+    # _ref = {'hello'}
 
     def init_start(self):
-        self.interval1 = interval(self.host, 1, self.proxy, "hello", "you", ",,")
+        self.interval1 = interval(self.host, 1, self.proxy, "hello", "you", "too")
         later(5, self.proxy, "stop_interval")
 
     def stop_interval(self):
@@ -23,7 +22,7 @@ class Registry(object):
         print(f"{self.id} Hello {msg} {m2}")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     N = 2   # 10000
 
     set_context()

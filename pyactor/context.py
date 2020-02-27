@@ -1,4 +1,5 @@
 import inspect
+from os import path
 from signal import SIGINT
 from importlib import import_module
 
@@ -171,11 +172,12 @@ class Host(object):
         self.host_url = aurl
 
         if aurl.scheme == 'http':
-            self.__launch_actor('http', rpcactor.RPCDispatcher(url, self, 'rpc'))
+            self.__launch_actor('http',
+                                rpcactor.RPCDispatcher(url, self, 'rpc'))
 
         elif aurl.scheme == 'amqp':
             self.__launch_actor('amqp', rpcactor.RPCDispatcher(url, self,
-                                                             'rabbit'))
+                                                               'rabbit'))
 
     def spawn(self, aid, klass, *param, **kparam):
         """
@@ -434,6 +436,9 @@ class Host(object):
         """
         if isinstance(param, Proxy):
             module_name = param.actor.klass.__module__
+            if module_name == '__main__':
+                module_name = path.splitext(
+                    path.basename(inspect.getfile(param.actor.klass)))[0]
             return ProxyRef(param.actor.url, param.actor.klass.__name__,
                             module_name)
         elif isinstance(param, list):

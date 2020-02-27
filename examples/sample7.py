@@ -5,9 +5,8 @@ from pyactor.context import set_context, create_host, sleep, shutdown
 
 
 class Echo(object):
-    _tell = ["echo", "echo2", "echo3"]
-    _ask = []
-    _ref = ["echo", "echo2", "echo3"]
+    _tell = {'echo', 'echo2', 'echo3'}
+    _ref = {'echo', 'echo2', 'echo3'}
 
     def echo(self, msg, sender):
         print(f"{msg} from: {sender.get_name()}")
@@ -22,9 +21,9 @@ class Echo(object):
 
 
 class Bot(object):
-    _tell = ["set_echo", "say_hi"]
-    _ask = ["get_name"]
-    _ref = ["set_echo"]
+    _tell = {'set_echo', 'say_hi'}
+    _ask = {'get_name'}
+    _ref = {'set_echo'}
 
     def __init__(self):
         self.greetings = ["hello", "hi", "hey", "what's up?"]
@@ -40,7 +39,7 @@ class Bot(object):
             self.echo.echo(salute, self.proxy)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context()
     h = create_host()
     e1 = h.spawn('echo1', Echo)

@@ -65,7 +65,7 @@ class Server(object):
         return not self.clients.keys()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context('green_thread')
     host = create_host('http://127.0.0.1:1679/')
 

@@ -6,7 +6,7 @@ from pyactor.exceptions import PyActorTimeoutError
 
 
 class File(object):
-    _ask = ["download"]
+    _ask = {'download'}
 
     def download(self, filename):
         print(f"downloading {filename}")
@@ -15,11 +15,11 @@ class File(object):
 
 
 class Web(object):
-    _ask = ["list_files", "get_file"]
-    _tell = ["remote_server"]
-    _parallel = ["list_files", "get_file", "remote_server"]
+    _ask = {'list_files', 'get_file'}
+    _tell = {'remote_server'}
+    _parallel = {'list_files', 'get_file', 'remote_server'}
 # Comment the line above to check the raise of timeouts if paral are not used.
-    _ref = ["remote_server"]
+    _ref = {'remote_server'}
 
     def __init__(self):
         self.files = ["a1.txt", "a2.txt", "a3.txt", "a4.zip"]
@@ -36,10 +36,8 @@ class Web(object):
 
 
 class Workload(object):
-    _ask = []
-    _tell = ["launch", "download", "remote_server"]
-    _parallel = []
-    _ref = ["remote_server"]
+    _tell = {'launch', 'download', 'remote_server'}
+    _ref = {'remote_server'}
 
     def launch(self):
         for i in range(10):
@@ -56,7 +54,7 @@ class Workload(object):
         print("download finished")
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context('green_thread')
     # set_context()
 

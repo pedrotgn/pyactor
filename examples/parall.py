@@ -7,7 +7,7 @@ from pyactor.exceptions import PyActorTimeoutError
 
 
 class Work(object):
-    _ask = ["sleeping"]
+    _ask = {'sleeping'}
 
     def sleeping(self, t):
         sleep(t)
@@ -15,9 +15,9 @@ class Work(object):
 
 
 class ParaWork(object):
-    _tell = ['work']
-    _ask = ['check_work']
-    _parallel = ['work']
+    _tell = {'work'}
+    _ask = {'check_work'}
+    _parallel = {'work'}
 
     def __init__(self):
         self.count = 0
@@ -34,7 +34,7 @@ class ParaWork(object):
         return self.count
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     # set_context('green_thread')
     set_context()
 

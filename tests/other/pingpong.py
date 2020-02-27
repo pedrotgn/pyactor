@@ -85,7 +85,7 @@ class PongActor(object):
             raise Exception("Unsupported message: " + msg)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     set_context('green_thread')
     host = create_host()
 

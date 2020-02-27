@@ -6,8 +6,7 @@ from pyactor.context import set_context, create_host, sleep, shutdown, Host
 
 
 class Echo(object):
-    _tell = ['echo']
-    _ask = []
+    _tell = {'echo'}
 
     def echo(self, msg):
         print(msg)
@@ -15,16 +14,16 @@ class Echo(object):
 
 def main():
     set_context()
-    host = create_host('http://127.0.0.1:12666')
+    host = create_host("http://127.0.0.1:12666")
 
-    remote = host.lookup_url('http://127.0.0.1:12777', Host)
+    remote = host.lookup_url("http://127.0.0.1:12777", Host)
     print(remote)
 
-    p1 = host.lookup_url('http://127.0.0.1:12777/1', Echo)
+    p1 = host.lookup_url("http://127.0.0.1:12777/1", Echo)
     p2 = remote.lookup('1')
 
-    print('p1 =', id(p1))
-    print('p2 =', id(p2))
+    print("p1 =", id(p1))
+    print("p2 =", id(p2))
 
     print(p1 == p2)
     print(p1 != p2)
