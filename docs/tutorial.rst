@@ -15,14 +15,14 @@ This library allows the creation and management of actors in a distributed
 system using Python. It follows the classic actor model and tries to be a simple
 way to get two remote actors to quickly communicate.
 
-To install the library use::
+To install the library, use::
 
     python setup.py install
 
 You can check that works with the examples explained in this page, that you can
-find in the ./examples directory of this project. Tested with Python 2.7.
+find in the ./examples directory of this project.
 
-The library requires Gevent, so you may need to install it.
+The library requires Gevent.
 
 It is also available at PYPI, so the most easy way of installing PyActor is by::
 
@@ -49,28 +49,28 @@ Then, first of all, a :class:`~.context.Host` is needed in order to create some
 actors. To create a host, use the function :func:`~.create_host` which returns
 a proxy (:class:`~.proxy.Proxy`) to the instance of a :class:`~.Host`.
 You should never work with the instance itself, but always with proxies to
-maintain the actor model.
+send messages to actors.
 When you have the proxy, use it to spawn actors by giving the
-class type of the actor to create and one string that will identify it among the
+class type of the actor to create and one string that will identify it in the
 host. The :meth:`~.context.Host.spawn` method will return the proxy
 that manages that actor. See example::
 
     h = create_host()
     actor1 = h.spawn('id1', MyClass)
 
-The class of an actor must have defined its methods in the _tell and _ask lists
-so they can be called through the proxy. In the _tell list will be named those
-methods meant to be asynchronous and in the _ask list, the synchronous ones.
+The class of an actor must have defined its methods in the _tell and _ask sets
+so they can be called through the proxy. In the _tell set will be named those
+methods meant to be asynchronous and in the _ask set, the synchronous ones.
 In this example we have a class MyClass with a sync method *ask_me()* and an
 async method *tell_me()*::
 
     class MyClass:
-        _tell =['tell_me']
-        _ask = ['ask_me']
-        def tell_me(self,msg):
-            print msg
+        _tell = {'tell_me'}
+        _ask = {'ask_me'}
+        def tell_me(self, msg):
+            print(msg)
         def ask_me(self):
-            return 'hello back'
+            return "hello back"
 
 As you can see, the async method receives a message and simply prints it while
 the sync method returns a result. More detailed examples can be found in the
@@ -82,7 +82,7 @@ tutorial for this library.
 Sample 1 - Basic
 ================================================================================
 
-This example shows and tests the most basic elements of this library. It creates
+This example shows and tests the most basic elements of PyActor. It creates
 a :class:`~.Host` and adds an actor to it. Then, queries an async method of this
 actor. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\sample1.py``:
@@ -101,13 +101,14 @@ before finishing.
 
 The actor to create in this example will be an :class:`Echo`. This class only
 has one method which prints the message *msg*, given by parameter. As you can
-see, the classes destined to be actors must have the attributes ``_tell=[]``
-and ``_ask=[]`` that include the names of the methods that can be remotely
+see, the classes destined to be actors must have the attributes ``_tell={...}``
+and ``_ask={...}`` that include the names of the methods that can be remotely
 invoked in an asynchronous or synchronous way, respectively. In this sample we
 have the echo method, which is async, as no response from it is needed.
 
-.. note:: In this sample we have the _ask list also defined as a learning
-    purpose, but you could just not write that list if none method goes there.
+.. note:: In this sample we do not have synchronous methods, so it is not
+    necessary to declare the _ask set. However, it could also be declared as
+    an empty ser ``_ask = set()``.
 
 The first thing to do is define which model are we going to use. For now,
 we are using the classic threads, so we'll call the function without parameters
@@ -165,7 +166,7 @@ should be always called at the end to do a clean exit::
 Sample 2 - Sync
 ================================================================================
 
-This example extends the content of the previous one by including sync queries.
+This example extends the content of the previous one by including sync requests.
 It still creates a :class:`~.Host` and adds an actor to it. This is the full
 code of this sample, which you can find and test in
 ``pyactor\examples\sample2.py``:
@@ -200,14 +201,14 @@ sample, which you can find and test in ``pyactor\examples\sample3.py``:
 
 
 Now we have the same :class:`Echo` class but in the sync method we added a sleep
-of 2 seconds. Also, we surrounded the call of the method by a try structure
+of 2 seconds. Also, we surrounded the method call by a try structure
 catching a :class:`~.PyActorTimeoutError` exception from pyactor.exceptions. Since we
-are giving to the invocation a expire time of 1 second, the timeout will be
+are giving an expire time of 1 second to the invocation, the timeout will be
 reached and the exception raised.
 
 
-You can set a timeout for the query of your choice. For that, add the parameter
-with the tag `timeout=X` in the call, in seconds. ::
+You can set a timeout for the query of your choice. For that, add the
+keyword parameter `timeout=X` in the call, in seconds. ::
 
     x = e1.say_something(timeout=3)
 
@@ -256,7 +257,7 @@ Sample 5 - References to actors
 ================================================================================
 
 This example tests the sending of proxy references by parameter using the
-definition of the _ref list. This is the full code of this sample, which you can
+definition of the _ref set. This is the full code of this sample, which you can
 find and test in ``pyactor\examples\sample5.py``:
 
 .. literalinclude:: ../examples/sample5.py
@@ -264,22 +265,20 @@ find and test in ``pyactor\examples\sample5.py``:
 
 If you pass references to actors (proxies) by parameter in actors methods, would
 mean they are sharing the same instance of a proxy. This could cause various
-problems of concurrency so we might want different proxies in different spots.
+concurrency problems, so we might want different proxies in different spots.
 To achieve that, you have to indicate that a method *receives or returns* a
-proxy by adding it to the _ref list of the class (it yet must be in _ask or
-_tell).
+proxy by adding it to the class' _ref set (it still must be in _ask or _tell).
 
-With this indication, pyActor will search for proxies in the parameters and make
-a new proxy for its actor in the context that the method will be executed (the
-actor's).
+With this indication, PyActor will search for proxies in the parameters and make
+a new proxy for the actor in the context that the method will be executed.
 
 In the example, Echo has methods that receive a proxy, in this methods
 you can see examples of passing proxies even inside lists or dictionaries.
 For that to work correctly on any system, Echo needs to define its methods
-as they have this functionality. This why all three methods are in the _ref
-list ::
+as they have this functionality. This is why all three methods are in the _ref
+set ::
 
-    _ref = ['echo', 'echo2', 'echo3']
+    _ref = {'echo', 'echo2', 'echo3'}
 
 Although the proxies are different, you may yet compare them directly so when
 using ``p1 == p2`` on two proxies, the comparison will be done on the actors
@@ -293,8 +292,8 @@ See the basic examples on ``proxies_test.py``.
 Sample 6 - self.id, proxy and host
 ================================================================================
 
-This example tests the self references to actors id and proxy. This is the full
-code of this sample, which you can find and test in
+This example tests the self references to an actor's id and proxy. This is the
+full code of this sample, which you can find and test in
 ``pyactor\examples\sample6.py``:
 
 .. literalinclude:: ../examples/sample6.py
@@ -306,15 +305,15 @@ host it is located, ``self.url`` contains its network location. Then, with
 ``self.proxy`` you can get a reference to a proxy managing the actor so you can
 give it to another function, class or module in a safe and easy way.
 
-.. note:: Remember to put methods that receive or return proxies at _ref list.
+.. note:: Remember to put methods that receive or return proxies in the _ref set.
 
 It is also possible to use ``self.host``, which will give a proxy to the host in
 which the actor is, so you can :meth:`~.lookup` other actors from there, among
-many other possibilities.
+other possibilities.
 
 In the example, we use these three calls to send various salutations from a
 :class:`Bot` to an :class:`Echo` giving by parameter also a proxy from the Bot
-so the Echo can call one of Bot's methods in order to get its id. Also, the
+so the Echo can call one of the Bot's methods to get its id. Also, the
 :meth:`set_echo` method, in this case, does not receive the Echo by parameter.
 It uses the inside reference it already has to call a :meth:`~.lookup` to the
 host and get the wanted reference.
@@ -355,16 +354,16 @@ can find and test in ``pyactor\examples\sample7.py``:
 .. literalinclude:: ../examples/sample7.py
     :linenos:
 
-To remark the importance of using the _ref list, we extend here sample 5 with
+To remark the importance of using the _ref set, we extend here sample 5 with
 more examples of passing proxies combined with the self references we saw in
 sample 6.
 
 Bot has a method ``set_echo`` that gets the echo it will use by parameter. As
 this echo has to be a proxy, Bot includes the next definition::
 
-    _ref = ['set_echo']
+    _ref = {'set_echo'}
 
-So then, at the main code, we can make this call without any future concurrency
+So then, at the main code, we can make this call without any concurrency
 problems, as the proxies are not shared::
 
     bot.set_echo(e1)
@@ -378,7 +377,7 @@ Including examples of passing proxies even inside lists or dictionaries.
 Sample 8 - Futures
 ================================================================================
 
-This example tests more deeply the functionalities of futures. This is the full
+This example tests more deeply the features of futures. This is the full
 code of this sample, which you can find and test in
 ``pyactor\examples\sample8.py``:
 
@@ -428,15 +427,15 @@ the :meth:`say_something` method and sets the callback for this to his other
 method :meth:`pong`. This second will receive the result of the execution of the
 :meth:`say_something` method.
 
-Remember, :meth:`set_echo` needs to be listed in the `_ref` list of the
-:class:`Bot` class.
+Remember, :meth:`set_echo` needs to be listed in the :class:`Bot` class' `_ref`
+set.
 
 In order to add a callback, the sync call must be defined as a Future. We do
 this by adding the parameter `future=True` to the call.
 
 Then, use the Future method :meth:`~.add_callback` which takes by
 parameter the name of the method to callback, which is one from the actor that
-calls it. You can add various callbacks to one future, and them will be called
+calls it. You can add various callbacks to one future, and they will be called
 in order when the work is finished. Also, if you add a callback to a finished
 future, it will be directly invoked.
 
@@ -470,13 +469,13 @@ This is the full code of this sample, which you can find and test in
 .. literalinclude:: ../examples/sample10.py
     :linenos:
 
-Parallels are a way of letting one actor to process many queries at a time.
+Parallels are a way of letting one actor process many queries at a time.
 This will allow the actor to keep receiving calls when another call has been
 blocked with another job (an I/O call or a synchronous call to another actor).
 
 To make one method execute parallel, you need to specify it in the class
-attribute _parallel, which is a list. The method must also be in one of the
-lists _tell or _ask. The methods with this tag will be executed in new threads
+attribute _parallel, which is a set. The method must also be in one of the
+sets _tell or _ask. The methods with this tag will be executed in new threads
 so their execution do not interfere with receiving other queries. That is, the
 actor can attend other queries while executing the parallel method.
 
@@ -490,11 +489,11 @@ method could modify a property of the actor while a parallel, that operates with
 that data, is blocked, leading to an inconsistency.
 
 In this example we have three classes: File, Web and Workload. File represents a
-server that serve the download of files. Simulates the work with a sleep.
-Web represents a web server which contains a list of files. It has to have a
-file server that provide the files and can list its files (list_files) and
+server that serves the download of files. Simulates the work with a sleep.
+Web represents a web server which contains a list of files. It must have a
+file server that provides the files and can list its files (list_files) and
 return one of them (get_file). Workload is the class that will do the work. It
-asks the web to list its files ten times, or request to download one of the
+asks the web to list its files ten times, or requests to download one of the
 files.
 
 The execution is simple, we create one file server, one web server and attach
@@ -502,7 +501,7 @@ the file server to the web::
 
     web.remote_server(f1)
 
-Then lets do the work. Create two Workload instance and pass to them the web
+Then let's do the work. Create two Workload instances and pass to them the web
 server we created::
 
     load = host.spawn('wl1', Workload)
@@ -522,7 +521,7 @@ free the actor so it can keep serving answers to the first load.
 
 If we do not use parallels in this example (which you can try by commenting the
 right line as indicated) some of the calls to the list_files method will raise
-TimeoutError as the thread of that actor is blocked with the download.
+TimeoutError as that actor's thread is blocked with the download.
 
 .. note:: `sample10b` combines this example with the use of Futures.
 
@@ -560,7 +559,7 @@ interval after a certain time. This method works similar to the other. You
 specify by parameter the actor and the method to be executed after that time,
 and only accepts methods of the tell type.
 
-If the method requires arguments, those have to be after the three base. In the
+If the method requires arguments, those can be passed in the same call. In the
 example, hello needs one argument and it is passed as::
 
     self.host.interval(1, self.proxy, "hello", "you")
@@ -588,7 +587,7 @@ one host. This is the full code of this sample, which you can find and test in
 You can always delete an actor by calling the method :meth:`~.stop_actor` of its
 host. This function will stop the thread of that actor and all its references
 from the host. This means the actor cannot be looked up anymore, it will not
-receive any more work and you can create a future actor with its same id.
+receive any more work and you can create a new actor with its same id.
 
 .. note:: Parallel queries already submitted will end as usual.
 

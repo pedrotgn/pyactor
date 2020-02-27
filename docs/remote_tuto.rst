@@ -3,7 +3,7 @@
 Remote Tutorial
 ***************
 
-This page explains the ways of using PyActor for remote communications between
+This page explains hot to use PyActor for remote communications between
 machines.
 
 .. _rs1:
@@ -12,7 +12,7 @@ Sample 1 - Basic communication
 ================================================================================
 
 This example shows the basis on setting a remote communication and sending tell
-methods. This is the full code of this sample, which you can find and test in
+requests. This is the full code of this sample, which you can find and test in
 ``pyactor\examples\Remote\s1_server.py``:
 
 .. literalinclude:: ../examples/Remote/s1_server.py
@@ -43,7 +43,7 @@ times.
 Sample 2 - Basic communication 2
 ================================================================================
 
-This example extends the first by adding ask queries. This is the full code of
+This example extends the first by adding ask requests. This is the full code of
 this sample, which you can find and test in
 ``pyactor\examples\Remote\s2_server.py``:
 
@@ -64,7 +64,7 @@ As the tell methods, they are used as normally, like in the local examples.
 Sample 3 - Remote spawning
 ================================================================================
 
-This example shows how to spawn an actor onto another host. This is the full
+This example shows how to spawn an actor in another host. This is the full
 code of this sample, which you can find and test in
 ``pyactor\examples\Remote\s3_host.py``:
 
@@ -80,7 +80,7 @@ In this case the server part only creates its host and makes it serve forever
 (:meth:`~serve_forever`). The client is the one that uses :meth:`~.lookup_url`
 to get the server reference and spawn an actor in it. Then, sends the work to
 the actor. To spawn the actor, as the class of it is defined in the client
-module, the method uses a string to do define where is the Class so the server
+module, the method uses a string to define where is the Class so the server
 can import it. This string uses the form ``module/class_name``::
 
     server = remote_host.spawn('server', 's3_client/Server')
@@ -111,12 +111,11 @@ And ``pyactor\examples\Remote\s4_clientb.py``:
 .. literalinclude:: ../examples/Remote/s4_clientb.py
     :linenos:
 
-In this example we have a registry where Servers can be bind. The registry
+In this example we have a registry where Servers can be bound. The registry
 module starts an actor which is the registry itself to which servers can be
-bind and clients look for servers. The first client, binds a server to the
-registry and waits for queries to that server. The second one, uses the registry
-to find the first one and spawn a server instance on it to afterwards send work
-to it.
+bound and clients look for servers. The first client binds its host to the
+registry and waits. The second one uses the registry to find the first's host
+and spawn a server on it. Then, send work to that server.
 
 In order to execute the second client repeatedly without having to restart
 all the processes, before spawning the server remotely, it checks if the first
@@ -172,9 +171,12 @@ assume the role of main host.
 Using RabbitMQ
 ================================================================================
 
+*Unmaintained* Only works on a single machine with multiple hosts and needs
+the rabbit server running locally.
+
 This library also supports the usage of communication through RabbitMQ queues.
 To use this approach, simply define the hosts with an URL with the scheme
-`amqp` instead of `http`. This will create a dipatcher for that host that works
+`amqp` instead of `http`. This will create a dispatcher for that host that works
 with RabbitMQ, and all its actors will work at that scheme.
 
 You can see an example with ``pyactor\examples\Remote\s1_clientrbb.py``:

@@ -53,7 +53,7 @@ master_doc = 'index'
 # General information about the project.
 project = u'PyActor'
 copyright = u'2016-2020, CloudLab DEIM'
-author = u'Pedro Garcia Lopez & Daniel Barcelona Pons'
+author = u'Daniel Barcelona Pons & Pedro Garcia Lopez'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
