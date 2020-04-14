@@ -15,6 +15,7 @@ class Future(object):
     """
     Container for the result of an ask query sent asynchronously which
     could not be resolved yet.
+
     """
 
     def __init__(self, fid, future_ref, manager_channel):
