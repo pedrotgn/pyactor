@@ -84,7 +84,7 @@ async method *tell_me()*:
         _tell = {'tell_me'}
         _ask = {'ask_me'}
         def tell_me(self, msg):
-            print msg
+            print(msg)
         def ask_me(self):
             return "hello back"
 
@@ -93,7 +93,7 @@ the sync method returns a result. You can now call this methods from your main
 code:
 
     actor1.tell_me("Hello")
-    print actor1.ask_me()
+    print(actor1.ask_me())
 
 ## Remote connections
 

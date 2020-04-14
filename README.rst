@@ -92,7 +92,7 @@ async method *tell_me()*::
         _tell = {'tell_me'}
         _ask = {'ask_me'}
         def tell_me(self, msg):
-            print msg
+            print(msg)
         def ask_me(self):
             return "hello back"
 
@@ -101,7 +101,7 @@ the sync method returns a result. You can now call this methods from your main
 code::
 
     actor1.tell_me("Hello")
-    print actor1.ask_me()
+    print(actor1.ask_me())
 
 Remote connections
 ==================
@@ -126,4 +126,4 @@ PyActor has many examples and a tutorial explaining all its features.
 This examples can be found in the ``'pyactor/examples'`` directory of the project
 (`github <https://github.com/pedrotgn/pyactor>`_).
 They are also explained in the documentation as a tutorial, hosted at
-`readthedocs.org <http://pyactor.readthedocs.io/en/latest/?badge=latest>`_ which you can find above.
+`readthedocs.org <http://pyactor.readthedocs.io/en/latest/?badge=latest>`_.
