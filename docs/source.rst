@@ -24,7 +24,7 @@ Proxy
 XMLRPC Server
 =============
 
-.. literalinclude:: ../pyactor/rcpserver.py
+.. literalinclude:: ../pyactor/rpcserver.py
     :linenos:
 
 .. _rabbit_source:
